@@ -1,5 +1,5 @@
 import os, uuid, datetime
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
+from flask import Flask, abort, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
 from dotenv import load_dotenv
 from sheets import get_inventory, append_loan, get_loan_with_items, update_stock, find_loan_by_code, update_loan_status
 from mailer import init_app, send_loan_email, schedule_return_reminder, reminder_send_email, mail
@@ -172,20 +172,75 @@ def return_submit():
     return jsonify(ok=True)
 
 
-
-
 # =======================
 # RIWAYAT PEMINJAMAN
 # =======================
 @app.route('/history')
 def history():
     from sheets import read_sheet
+
     rows = read_sheet('loans')
+    if not rows:
+        return render_template('history.html', loans=[])
 
-    headers = rows[0] if rows else []
-    data = [dict(zip(headers, r)) for r in rows[1:]] if rows else []
+    headers = rows[0]
+    data = [dict(zip(headers, r)) for r in rows[1:]]
 
-    return render_template('history.html', loans=data)
+    grouped = {}
+    for d in data:
+        code = d['code']
+        if code not in grouped:
+            grouped[code] = {
+                'code': code,
+                'borrower_name': d['borrower_name'],
+                'status': d['status'],
+                'items': []
+            }
+        grouped[code]['items'].append(d['item_name'])
+
+    loans = []
+    for g in grouped.values():
+        loans.append({
+            'code': g['code'],
+            'borrower_name': g['borrower_name'],
+            'status': g['status'],
+            'item_name': ', '.join(g['items'])  # ringkasan
+        })
+
+    return render_template('history.html', loans=loans)
+
+@app.route('/loan/<code>')
+def loan_detail(code):
+    from sheets import read_sheet
+
+    rows = read_sheet('loans')
+    headers = rows[0]
+    data = [dict(zip(headers, r)) for r in rows[1:] if r[headers.index('code')] == code]
+    receipt_url = url_for('receipt', code=code, _external=True)
+
+    if not data:
+        abort(404)
+
+    loan = {
+        'code': code,
+        'borrower_name': data[0]['borrower_name'],
+        'loan_date': data[0]['loan_date'],
+        'return_date': data[0]['return_date'],
+        'status': data[0]['status'],
+        'data': data
+    }
+
+    return render_template('loan_detail.html', loan=loan, receipt_url=receipt_url)
+
+
+@app.route("/receipt/<code>")
+def receipt(code):
+    loan = get_loan_with_items(code)
+
+    if not loan:
+        abort(404)
+
+    return render_template("receipt.html", loan=loan)
 
 # =======================
 # STATIC FILE UPLOAD

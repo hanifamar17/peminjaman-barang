@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Nota Peminjaman</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex justify-center p-4">
+
+<div class="max-w-md w-full bg-white rounded-xl shadow p-5 text-sm">
+
+  <h1 class="text-center text-lg font-bold mb-1">🧾 NOTA PEMINJAMAN</h1>
+  <p class="text-center text-gray-500 mb-4">Laboratorium</p>
+
+  <div class="space-y-1 mb-3">
+    <p><b>Kode:</b> {{ loan.code }}</p>
+    <p><b>Peminjam:</b> {{ loan.borrower_name }}</p>
+    <p><b>Tgl Pinjam:</b> {{ loan.loan_date }}</p>
+    <p><b>Tgl Kembali:</b> {{ loan.return_date }}</p>
+    <p>
+      <b>Status:</b>
+      <span class="font-semibold
+        {% if loan.status == 'dikembalikan' %}text-green-600{% else %}text-orange-600{% endif %}
+      ">
+        {{ loan.status }}
+      </span>
+    </p>
+  </div>
+
+  <hr class="my-3">
+
+  <p class="font-semibold mb-2">📦 Barang Dipinjam</p>
+  <ul class="space-y-1">
+    {% for i in loan['items'] %}
+      <li class="flex justify-between">
+        <span>{{ i.item_name }}</span>
+        <span>x {{ i.qty }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <hr class="my-3">
+
+  <p class="text-center text-xs text-gray-400 mt-4">
+    Simpan halaman ini sebagai bukti peminjaman
+  </p>
+
+</div>
+
+</body>
+</html>

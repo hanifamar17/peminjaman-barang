@@ -4,30 +4,35 @@
 {% block content %}
 <h2 class="text-xl font-semibold mb-4">📄 Riwayat Peminjaman</h2>
 
-<input type="text" id="filter"
-       class="w-full mb-3 p-2 border rounded"
-       placeholder="Cari...">
+<input type="text" id="filter" class="w-full mb-3 p-2 border rounded" placeholder="Cari...">
 
 <div class="overflow-x-auto">
-<table class="w-full text-sm border">
-  <thead class="bg-gray-100">
-    <tr>
-      <th class="p-2 border">Kode</th>
-      <th class="p-2 border">Barang</th>
-      <th class="p-2 border">Peminjam</th>
-      <th class="p-2 border">Status</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody">
-    {% for l in loans %}
-    <tr class="border">
-      <td class="p-2">{{ l.code }}</td>
-      <td class="p-2">{{ l.item_name }}</td>
-      <td class="p-2">{{ l.borrower_name }}</td>
-      <td class="p-2">{{ l.status }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <table class="w-full text-sm border">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="p-2 border">Kode</th>
+                <th class="p-2 border">Barang</th>
+                <th class="p-2 border">Peminjam</th>
+                <th class="p-2 border">Status</th>
+                <th class="p-2 border">Aksi</th>
+            </tr>
+        </thead>
+
+        <tbody id="tableBody">
+            {% for l in loans %}
+            <tr class="border">
+                <td class="p-2">{{ l.code }}</td>
+                <td class="p-2">{{ l.item_name }}</td>
+                <td class="p-2">{{ l.borrower_name }}</td>
+                <td class="p-2">{{ l.status }}</td>
+                <td class="p-2 text-center">
+                    <a href="{{ url_for('loan_detail', code=l.code) }}" class="text-blue-600 hover:underline">
+                        Detail
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

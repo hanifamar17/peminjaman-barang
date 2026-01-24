@@ -2,276 +2,244 @@
 {% block title %}Peminjaman Barang{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-6 py-8">
+<div class="max-w-2xl mx-auto px-4 py-6">
 
     <!-- Header -->
-    <div class="mb-8">
-        <div class="flex items-center gap-3 mb-2">
+    <div class="mb-6">
+        <div class="flex items-center gap-3 mb-1">
             <div
-                class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <span class="text-2xl">📦</span>
+                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <span class="text-xl">📦</span>
             </div>
-            <h1 class="text-2xl font-bold text-gray-900">Peminjaman Inventaris</h1>
+            <h1 class="text-xl font-bold text-gray-900">Peminjaman Inventaris</h1>
         </div>
-        <p class="text-gray-600 text-sm">Pilih barang yang ingin dipinjam dari laboratorium</p>
+        <p class="text-gray-600 text-sm">Pilih barang yang ingin dipinjam</p>
     </div>
 
-    <!-- Search Section -->
-    <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-            🔍 Cari Barang Inventaris
-        </label>
+    <!-- Search -->
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Cari Barang</label>
         <div class="relative">
             <input id="searchItem" type="text"
-                class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder="Ketik nama barang yang ingin dipinjam...">
-            <div id="searchResult"
-                class="mt-2 border border-gray-200 rounded-xl bg-white divide-y divide-gray-100 shadow-lg overflow-hidden hidden">
+                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Ketik nama barang...">
+            <div id="loader" class="hidden absolute right-3 top-3">
+                <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
+            <div id="searchResult"
+                class="mt-2 border border-gray-200 rounded-lg bg-white divide-y overflow-hidden hidden"></div>
         </div>
     </div>
 
-    <!-- Form Section -->
-    <form id="borrowForm" class="space-y-5 hidden">
-        <input type="hidden" name="item_id" id="item_id">
-        <input type="hidden" name="item_name" id="item_name">
-
-        <!-- Selected Item Badge -->
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-4 rounded-lg">
-            <p class="text-xs font-medium text-blue-600 mb-1">BARANG TERPILIH</p>
-            <p id="selectedItem" class="text-gray-900 font-semibold">-</p>
+    <!-- Form -->
+    <form id="borrowForm" class="space-y-4 hidden">
+        <!-- Selected Items -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+            <p class="text-xs font-medium text-blue-700 mb-1">BARANG DIPILIH</p>
+            <p id="selectedItem" class="text-sm text-gray-900 font-medium">-</p>
         </div>
 
-        <!-- Form Grid -->
-        <div class="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-
-            <!-- Daftar Barang Dipilih -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <!-- Items Table -->
             <div>
-                <h3 class="font-semibold mb-2">Barang Dipilih</h3>
-                <table class="w-full text-sm border">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="p-2">Kode</th>
-                            <th class="p-2">Barang</th>
-                            <th class="p-2 w-24">Qty</th>
-                            <th class="p-2 w-16">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="selectedItems"></tbody>
-                </table>
+                <h3 class="font-medium text-sm mb-2">Daftar Barang</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm whitespace-nowrap divide-y divide-gray-200">
+                        <thead class="bg-gray-1000">
+                            <tr class="bg-gray-50">
+                                <th class="px-3 py-2 text-left font-medium text-gray-500 tracking-wider">Barang</th>
+                                <th class="px-3 py-2 text-center font-medium text-gray-500 tracking-wider w-20">Qty</th>
+                                <th class="px-3 py-2 text-center font-medium text-gray-500 tracking-wider w-12">×</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectedItems" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="grid sm:grid-cols-2 gap-4">
+            <!-- Borrower Info -->
+            <div class="grid sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Peminjam</label>
-                    <input type="text" name="borrower_name"
-                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+                    <input type="text" name="borrower_name" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         placeholder="Nama lengkap">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Peminjam</label>
-                    <input type="email" name="borrower_email"
-                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" name="borrower_email" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         placeholder="email@example.com">
                 </div>
             </div>
 
-            <div class="grid sm:grid-cols-2 gap-4">
+            <div class="grid sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Pinjam</label>
-                    <input type="date" name="loan_date"
-                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tgl Pinjam</label>
+                    <input type="date" name="loan_date" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kembali</label>
-                    <input type="date" name="return_date"
-                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tgl Kembali</label>
+                    <input type="date" name="return_date" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
-                <textarea name="note" rows="3"
-                    class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
-                    placeholder="Tambahkan catatan jika diperlukan..."></textarea>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+                <textarea name="note" rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                    placeholder="Catatan opsional..."></textarea>
             </div>
         </div>
 
-        <!-- Preview Section -->
-        <div class="bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-5">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="text-xl">🧾</span>
-                <p class="font-semibold text-gray-900">Ringkasan Peminjaman</p>
-            </div>
-            <pre id="previewText"
-                class="text-sm text-gray-700 whitespace-pre-wrap font-mono bg-white/50 p-3 rounded-lg">Lengkapi form untuk melihat ringkasan</pre>
+        <!-- Preview -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p class="font-medium text-sm mb-2">📋 Ringkasan</p>
+            <pre id="previewText" class="text-xs text-gray-700 whitespace-pre-wrap">Lengkapi form</pre>
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit"
-            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3.5 rounded-xl font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 transform hover:scale-[1.02]">
-            <span class="flex items-center justify-center gap-2">
-                <span>📦</span>
-                <span>Konfirmasi Peminjaman</span>
+        <!-- Submit -->
+        <button type="submit" id="submitBtn"
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-lg font-semibold transition-all cursor-pointer">
+            <span id="submitText">📦 Konfirmasi Peminjaman</span>
+            <span id="submitLoader" class="hidden">
+                <div class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
+                </div>
             </span>
         </button>
     </form>
 
 </div>
 
-<!-- ===================== -->
-<!-- JAVASCRIPT -->
-<!-- ===================== -->
+<!--Swal mixin-->
+<script>
+    // Mixin untuk toast notifikasi
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // =====================
-        // DEBOUNCE
-        // =====================
-        function debounce(fn, delay = 500) {
+        const debounce = (fn, delay = 500) => {
             let timer;
             return (...args) => {
                 clearTimeout(timer);
-                timer = setTimeout(() => fn.apply(this, args), delay);
+                timer = setTimeout(() => fn(...args), delay);
             };
-        }
+        };
 
-        // =====================
-        // SEARCH INVENTORY
-        // =====================
         let selectedItems = [];
         const searchInput = document.getElementById('searchItem');
         const searchResult = document.getElementById('searchResult');
+        const loader = document.getElementById('loader');
         const borrowForm = document.getElementById('borrowForm');
         const selectedItemLabel = document.getElementById('selectedItem');
         const selectedItemsTable = document.getElementById('selectedItems');
+        const previewText = document.getElementById('previewText');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const submitLoader = document.getElementById('submitLoader');
 
         const searchInventory = debounce(async (q) => {
             if (!q) {
                 searchResult.classList.add('hidden');
+                loader.classList.add('hidden');
                 return;
             }
 
-            const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-            const data = await res.json();
+            loader.classList.remove('hidden');
 
-            searchResult.innerHTML = '';
-            searchResult.classList.remove('hidden');
+            try {
+                const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+                const data = await res.json();
 
-            data.forEach(item => {
-                if (parseInt(item.stock) <= 0) return;
+                searchResult.innerHTML = '';
+                searchResult.classList.remove('hidden');
 
-                const el = document.createElement('div');
-                el.className = 'p-2 hover:bg-gray-100 cursor-pointer';
-                el.innerHTML = `
-      <b>${item.name}</b><br>
-      <span class="text-xs text-gray-600">
-        Stok: ${item.stock}
-      </span>
-    `;
+                data.forEach(item => {
+                    if (parseInt(item.stock) <= 0) return;
 
-                el.onclick = () => {
-                    addItem(item);
-                    searchResult.classList.add('hidden');
-                    borrowForm.classList.remove('hidden');
-                };
+                    const el = document.createElement('div');
+                    el.className = 'p-3 hover:bg-gray-50 cursor-pointer';
+                    el.innerHTML = `<b class="text-sm">${item.name}</b><br><span class="text-xs text-gray-600">Stok: ${item.stock}</span>`;
+                    el.onclick = () => {
+                        addItem(item);
+                        searchResult.classList.add('hidden');
+                        borrowForm.classList.remove('hidden');
+                        searchInput.value = '';
+                    };
+                    searchResult.appendChild(el);
+                });
+            } catch (e) {
+                console.error(e);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }, 500);
 
-                searchResult.appendChild(el);
-            });
-        }, 600);
-
-        searchInput.addEventListener('input', e => {
-            searchInventory(e.target.value.trim());
-        });
+        searchInput.addEventListener('input', e => searchInventory(e.target.value.trim()));
 
         function addItem(item) {
             const exist = selectedItems.find(i => i.item_id === item.item_id);
-
             if (exist) {
-                if (exist.qty < item.stock) {
-                    exist.qty++;
-                }
+                if (exist.qty < item.stock) exist.qty++;
             } else {
-                selectedItems.push({
-                    item_id: item.item_id,
-                    name: item.name,
-                    stock: item.stock,
-                    qty: 1
-                });
+                selectedItems.push({ item_id: item.item_id, name: item.name, stock: item.stock, qty: 1 });
             }
-
             renderSelectedItems();
             updatePreview();
         }
 
         function renderSelectedItems() {
             selectedItemsTable.innerHTML = '';
-
             selectedItems.forEach((item, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-            <td class="p-2">${item.item_id}</td>
-            <td class="p-2">${item.name}</td>
-            <td class="p-2">
-                <input type="number"
-                    min="1"
-                    max="${item.stock}"
-                    value="${item.qty}"
-                    class="border w-16 p-1"
-                    onchange="updateQty(${idx}, this.value)">
-            </td>
-            <td class="p-2 text-center">
-                <button type="button"
-                    onclick="removeItem(${idx})"
-                    class="text-red-600">✕</button>
-            </td>
-        `;
+                <td class="px-3 py-2 capitalize whitespace-nowrap text-xs">${item.name}</td>
+                <td class="px-3 py-2 capitalize whitespace-nowrap text-center">
+                    <input type="number" min="1" max="${item.stock}" value="${item.qty}"
+                        class="border w-16 p-1 text-xs text-center rounded"
+                        onchange="updateQty(${idx}, this.value)">
+                </td>
+                <td class="px-3 py-2 capitalize whitespace-nowrap text-center">
+                    <button type="button" onclick="removeItem(${idx})" class="text-red-600 hover:text-red-800">✕</button>
+                </td>
+            `;
                 selectedItemsTable.appendChild(tr);
             });
-
-            selectedItemLabel.textContent =
-                selectedItems.map(i => `${i.name} (${i.qty})`).join(', ');
+            selectedItemLabel.textContent = selectedItems.map(i => `${i.name} (${i.qty})`).join(', ');
         }
 
-        function updateQty(idx, val) {
+        window.updateQty = (idx, val) => {
             selectedItems[idx].qty = parseInt(val);
             updatePreview();
-        }
+        };
 
-        function removeItem(idx) {
+        window.removeItem = (idx) => {
             selectedItems.splice(idx, 1);
             renderSelectedItems();
             updatePreview();
-        }
-
-        // =====================
-        // PREVIEW NOTA
-        // =====================
-        const previewText = document.getElementById('previewText');
+        };
 
         function updatePreview() {
             const f = borrowForm;
-
-            let itemsText = selectedItems.length
-                ? selectedItems.map(i => `- ${i.name} × ${i.qty}`).join('\n')
-                : '-';
-
-            previewText.textContent = `
-        Barang:
-        ${itemsText}
-
-        Peminjam        : ${f.borrower_name.value || '-'}
-        Email           : ${f.borrower_email.value || '-'}
-        Tanggal Pinjam  : ${f.loan_date.value || '-'}
-        Tanggal Kembali : ${f.return_date.value || '-'}
-        `.trim();
+            const itemsText = selectedItems.length ? selectedItems.map(i => `- ${i.name} × ${i.qty}`).join('\n') : '-';
+            previewText.textContent = `Barang:\n${itemsText}\n\nPeminjam: ${f.borrower_name.value || '-'}\nEmail: ${f.borrower_email.value || '-'}\nTgl Pinjam: ${f.loan_date.value || '-'}\nTgl Kembali: ${f.return_date.value || '-'}`.trim();
         }
-
 
         borrowForm.addEventListener('input', updatePreview);
 
-        // =====================
-        // SUBMIT + SWEETALERT
-        // =====================
         borrowForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -280,14 +248,20 @@
                 return;
             }
 
-            Swal.fire({
+            const result = await Swal.fire({
                 title: 'Konfirmasi Peminjaman?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Pinjam'
-            }).then(async (result) => {
-                if (!result.isConfirmed) return;
+            });
 
+            if (!result.isConfirmed) return;
+
+            submitBtn.disabled = true;
+            submitText.classList.add('hidden');
+            submitLoader.classList.remove('hidden');
+
+            try {
                 const payload = {
                     borrower_name: borrowForm.borrower_name.value,
                     borrower_email: borrowForm.borrower_email.value,
@@ -305,12 +279,30 @@
                 const json = await res.json();
 
                 if (json.ok) {
-                    Swal.fire('Berhasil', `Kode: ${json.code}`, 'success')
-                        .then(() => location.href = '/history');
+                    Toast.fire({
+                        icon: 'success',
+                        title: `Berhasil disimpan · Kode ${json.code}`
+                    });
+
+                    setTimeout(() => {
+                        location.href = '/history';
+                    }, 1200);
                 } else {
-                    Swal.fire('Gagal', json.error || 'Terjadi kesalahan', 'error');
+                    Toast.fire({
+                        icon: 'error',
+                        title: json.error || 'Gagal menyimpan data'
+                    });
                 }
-            });
+            } catch (e) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Terjadi kesalahan sistem'
+                });
+            } finally {
+                submitBtn.disabled = false;
+                submitText.classList.remove('hidden');
+                submitLoader.classList.add('hidden');
+            }
         });
     });
 </script>

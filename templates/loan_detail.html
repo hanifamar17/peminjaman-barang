@@ -2,14 +2,76 @@
 {% block title %}Detail Peminjaman{% endblock %}
 
 {% block content %}
-<div class="bg-white border rounded p-4">
-  <h2 class="text-lg font-semibold mb-3">🧾 Bukti Peminjaman</h2>
+<div class="bg-white border rounded p-4 max-w-xl mx-auto">
+    <h2 class="text-lg font-semibold mb-3">🧾 Detail Peminjaman</h2>
 
-  <p><b>Kode:</b> {{ loan.code }}</p>
-  <p><b>Barang:</b> {{ loan.item_name }}</p>
-  <p><b>Peminjam:</b> {{ loan.borrower_name }}</p>
-  <p><b>Tanggal Pinjam:</b> {{ loan.loan_date }}</p>
-  <p><b>Tanggal Kembali:</b> {{ loan.return_date }}</p>
-  <p><b>Status:</b> {{ loan.status }}</p>
+    <p><b>Kode:</b> {{ loan.code }}</p>
+    <p><b>Peminjam:</b> {{ loan.borrower_name }}</p>
+    <p><b>Tanggal Pinjam:</b> {{ loan.loan_date }}</p>
+    <p><b>Tanggal Kembali:</b> {{ loan.return_date }}</p>
+    <p><b>Status:</b> {{ loan.status }}</p>
+
+    <hr class="my-3">
+
+    <h3 class="font-semibold mb-2">Daftar Barang</h3>
+    <table class="w-full text-sm border">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="p-2 border">Barang</th>
+                <th class="p-2 border">Jumlah</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in loan.data %}
+            <tr>
+                <td class="p-2 border">{{ i.item_name }}</td>
+                <td class="p-2 border text-center">{{ i.qty }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- SHARE BUTTON -->
+    <div class="flex gap-2 mt-4">
+        <button id="btnShare" data-link="{{ receipt_url }}"
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+            🔗 Salin Link
+        </button>
+
+        <a href="https://wa.me/?text={{ ('Nota Peminjaman Barang:%0A' ~ receipt_url) | urlencode }}" target="_blank"
+            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+            📱 WhatsApp
+        </a>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!--Swal mixin-->
+<script>
+    // Mixin untuk toast notifikasi
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+</script>
+<script>
+    document.getElementById('btnShare')?.addEventListener('click', () => {
+        const link = document.getElementById('btnShare').dataset.link;
+
+        navigator.clipboard.writeText(link).then(() => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Berhasil disimpan',
+                text: 'Link nota peminjaman telah disalin ke clipboard'
+            });
+        });
+    });
+</script>
 {% endblock %}
