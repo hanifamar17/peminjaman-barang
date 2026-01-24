@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Detail Peminjaman{% endblock %}
+
+{% block content %}
+<div class="bg-white border rounded p-4">
+  <h2 class="text-lg font-semibold mb-3">🧾 Bukti Peminjaman</h2>
+
+  <p><b>Kode:</b> {{ loan.code }}</p>
+  <p><b>Barang:</b> {{ loan.item_name }}</p>
+  <p><b>Peminjam:</b> {{ loan.borrower_name }}</p>
+  <p><b>Tanggal Pinjam:</b> {{ loan.loan_date }}</p>
+  <p><b>Tanggal Kembali:</b> {{ loan.return_date }}</p>
+  <p><b>Status:</b> {{ loan.status }}</p>
+</div>
+{% endblock %}
