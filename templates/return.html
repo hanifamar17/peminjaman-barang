@@ -1,70 +1,151 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-xl mx-auto p-4">
-    <h1 class="text-xl font-semibold mb-4">Pengembalian Barang</h1>
+<div class="max-w-2xl mx-auto px-4 py-6">
 
-    <!-- FORM INPUT KODE -->
-    <div class="bg-white rounded-lg shadow p-4 space-y-3">
-        <label class="block text-sm font-medium">Kode Peminjaman</label>
-        <input id="loanCode" type="text" placeholder="Contoh: LOAN-AB12"
-            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring" />
+    <div class="mb-6">
+        <h1 class="text-xl font-bold text-gray-900">Pengembalian Barang</h1>
+        <p class="text-gray-600 text-sm">Validasi pengembalian barang inventaris laboratorium.</p>
     </div>
 
-    <!-- RINGKASAN -->
-    <div id="loanSummary" class="hidden mt-4 bg-gray-50 border rounded-lg p-4">
-        <h2 class="font-semibold mb-2">Ringkasan Peminjaman</h2>
-        <ul class="text-sm space-y-1">
-            <li><b>Nama:</b> <span id="sBorrower"></span></li>
+    <div class="bg-white rounded-lg border border-slate-200 p-6 mb-4">
+        <label for="loanCode" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kode
+            Peminjaman</label>
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </span>
+            <input id="loanCode" type="text" placeholder="Masukkan kode ref..."
+                class="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-blue-500 font-mono transition-all" />
+        </div>
+    </div>
 
-            <li>
-                <b>Barang:</b>
-                <ul id="sItems" class="list-disc ml-5"></ul>
-            </li>
+    <div id="loanSummary" class="hidden space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <div class="p-5 border-b border-slate-50 bg-slate-50/50">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide">Ringkasan Peminjaman</h2>
+            </div>
 
-            <li><b>Tgl Pinjam:</b> <span id="sLoanDate"></span></li>
-            <li><b>Tgl Kembali:</b> <span id="sReturnDate"></span></li>
-            <li><b>Status:</b> <span id="sStatus" class="font-semibold"></span></li>
-        </ul>
+            <div class="bg-gray-50/50 p-4 md:p-6 border-b border-gray-100">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Kode Referensi</p>
+                        <p id="sIdItem" class="mt-1 text-sm font-mono font-medium text-gray-900 select-all"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Peminjam</p>
+                        <p id="sBorrower" class="mt-1 text-sm font-medium text-gray-900"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Status Saat Ini</p>
+                        <span id="sStatus" class="mt-1 text-sm font-medium text-gray-900"></span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Tgl Pinjam</p>
+                        <p id="sLoanDate" class="mt-1 text-sm font-medium text-gray-900"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Tgl Kembali</p>
+                        <p id="sReturnDate" class="mt-1 text-sm font-medium text-gray-900"></p>
+                    </div>
+                </div>
 
-        <!-- UPLOAD FOTO -->
-        <div class="mt-3">
-            <label class="block text-sm font-medium">Foto Bukti Pengembalian</label>
-            <input type="file" id="proof" accept="image/*" class="mt-1 block w-full text-sm" />
+                <div class="mt-8">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                            </path>
+                        </svg>
+                        Daftar Barang
+                    </h3>
+                    <div id="sItems" class="space-y-2">
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <button id="btnReturn" class="mt-4 w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
-            Dikembalikan
-        </button>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+            <!--
+            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Foto Bukti
+                Pengembalian</label>-->
+
+            <div class="relative group">
+                <input type="file" id="proof" accept="image/*"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 hidden" />
+                <div
+                    class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center group-hover:border-blue-400 group-hover:bg-blue-50 transition-all hidden">
+                    <div
+                        class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-100">
+                        <svg class="w-6 h-6 text-slate-400 group-hover:text-blue-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium" id="fileName">Klik untuk ambil foto atau upload</p>
+                </div>
+            </div>
+
+            <button id="btnReturn"
+                class="mt-6 w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:scale-100 flex items-center justify-center gap-2">
+                Konfirmasi Pengembalian
+            </button>
+        </div>
     </div>
 </div>
 
-<!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+<!--Swal mixin-->
+<script>
+    // Mixin untuk toast notifikasi
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const loanCodeInput = document.getElementById("loanCode");
         const summaryBox = document.getElementById("loanSummary");
         const btnReturn = document.getElementById("btnReturn");
         const proofInput = document.getElementById("proof");
+        const fileNameText = document.getElementById("fileName");
 
         let currentLoan = null;
         let debounceTimer = null;
 
-        /* =========================
-           DEBOUNCE INPUT KODE
-        ========================== */
-        loanCodeInput.addEventListener("input", () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(fetchLoan, 700);
+        // Feedback nama file setelah pilih foto
+        proofInput.addEventListener("change", (e) => {
+            if (e.target.files.length > 0) {
+                fileNameText.innerText = "📸 " + e.target.files[0].name;
+                fileNameText.classList.add("text-blue-600", "font-bold");
+            }
         });
 
-        /* =========================
-           FETCH DATA PEMINJAMAN
-        ========================== */
+        loanCodeInput.addEventListener("input", () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(fetchLoan, 500);
+        });
+
         function fetchLoan() {
             const code = loanCodeInput.value.trim();
-            if (!code) return;
+            if (!code) {
+                summaryBox.classList.add("hidden");
+                return;
+            }
 
             fetch(`/api/loan/${code}`)
                 .then(res => res.json())
@@ -77,50 +158,61 @@
                     const loan = res.loan;
                     currentLoan = loan;
 
+                    document.getElementById("sIdItem").innerText = loan.code;
                     document.getElementById("sBorrower").innerText = loan.borrower_name;
                     document.getElementById("sLoanDate").innerText = loan.loan_date;
                     document.getElementById("sReturnDate").innerText = loan.return_date;
-                    document.getElementById("sStatus").innerText = loan.status;
 
-                    // ===== BARANG (MULTI) =====
+                    const statusEl = document.getElementById("sStatus");
+                    statusEl.innerText = loan.status;
+
+                    // Styling Status Badge
+                    if (loan.status.toLowerCase() === 'dikembalikan') {
+                        statusEl.className = "inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight bg-green-100 text-green-700 ring-1 ring-green-600/20";
+                        btnReturn.disabled = true;
+                        btnReturn.innerText = "Dikembalikan";
+                    } else {
+                        statusEl.className = "inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight bg-amber-100 text-amber-700 ring-1 ring-amber-600/20";
+                        btnReturn.disabled = false;
+                        btnReturn.innerText = "Konfirmasi Pengembalian";
+                    }
+
                     const itemsBox = document.getElementById("sItems");
                     itemsBox.innerHTML = "";
-
                     loan.items.forEach(item => {
-                        const li = document.createElement("li");
-                        li.textContent = `${item.item_name} × ${item.qty}`;
-                        itemsBox.appendChild(li);
+                        const div = document.createElement("div");
+                        div.className = "flex justify-between items-center bg-slate-50 px-3 py-2 rounded-lg text-sm border border-slate-100";
+                        div.innerHTML = `<span class="text-slate-700">${item.item_name}</span><span class="font-bold text-slate-900">×${item.qty}</span>`;
+                        itemsBox.appendChild(div);
                     });
-
-                    btnReturn.disabled = loan.status === "dikembalikan";
-                    btnReturn.classList.toggle("opacity-50", loan.status === "dikembalikan");
 
                     summaryBox.classList.remove("hidden");
                 });
         }
-        /* =========================
-           SUBMIT PENGEMBALIAN
-        ========================== */
+
         btnReturn.addEventListener("click", () => {
             if (!currentLoan) return;
 
             Swal.fire({
-                title: "Konfirmasi",
-                text: "Yakin semua barang sudah dikembalikan?",
-                icon: "question",
+                title: "Proses Pengembalian?",
+                text: "Pastikan fisik barang sudah diperiksa dan sesuai jumlahnya.",
+                icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: "Ya, dikembalikan",
+                confirmButtonColor: "#0f172a", // slate-900
+                confirmButtonText: "Ya, Selesaikan",
                 cancelButtonText: "Batal"
             }).then(result => {
                 if (!result.isConfirmed) return;
 
                 const formData = new FormData();
                 formData.append("code", currentLoan.code);
-
-                // foto bukti (opsional)
-                if (proofInput && proofInput.files.length > 0) {
+                if (proofInput.files.length > 0) {
                     formData.append("proof", proofInput.files[0]);
                 }
+
+                // Loading State
+                btnReturn.disabled = true;
+                btnReturn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
 
                 fetch("/return/submit", {
                     method: "POST",
@@ -129,21 +221,33 @@
                     .then(res => res.json())
                     .then(res => {
                         if (res.ok) {
-                            Swal.fire({
+                            Toast.fire({
                                 icon: "success",
-                                title: "Berhasil",
-                                text: "Barang berhasil dikembalikan"
-                            }).then(() => location.reload());
+                                title: "Berhasil diperbarui"
+                            }).then(() => {
+                                location.reload(); // Reload setelah toast selesai (2 detik)
+                            });
                         } else {
-                            Swal.fire("Gagal", res.error || "Terjadi kesalahan", "error");
+                            Toast.fire({
+                                icon: "error",
+                                title: res.error || "Gagal memproses"
+                            });
+
+                            // Reset tombol jika gagal
+                            btnReturn.disabled = false;
+                            btnReturn.innerText = "Konfirmasi Pengembalian";
                         }
                     })
                     .catch(() => {
-                        Swal.fire("Error", "Server tidak merespons", "error");
+                        Toast.fire({
+                            icon: "error",
+                            title: "Server tidak merespons"
+                        });
+                        btnReturn.disabled = false;
+                        btnReturn.innerText = "Konfirmasi Pengembalian";
                     });
             });
         });
     });
 </script>
-
 {% endblock %}

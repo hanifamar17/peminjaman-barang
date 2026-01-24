@@ -2,37 +2,127 @@
 {% block title %}Riwayat{% endblock %}
 
 {% block content %}
-<h2 class="text-xl font-semibold mb-4">📄 Riwayat Peminjaman</h2>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center gap-3 mb-1">
+            <h2 class="text-xl font-bold text-gray-900">Riwayat Peminjaman</h2>
+        </div>
+        <p class="text-gray-600 text-sm">Lihat semua riwayat peminjaman barang</p>
+    </div>
 
-<input type="text" id="filter" class="w-full mb-3 p-2 border rounded" placeholder="Cari...">
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <div class="relative">
+            <input type="text" id="filter" 
+                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="🔍 Cari kode, barang, atau peminjam...">
+            <div id="searchCount" class="mt-1 text-xs text-gray-500 hidden"></div>
+        </div>
+    </div>
 
-<div class="overflow-x-auto">
-    <table class="w-full text-sm border">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="p-2 border">Kode</th>
-                <th class="p-2 border">Barang</th>
-                <th class="p-2 border">Peminjam</th>
-                <th class="p-2 border">Status</th>
-                <th class="p-2 border">Aksi</th>
-            </tr>
-        </thead>
+    <!-- Info Footer -->
+    <div class="mt-4 text-xs text-gray-500 text-right mb-2">
+        Total: <span id="totalCount">{{ loans|length }}</span> peminjaman
+    </div>
+    <!-- Table Wrapper -->
+    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm whitespace-nowrap divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                    <tr class="bg-gray-50">
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kode</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Barang</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Peminjam</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="bg-white divide-y divide-gray-100">
+                    {% for l in loans %}
+                    <tr class="hover:bg-gray-100 text-sm transition" data-row>
+                        <td class="px-3 py-2">
+                            <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ l.code }}</span>
+                        </td>
+                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">{{ l.item_name }}</td>
+                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">{{ l.borrower_name }}</td>
+                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
+                            {% if l.status == 'dipinjam' %}
+                            <span class="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded">
+                                Dipinjam
+                            </span>
+                            {% elif l.status == 'dikembalikan' %}
+                            <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                                Dikembalikan
+                            </span>
+                            {% else %}
+                            <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                                {{ l.status }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
+                            <a href="{{ url_for('loan_detail', code=l.code) }}" 
+                                class="inline-block px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition">
+                                Detail
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden p-8 text-center">
+            <div class="text-4xl mb-2">🔍</div>
+            <p class="text-gray-600 text-sm">Tidak ada data ditemukan</p>
+        </div>
+    </div>
 
-        <tbody id="tableBody">
-            {% for l in loans %}
-            <tr class="border">
-                <td class="p-2">{{ l.code }}</td>
-                <td class="p-2">{{ l.item_name }}</td>
-                <td class="p-2">{{ l.borrower_name }}</td>
-                <td class="p-2">{{ l.status }}</td>
-                <td class="p-2 text-center">
-                    <a href="{{ url_for('loan_detail', code=l.code) }}" class="text-blue-600 hover:underline">
-                        Detail
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const filterInput = document.getElementById('filter');
+    const tableBody = document.getElementById('tableBody');
+    const searchCount = document.getElementById('searchCount');
+    const emptyState = document.getElementById('emptyState');
+    const totalCount = document.getElementById('totalCount');
+    const rows = tableBody.querySelectorAll('[data-row]');
+    const total = rows.length;
+
+    filterInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const isVisible = text.includes(query);
+            row.style.display = isVisible ? '' : 'none';
+            if (isVisible) visibleCount++;
+        });
+
+        // Show/hide empty state
+        if (visibleCount === 0 && query) {
+            emptyState.classList.remove('hidden');
+            tableBody.style.display = 'none';
+        } else {
+            emptyState.classList.add('hidden');
+            tableBody.style.display = '';
+        }
+
+        // Update search count
+        if (query) {
+            searchCount.textContent = `Menampilkan ${visibleCount} dari ${total} data`;
+            searchCount.classList.remove('hidden');
+        } else {
+            searchCount.classList.add('hidden');
+        }
+
+        totalCount.textContent = visibleCount;
+    });
+});
+</script>
 {% endblock %}

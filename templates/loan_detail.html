@@ -1,77 +1,180 @@
 {% extends 'base.html' %}
-{% block title %}Detail Peminjaman{% endblock %}
+{% block title %}Detail Peminjaman #{{ loan.code }}{% endblock %}
 
 {% block content %}
-<div class="bg-white border rounded p-4 max-w-xl mx-auto">
-    <h2 class="text-lg font-semibold mb-3">🧾 Detail Peminjaman</h2>
+<div class="max-w-2xl mx-auto px-4 py-6">
 
-    <p><b>Kode:</b> {{ loan.code }}</p>
-    <p><b>Peminjam:</b> {{ loan.borrower_name }}</p>
-    <p><b>Tanggal Pinjam:</b> {{ loan.loan_date }}</p>
-    <p><b>Tanggal Kembali:</b> {{ loan.return_date }}</p>
-    <p><b>Status:</b> {{ loan.status }}</p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+            <h2 class="text-xl font-bold text-gray-900">
+                Detail Peminjaman
+            </h2>
+            <p class="text-gray-600 text-sm">Informasi lengkap status dan barang.</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            {% if loan.status|lower == 'dikembalikan' %}
+            <span
+                class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                Dikembalikan
+            </span>
+            {% else %}
+            <span
+                class="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded">
+                Dipinjam
+            </span>
+            {% endif %}
+        </div>
+    </div>
 
-    <hr class="my-3">
+    <div class="bg-white border border-gray-200 rounded-lg p-0 md:p-4">
 
-    <h3 class="font-semibold mb-2">Daftar Barang</h3>
-    <table class="w-full text-sm border">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="p-2 border">Barang</th>
-                <th class="p-2 border">Jumlah</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in loan.data %}
-            <tr>
-                <td class="p-2 border">{{ i.item_name }}</td>
-                <td class="p-2 border text-center">{{ i.qty }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="bg-gray-50/50 p-4 md:p-6 border-b border-gray-100">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Kode Referensi</p>
+                    <p class="mt-1 text-sm font-mono font-medium text-gray-900 select-all">{{ loan.code }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Nama Peminjam</p>
+                    <p class="mt-1 text-sm font-medium text-gray-900">{{ loan.borrower_name }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Tanggal Pinjam</p>
+                    <p class="mt-1 text-sm font-medium text-gray-900 flex items-center">
+                        {{ loan.loan_date }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Batas Kembali</p>
+                    <p class="mt-1 text-sm font-medium text-gray-900 flex items-center">
+                        {{ loan.return_date }}
+                    </p>
+                </div>
+            </div>
+        </div>
 
-    <!-- SHARE BUTTON -->
-    <div class="flex gap-2 mt-4">
-        <button id="btnShare" data-link="{{ receipt_url }}"
-            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
-            🔗 Salin Link
-        </button>
+        <div class="p-2 md:p-4 mt-2">
+            <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
+                Daftar Barang
+            </h3>
 
-        <a href="https://wa.me/?text={{ ('Nota Peminjaman Barang:%0A' ~ receipt_url) | urlencode }}" target="_blank"
-            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
-            📱 WhatsApp
-        </a>
+            <div class="overflow-x-auto rounded-lg border border-gray-100">
+                <table class="min-w-full divide-y divide-gray-100">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col"
+                                class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Barang</th>
+                            <th scope="col"
+                                class="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Jumlah (Qty)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        {% for i in loan.data %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
+                                {{ i.item_name }}
+                            </td>
+                            <td class="px-3 py-2 capitalize whitespace-nowrap text-sm text-right font-mono">
+                                {{ i.qty }} unit
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div
+            class="bg-gray-50 px-2 md:px-6 py-4 flex flex-col sm:flex-row gap-3 items-center justify-between border-t border-gray-100">
+            <span class="text-xs text-gray-400">Bagikan detail peminjaman ini:</span>
+
+            <div class="flex w-full sm:w-auto gap-3">
+                <button id="btnShare" data-link="{{ receipt_url }}"
+                    class="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-all focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Salin
+                </button>
+
+                {% set wa_message =
+                "*DETAIL PEMINJAMAN INVENTARIS*\n" ~
+                "--------------------------------\n" ~
+                "*Kode:* " ~ loan.code ~ "\n" ~
+                "*Nama:* " ~ loan.borrower_name ~ "\n" ~
+                "*Tgl Pinjam:* " ~ loan.loan_date ~ "\n" ~
+                "*Status:* " ~ loan.status ~ "\n\n" ~
+                "Lihat bukti peminjaman di sini:\n" ~
+                receipt_url ~ "\n"
+                %}
+
+                <a href="https://wa.me/?text={{ wa_message | urlencode }}" target="_blank"
+                    class="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-all shadow-sm hover:shadow focus:ring-2 focus:ring-offset-1 focus:ring-green-500 whitespace-nowrap">
+
+                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                    </svg>
+
+                    <span>WhatsApp</span>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!--Swal mixin-->
 <script>
-    // Mixin untuk toast notifikasi
     const Toast = Swal.mixin({
         toast: true,
         position: "top-end",
         showConfirmButton: false,
-        timer: 2500,
+        timer: 3000,
         timerProgressBar: true,
         didOpen: (toast) => {
-            toast.addEventListener("mouseenter", Swal.stopTimer);
-            toast.addEventListener("mouseleave", Swal.resumeTimer);
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
         }
     });
-</script>
-<script>
-    document.getElementById('btnShare')?.addEventListener('click', () => {
-        const link = document.getElementById('btnShare').dataset.link;
 
-        navigator.clipboard.writeText(link).then(() => {
-            Toast.fire({
-                icon: 'success',
-                title: 'Berhasil disimpan',
-                text: 'Link nota peminjaman telah disalin ke clipboard'
-            });
+    const btnShare = document.getElementById('btnShare');
+    if (btnShare) {
+        btnShare.addEventListener('click', async () => {
+            const link = btnShare.dataset.link;
+            try {
+                await navigator.clipboard.writeText(link);
+                // Ubah tampilan tombol sementara
+                const originalContent = btnShare.innerHTML;
+                btnShare.innerHTML = `✅ Tersalin`;
+                btnShare.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Link berhasil disalin'
+                });
+
+                // Kembalikan tombol setelah 2 detik
+                setTimeout(() => {
+                    btnShare.innerHTML = originalContent;
+                    btnShare.classList.remove('bg-green-50', 'text-green-600', 'border-green-200');
+                }, 2000);
+            } catch (err) {
+                console.error('Gagal menyalin:', err);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Gagal menyalin link'
+                });
+            }
         });
-    });
+    }
 </script>
 {% endblock %}
