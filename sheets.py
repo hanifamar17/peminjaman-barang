@@ -116,6 +116,7 @@ def get_loan_with_items(code):
                 "loan_date": d.get("loan_date"),
                 "return_date": d.get("return_date"),
                 "status": d.get("status"),
+                "note": d.get("note"),
                 "items": []
             }
 

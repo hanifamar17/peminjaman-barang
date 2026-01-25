@@ -3,9 +3,21 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-6">
-    
+    <a href="/" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 
+          active:scale-95 active:bg-gray-100 group">
+
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+        </svg>
+
+        <span>Kembali</span>
+    </a>
+
     <!-- Header -->
-    <div class="mb-6">
+    <div class="mb-6 mt-2">
         <div class="flex items-center gap-3 mb-1">
             <h2 class="text-xl font-bold text-gray-900">Riwayat Peminjaman</h2>
         </div>
@@ -15,41 +27,52 @@
     <!-- Search Bar -->
     <div class="mb-4">
         <div class="relative">
-            <input type="text" id="filter" 
+            <input type="text" id="filter"
                 class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 placeholder="🔍 Cari kode, barang, atau peminjam...">
             <div id="searchCount" class="mt-1 text-xs text-gray-500 hidden"></div>
         </div>
     </div>
 
-    <!-- Info Footer -->
-    <div class="mt-4 text-xs text-gray-500 text-right mb-2">
-        Total: <span id="totalCount">{{ loans|length }}</span> peminjaman
-    </div>
-    <!-- Table Wrapper -->
-    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm whitespace-nowrap divide-y divide-gray-200">
-                <thead class="bg-gray-100">
-                    <tr class="bg-gray-50">
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kode</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Barang</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Peminjam</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">Aksi</th>
+    <div class="bg-white p-2 md:p-4 border border-gray-200 rounded-lg">
+        <!-- Info Footer -->
+        <div class="mt-4 text-xs text-gray-500 text-right mb-2">
+            <span id="totalCount">{{ loans|length }}</span> peminjaman
+        </div>
+
+        <!-- Table Wrapper -->
+        <div class="overflow-x-auto rounded-lg border border-gray-100">
+            <table class="min-w-full divide-y divide-gray-100">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Kode</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Tanggal</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Barang</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Peminjam</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Status</th>
+                        <th
+                            class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">
+                            Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="bg-white divide-y divide-gray-100">
                     {% for l in loans %}
                     <tr class="hover:bg-gray-100 text-sm transition" data-row>
-                        <td class="px-3 py-2">
+                        <td class="px-3 py-2 whitespace-nowrap">
                             <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ l.code }}</span>
                         </td>
+                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">{{ l.loan_date[8:10] }}/{{ l.loan_date[5:7] }}/{{ l.loan_date[0:4] }}</td>
                         <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">{{ l.item_name }}</td>
                         <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">{{ l.borrower_name }}</td>
                         <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
                             {% if l.status == 'dipinjam' %}
-                            <span class="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded">
+                            <span
+                                class="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded">
                                 Dipinjam
                             </span>
                             {% elif l.status == 'dikembalikan' %}
@@ -63,7 +86,7 @@
                             {% endif %}
                         </td>
                         <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
-                            <a href="{{ url_for('loan_detail', code=l.code) }}" 
+                            <a href="{{ url_for('loan_detail', code=l.code) }}"
                                 class="inline-block px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition">
                                 Detail
                             </a>
@@ -73,7 +96,31 @@
                 </tbody>
             </table>
         </div>
-        
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+            <div class="text-xs text-gray-500 order-2 sm:order-1">
+                Halaman <span id="currentPage" class="font-bold text-gray-900">1</span> dari <span id="totalPages"
+                    class="font-bold text-gray-900">1</span>
+            </div>
+
+            <div class="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
+                <button id="prevBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
+                   transition-all duration-200
+                   hover:bg-gray-50 
+                   active:scale-95 active:bg-gray-100 
+                   disabled:opacity-40 disabled:pointer-events-none disabled:scale-100 cursor-pointer">
+                    Sebelumnya
+                </button>
+
+                <button id="nextBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
+                   transition-all duration-200
+                   hover:bg-gray-50 
+                   active:scale-95 active:bg-gray-100 
+                   disabled:opacity-40 disabled:pointer-events-none disabled:scale-100 cursor-pointer">
+                    Selanjutnya
+                </button>
+            </div>
+        </div>
+
         <!-- Empty State -->
         <div id="emptyState" class="hidden p-8 text-center">
             <div class="text-4xl mb-2">🔍</div>
@@ -84,45 +131,110 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const filterInput = document.getElementById('filter');
-    const tableBody = document.getElementById('tableBody');
-    const searchCount = document.getElementById('searchCount');
-    const emptyState = document.getElementById('emptyState');
-    const totalCount = document.getElementById('totalCount');
-    const rows = tableBody.querySelectorAll('[data-row]');
-    const total = rows.length;
+    document.addEventListener('DOMContentLoaded', () => {
+        // Elements
+        const filterInput = document.getElementById('filter');
+        const tableBody = document.getElementById('tableBody');
+        const searchCount = document.getElementById('searchCount');
+        const emptyState = document.getElementById('emptyState');
+        const totalCountLabel = document.getElementById('totalCount');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentPageLabel = document.getElementById('currentPage');
+        const totalPagesLabel = document.getElementById('totalPages');
 
-    filterInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        let visibleCount = 0;
+        // State
+        const allRows = Array.from(tableBody.querySelectorAll('[data-row]'));
+        let filteredRows = [...allRows];
+        let currentPage = 1;
+        const rowsPerPage = 10; // jumlah baris per halaman
+        let debounceTimer;
 
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            const isVisible = text.includes(query);
-            row.style.display = isVisible ? '' : 'none';
-            if (isVisible) visibleCount++;
+        // --- FUNGSI UTAMA ---
+        function updateTable() {
+            const totalRows = filteredRows.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+
+            // Pastikan currentPage tidak melebihi totalPages
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            // Sembunyikan semua, lalu tampilkan yang masuk range paginasi
+            allRows.forEach(row => row.style.display = 'none');
+
+            const rowsToDisplay = filteredRows.slice(start, end);
+            rowsToDisplay.forEach(row => row.style.display = '');
+
+            // UI Updates
+            currentPageLabel.textContent = currentPage;
+            totalPagesLabel.textContent = totalPages;
+            totalCountLabel.textContent = totalRows;
+
+            // Tombol Navigasi
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+
+            // Empty State handling
+            if (totalRows === 0) {
+                emptyState.classList.remove('hidden');
+                tableBody.closest('.overflow-x-auto').classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                tableBody.closest('.overflow-x-auto').classList.remove('hidden');
+            }
+        }
+
+        // --- DEBOUNCE PENCARIAN ---
+
+        filterInput.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+
+            // Jeda 300ms sebelum eksekusi pencarian
+            debounceTimer = setTimeout(() => {
+                const query = e.target.value.toLowerCase().trim();
+
+                // Filter data
+                filteredRows = allRows.filter(row => {
+                    return row.textContent.toLowerCase().includes(query);
+                });
+
+                // Reset ke halaman 1 saat mencari
+                currentPage = 1;
+
+                // Update Search Count UI
+                if (query) {
+                    searchCount.textContent = `Ditemukan ${filteredRows.length} data`;
+                    searchCount.classList.remove('hidden');
+                } else {
+                    searchCount.classList.add('hidden');
+                }
+
+                updateTable();
+            }, 300);
         });
 
-        // Show/hide empty state
-        if (visibleCount === 0 && query) {
-            emptyState.classList.remove('hidden');
-            tableBody.style.display = 'none';
-        } else {
-            emptyState.classList.add('hidden');
-            tableBody.style.display = '';
-        }
+        // --- EVENT NAVIGASI ---
 
-        // Update search count
-        if (query) {
-            searchCount.textContent = `Menampilkan ${visibleCount} dari ${total} data`;
-            searchCount.classList.remove('hidden');
-        } else {
-            searchCount.classList.add('hidden');
-        }
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+            }
+        });
 
-        totalCount.textContent = visibleCount;
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTable();
+            }
+        });
+
+        // Inisialisasi awal
+        updateTable();
     });
-});
 </script>
 {% endblock %}
