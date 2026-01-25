@@ -1,16 +1,46 @@
+# sheets.py
+import os
+import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-import os, datetime
 
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
 
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-CREDS_PATH = os.getenv('GOOGLE_CREDENTIALS_JSON')
-SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
 
 def get_service():
-    creds = service_account.Credentials.from_service_account_file(CREDS_PATH, scopes=SCOPES)
-    service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
-    return service
+    """
+    Membuat Google Sheets service.
+    - Lokal: GOOGLE_CREDENTIALS_JSON boleh path file
+    - Vercel: GOOGLE_CREDENTIALS_JSON berisi JSON string
+    """
+
+    creds_env = os.getenv("GOOGLE_CREDENTIALS_JSON")
+    if not creds_env:
+        raise RuntimeError("GOOGLE_CREDENTIALS_JSON tidak diset")
+
+    # === CASE 1: ENV berisi PATH FILE (lokal) ===
+    if creds_env.strip().endswith(".json"):
+        creds = service_account.Credentials.from_service_account_file(
+            creds_env,
+            scopes=SCOPES
+        )
+
+    # === CASE 2: ENV berisi JSON STRING (Vercel) ===
+    else:
+        creds_dict = json.loads(creds_env)
+        creds = service_account.Credentials.from_service_account_info(
+            creds_dict,
+            scopes=SCOPES
+        )
+
+    return build(
+        "sheets",
+        "v4",
+        credentials=creds,
+        cache_discovery=False
+    )
+
 
 def read_sheet(sheet_name, range_header=None):
     service = get_service()
