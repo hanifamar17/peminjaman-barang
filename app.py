@@ -18,6 +18,7 @@ from sheets import (
     update_stock,
     find_loan_by_code,
     update_loan_status,
+    read_sheet,
 )
 from mailer import (
     mail,
@@ -32,12 +33,8 @@ load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev")
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER", "static/uploads")
-app.config["ENABLE_SCHEDULER"] = os.getenv("ENABLE_SCHEDULER", "True") in [
-    "True",
-    "true",
-    "1",
-]
-
+ENABLE_SCHEDULER = os.getenv("ENABLE_SCHEDULER", "false").lower() in ["true", "1"]
+app.config["ENABLE_SCHEDULER"] = ENABLE_SCHEDULER
 # =========================
 # Konfigurasi Email (Gmail App Password)
 # =========================
@@ -50,7 +47,8 @@ app.config.update(
 )
 
 mail.init_app(app)
-init_app(app)
+if ENABLE_SCHEDULER:
+    init_app(app)
 
 
 # route: landing
@@ -272,6 +270,7 @@ def loan_detail(code):
         "return_date": data[0]["return_date"],
         "status": data[0]["status"],
         "note": data[0]["note"],
+        "borrower_email": data[0]["borrower_email"],
         "data": data,
     }
 
@@ -295,9 +294,25 @@ def receipt(code):
 def uploaded_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
+#URL
+@app.context_processor
+def inject_base_url():
+    from sheets import read_sheet
+
+    rows = read_sheet('url')
+    if not rows or len(rows) < 2:
+        base_url = '/'
+    else:
+        base_url = rows[1][0] or '/'
+
+    return dict(base_url=base_url)
+
+
+
+
 
 # =======================
 # MAIN
 # =======================
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True)

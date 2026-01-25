@@ -143,12 +143,13 @@
                 "*Nama:* " ~ loan.borrower_name ~ "\n" ~
                 "*Tgl Pinjam:* " ~ loan.loan_date ~ "\n" ~
                 "*Status:* " ~ loan.status ~ "\n\n" ~
-                "Lihat bukti peminjaman di sini:\n" ~
-                receipt_url ~ "\n"
+                "*Notifikasi email telah dikirimkan ke:* " ~ loan.borrower_email ~ "\n\n" ~
+                "Lihat bukti peminjaman selengkapnya di sini:\n" ~
+                receipt_url
                 %}
 
                 <a href="https://wa.me/?text={{ wa_message | urlencode }}" target="_blank"
-                    class="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-all shadow-sm hover:shadow focus:ring-2 focus:ring-offset-1 focus:ring-green-500 whitespace-nowrap">
+                    class="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-all shadow-sm active:scale-95 focus:ring-2 focus:ring-offset-1 focus:ring-green-500 whitespace-nowrap">
 
                     <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                         <path
