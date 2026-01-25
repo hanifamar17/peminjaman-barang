@@ -1,4 +1,3 @@
-# sheets.py
 import os
 import json
 from google.oauth2 import service_account
@@ -9,24 +8,18 @@ SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
 
 
 def get_service():
-    """
-    Membuat Google Sheets service.
-    - Lokal: GOOGLE_CREDENTIALS_JSON boleh path file
-    - Vercel: GOOGLE_CREDENTIALS_JSON berisi JSON string
-    """
-
     creds_env = os.getenv("GOOGLE_CREDENTIALS_JSON")
     if not creds_env:
         raise RuntimeError("GOOGLE_CREDENTIALS_JSON tidak diset")
 
-    # === CASE 1: ENV berisi PATH FILE (lokal) ===
+    # === PATH FILE (lokal) ===
     if creds_env.strip().endswith(".json"):
         creds = service_account.Credentials.from_service_account_file(
             creds_env,
             scopes=SCOPES
         )
 
-    # === CASE 2: ENV berisi JSON STRING (Vercel) ===
+    # === JSON STRING (Vercel) ===
     else:
         creds_dict = json.loads(creds_env)
         creds = service_account.Credentials.from_service_account_info(
@@ -40,7 +33,6 @@ def get_service():
         credentials=creds,
         cache_discovery=False
     )
-
 
 def read_sheet(sheet_name, range_header=None):
     service = get_service()

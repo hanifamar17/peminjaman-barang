@@ -33,8 +33,17 @@ load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev")
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER", "static/uploads")
-ENABLE_SCHEDULER = os.getenv("ENABLE_SCHEDULER", "false").lower() in ["true", "1"]
+
+IS_VERCEL = os.getenv("VERCEL") == "1"
+
+ENABLE_SCHEDULER = (
+    os.getenv("ENABLE_SCHEDULER", "false").lower() in ["true", "1"]
+    and not IS_VERCEL
+)
+
 app.config["ENABLE_SCHEDULER"] = ENABLE_SCHEDULER
+
+
 # =========================
 # Konfigurasi Email (Gmail App Password)
 # =========================
@@ -47,7 +56,9 @@ app.config.update(
 )
 
 mail.init_app(app)
-if ENABLE_SCHEDULER:
+
+# scheduler hanya di lokal
+if app.config["ENABLE_SCHEDULER"]:
     init_app(app)
 
 
