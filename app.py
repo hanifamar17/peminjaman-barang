@@ -243,21 +243,24 @@ def history():
                 "borrower_name": d["borrower_name"],
                 "status": d["status"],
                 "loan_date": d["loan_date"],
+                "created_at": d.get("created_at"),  # ⬅penting
                 "items": [],
             }
         grouped[code]["items"].append(d["item_name"])
 
     loans = []
     for g in grouped.values():
-        loans.append(
-            {
-                "code": g["code"],
-                "borrower_name": g["borrower_name"],
-                "status": g["status"],
-                "loan_date": g["loan_date"],
-                "item_name": ", ".join(g["items"]),  # ringkasan
-            }
-        )
+        loans.append({
+            "code": g["code"],
+            "borrower_name": g["borrower_name"],
+            "status": g["status"],
+            "loan_date": g["loan_date"],
+            "created_at": g["created_at"],
+            "item_name": ", ".join(g["items"]),
+        })
+
+    # SORT TERKINI DI ATAS
+    loans.sort(key=lambda x: x["created_at"] or "", reverse=True)
 
     return render_template("history.html", loans=loans)
 
