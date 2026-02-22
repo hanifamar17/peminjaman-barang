@@ -73,11 +73,11 @@
                 <span class="font-bold text-gray-800">Inventaris Lab</span>
             </a>
             {% if session.get('user') %}
-            <div class="relative group">
-                <button
+            <div class="relative inline-block text-left" id="userDropdownContainer">
+                <button id="dropdownBtn"
                     class="flex items-center gap-2 p-1.5 pr-3 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-full border border-gray-300 transition-all focus:outline-none cursor-pointer">
-                    <div
-                        class="w-7 h-7 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <div id="avatarIcon"
+                        class="w-7 h-7 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center shrink-0 transition-colors">
                         <i class="fa-solid fa-user-gear text-xs"></i>
                     </div>
 
@@ -85,12 +85,12 @@
                         {{ session.get('user') }}
                     </span>
 
-                    <i
-                        class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform group-hover:rotate-180"></i>
+                    <i id="chevronIcon"
+                        class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform"></i>
                 </button>
 
-                <div
-                    class="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+                <div id="dropdownMenu"
+                    class="hidden absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                     <div class="px-4 py-3 bg-gray-50/50 border-b border-gray-100">
                         <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Akun Terhubung</p>
                         <p class="text-sm font-semibold text-gray-800 truncate">{{ session.get('user') }}</p>
@@ -99,6 +99,7 @@
                     <div class="py-2">
                         <a href="{{ base_url }}" target="_blank" rel="noopener noreferrer"
                             class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                            <i class="fa-solid fa-chart-line w-4"></i>
                             <span>Dashboard</span>
                         </a>
 
@@ -108,6 +109,7 @@
 
                         <a href="{{ url_for('logout') }}"
                             class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+                            <i class="fa-solid fa-right-from-bracket w-4"></i>
                             <span>Keluar (Logout)</span>
                         </a>
                     </div>
@@ -117,7 +119,7 @@
             {% else %}
             <a href="{{ base_url }}" target="_blank" rel="noopener noreferrer"
                 class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-sm font-bold text-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all duration-300 border border-blue-100">
-                <span>manu</span>
+                <span>Login</span>
             </a>
             {% endif %}
         </div>
@@ -149,6 +151,51 @@
 
     <script>
         document.getElementById("current-year").textContent = new Date().getFullYear();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('dropdownBtn');
+            const menu = document.getElementById('dropdownMenu');
+            const chevron = document.getElementById('chevronIcon');
+            const avatar = document.getElementById('avatarIcon');
+
+            if (btn && menu) {
+                // Toggle Menu saat diklik (Mobile & Desktop)
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = menu.classList.contains('hidden');
+
+                    if (isHidden) {
+                        openMenu();
+                    } else {
+                        closeMenu();
+                    }
+                });
+
+                // Menutup menu jika klik di luar elemen dropdown
+                document.addEventListener('click', (e) => {
+                    if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                        closeMenu();
+                    }
+                });
+
+                function openMenu() {
+                    menu.classList.remove('hidden');
+                    chevron.classList.add('rotate-180');
+                    avatar.classList.add('bg-blue-600', 'text-white');
+                }
+
+                function closeMenu() {
+                    menu.classList.add('hidden');
+                    chevron.classList.remove('rotate-180');
+                    avatar.classList.remove('bg-blue-600', 'text-white');
+                }
+
+                // Opsional: Tetap aktifkan hover untuk pengguna Mouse (Desktop)
+                const container = document.getElementById('userDropdownContainer');
+                container.addEventListener('mouseenter', openMenu);
+                container.addEventListener('mouseleave', closeMenu);
+            }
+        });
     </script>
 </body>
 
