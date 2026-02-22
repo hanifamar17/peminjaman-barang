@@ -42,6 +42,7 @@
 
     <!-- Form -->
     <form id="borrowForm" class="space-y-4 hidden">
+        <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
         <!-- Selected Items -->
         <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
             <p class="text-xs font-medium text-blue-700 mb-1">BARANG DIPILIH</p>
@@ -265,6 +266,8 @@
         borrowForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const csrfToken = document.getElementById('csrf_token').value;
+
             if (!selectedItems.length) {
                 Swal.fire('Oops', 'Pilih minimal 1 barang', 'warning');
                 return;
@@ -295,7 +298,10 @@
 
                 const res = await fetch('/borrow/submit', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
                     body: JSON.stringify(payload)
                 });
 

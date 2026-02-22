@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+<input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 <div class="max-w-2xl mx-auto px-4 py-6">
     <a href="/" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 
@@ -130,7 +131,7 @@
         </div>
 
         <button id="btnReturn"
-            class="mt-6 w-full bg-slate-900 text-white py-4 rounded-lg font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:scale-100 flex items-center justify-center gap-2">
+            class="mt-6 w-full bg-slate-900 text-white py-4 rounded-lg font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:scale-100 flex items-center justify-center gap-2 cursor-pointer">
             Konfirmasi Pengembalian
         </button>
     </div>
@@ -161,6 +162,7 @@
         const proofInput = document.getElementById("proof");
         const fileNameText = document.getElementById("fileName");
         const loanLoader = document.getElementById("loanLoader");
+        const csrfToken = document.getElementById("csrf_token").value;
 
         let currentLoan = null;
         let debounceTimer = null;
@@ -295,6 +297,9 @@
 
                 fetch("/return/submit", {
                     method: "POST",
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
                     body: formData
                 })
                     .then(res => res.json())

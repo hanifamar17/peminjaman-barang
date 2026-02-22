@@ -27,6 +27,12 @@ from mailer import (
     schedule_return_reminder,
     reminder_send_email,
 )
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask import request, redirect, url_for, session, flash
+from werkzeug.security import check_password_hash
+from functools import wraps
+import time
+from flask_wtf import CSRFProtect
 
 load_dotenv()
 
@@ -43,6 +49,25 @@ ENABLE_SCHEDULER = (
 
 app.config["ENABLE_SCHEDULER"] = ENABLE_SCHEDULER
 
+# =========================
+# DETEKSI ENVIRONMENT
+# =========================
+IS_VERCEL = os.getenv("VERCEL") == "1"
+
+# =========================
+# SESSION CONFIG
+# =========================
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=IS_VERCEL,  # True hanya di Vercel (HTTPS)
+    SESSION_COOKIE_SAMESITE="Lax",
+)
+
+# =========================
+# CSRF PROTECTION
+# =========================
+csrf = CSRFProtect()
+csrf.init_app(app)
 
 # =========================
 # Konfigurasi Email (Gmail App Password)
@@ -61,6 +86,50 @@ mail.init_app(app)
 if app.config["ENABLE_SCHEDULER"]:
     init_app(app)
 
+
+
+# LOGIN
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        rows = read_sheet("login")
+        if not rows:
+            flash("Sistem login belum dikonfigurasi.")
+            return redirect(url_for("login"))
+
+        headers = rows[0]
+        users = [dict(zip(headers, r)) for r in rows[1:]]
+
+        user = next((u for u in users if u["username"] == username), None)
+
+        # Proteksi timing attack (delay kecil)
+        time.sleep(0.5)
+
+        if user and check_password_hash(user["password_hash"], password):
+            session["user"] = username
+            return redirect(url_for("landing"))
+
+        flash("Username atau password salah.")
+        return redirect(url_for("login"))
+
+    return render_template("login.html")
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# LOGOUT
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("landing"))
 
 # route: landing
 @app.route("/")
@@ -87,6 +156,7 @@ def api_search():
 # BORROWING PAGE
 # =======================
 @app.route("/borrow")
+@login_required
 def borrow():
     return render_template("borrow.html")
 
@@ -181,6 +251,7 @@ def borrow_submit():
 # HALAMAN PENGEMBALIAN
 # =======================
 @app.route("/return")
+@login_required
 def return_page():
     return render_template("return.html")
 
@@ -224,6 +295,7 @@ def return_submit():
 # RIWAYAT PEMINJAMAN
 # =======================
 @app.route("/history")
+@login_required
 def history():
     from sheets import read_sheet
 
@@ -266,6 +338,7 @@ def history():
 
 
 @app.route("/loan/<code>")
+@login_required
 def loan_detail(code):
     from sheets import read_sheet
 
