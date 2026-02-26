@@ -395,7 +395,10 @@ def inject_base_url():
     return dict(base_url=base_url)
 
 
-
+# ERROR HANDLER
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
 
 
 # =======================

@@ -17,7 +17,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
+    <!-- SweetAlert2 untuk notifikasi -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         body {
@@ -74,33 +78,34 @@
             </a>
             {% if session.get('user') %}
             <div class="relative inline-block text-left" id="userDropdownContainer">
-                <button id="dropdownBtn"
-                    class="flex items-center gap-2 p-1.5 pr-3 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-full border border-gray-300 transition-all focus:outline-none cursor-pointer">
+                <button id="dropdownBtn" type="button"
+                    class="flex items-center gap-2 p-1 md:p-1.5 pr-2 md:pr-3 text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-full border border-gray-300 transition-all focus:outline-none cursor-pointer">
                     <div id="avatarIcon"
-                        class="w-7 h-7 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center shrink-0 transition-colors">
-                        <i class="fa-solid fa-user-gear text-xs"></i>
+                        class="w-6 h-6 md:w-7 md:h-7 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center shrink-0 transition-colors">
+                        <i class="fa-solid fa-user-gear text-[10px] md:text-xs"></i>
                     </div>
 
-                    <span class="max-w-[100px] truncate">
+                    <span class="max-w-[70px] md:max-w-[100px] truncate select-none">
                         {{ session.get('user') }}
                     </span>
 
                     <i id="chevronIcon"
-                        class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform"></i>
+                        class="fa-solid fa-chevron-down text-[8px] md:text-[10px] text-gray-400 transition-transform duration-200"></i>
                 </button>
 
                 <div id="dropdownMenu"
-                    class="hidden absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                    class="hidden absolute right-0 mt-2 w-48 md:w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-[100] overflow-hidden transform origin-top-right">
+
                     <div class="px-4 py-3 bg-gray-50/50 border-b border-gray-100">
-                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Akun Terhubung</p>
+                        <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Akun Terhubung</p>
                         <p class="text-sm font-semibold text-gray-800 truncate">{{ session.get('user') }}</p>
                     </div>
 
-                    <div class="py-2">
+                    <div class="py-1">
                         <a href="{{ base_url }}" target="_blank" rel="noopener noreferrer"
-                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
-                            <i class="fa-solid fa-chart-line w-4"></i>
-                            <span>Dashboard</span>
+                            class="flex items-center gap-3 px-4 py-3 md:py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                            <i class="fa-solid fa-cubes w-4 text-center"></i>
+                            <span>labmanu-hub</span>
                         </a>
 
                         <div class="px-2 my-1">
@@ -108,19 +113,13 @@
                         </div>
 
                         <a href="{{ url_for('logout') }}"
-                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
-                            <i class="fa-solid fa-right-from-bracket w-4"></i>
-                            <span>Keluar (Logout)</span>
+                            class="flex items-center gap-3 px-4 py-3 md:py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
+                            <span>Keluar</span>
                         </a>
                     </div>
                 </div>
             </div>
-
-            {% else %}
-            <a href="{{ base_url }}" target="_blank" rel="noopener noreferrer"
-                class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-sm font-bold text-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all duration-300 border border-blue-100">
-                <span>Login</span>
-            </a>
             {% endif %}
         </div>
     </nav>
@@ -155,46 +154,48 @@
         document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('dropdownBtn');
             const menu = document.getElementById('dropdownMenu');
+            const container = document.getElementById('userDropdownContainer');
             const chevron = document.getElementById('chevronIcon');
             const avatar = document.getElementById('avatarIcon');
 
-            if (btn && menu) {
-                // Toggle Menu saat diklik (Mobile & Desktop)
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isHidden = menu.classList.contains('hidden');
+            if (!btn || !menu) return;
 
-                    if (isHidden) {
-                        openMenu();
-                    } else {
-                        closeMenu();
-                    }
-                });
-
-                // Menutup menu jika klik di luar elemen dropdown
-                document.addEventListener('click', (e) => {
-                    if (!btn.contains(e.target) && !menu.contains(e.target)) {
-                        closeMenu();
-                    }
-                });
-
-                function openMenu() {
+            // Fungsi Toggle
+            const toggleMenu = () => {
+                const isHidden = menu.classList.contains('hidden');
+                if (isHidden) {
+                    // Munculkan menu
                     menu.classList.remove('hidden');
                     chevron.classList.add('rotate-180');
                     avatar.classList.add('bg-blue-600', 'text-white');
-                }
-
-                function closeMenu() {
+                } else {
+                    // Sembunyikan menu
                     menu.classList.add('hidden');
                     chevron.classList.remove('rotate-180');
                     avatar.classList.remove('bg-blue-600', 'text-white');
                 }
+            };
 
-                // Opsional: Tetap aktifkan hover untuk pengguna Mouse (Desktop)
-                const container = document.getElementById('userDropdownContainer');
-                container.addEventListener('mouseenter', openMenu);
-                container.addEventListener('mouseleave', closeMenu);
-            }
+            // Event Klik pada Button
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Mencegah event "bubble" ke document
+                toggleMenu();
+            });
+
+            // Klik di luar untuk menutup menu
+            document.addEventListener('click', (e) => {
+                // Jika menu sedang terbuka dan yang diklik bukan bagian dari dropdown
+                if (!menu.classList.contains('hidden') && !container.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    chevron.classList.remove('rotate-180');
+                    avatar.classList.remove('bg-blue-600', 'text-white');
+                }
+            });
+
+            // Mencegah menu tertutup saat mengklik area di dalam menu itu sendiri
+            menu.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
         });
     </script>
 </body>
