@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Hapus Inventory{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <a href="#" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 
+          active:scale-95 active:bg-gray-100 group">
+
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+        </svg>
+
+        <span>Kembali</span>
+    </a>
+
+  <h2>Konfirmasi Hapus</h2>
+
+<p>Apakah Anda yakin ingin menghapus barang berikut?</p>
+
+<ul>
+    <li><strong>ID:</strong> {{ item.item_id }}</li>
+    <li><strong>Nama:</strong> {{ item.name }}</li>
+    <li><strong>Stock:</strong> {{ item.stock }}</li>
+</ul>
+
+<form method="POST">
+     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit">Ya, Hapus</button>
+    <a href="{{ url_for('inventory') }}">Batal</a>
+</form>
+</div>
+{% endblock %}

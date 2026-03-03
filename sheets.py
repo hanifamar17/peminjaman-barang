@@ -65,19 +65,6 @@ def update_cell_range(sheet_name, range_name, value):
         body=body
     ).execute()
 
-# utility khusus inventory
-def get_inventory():
-    rows = read_sheet('inventory')
-    if not rows: return []
-    headers = rows[0]
-    items = []
-    for r in rows[1:]:
-        d = dict(zip(headers, r))
-
-        # ensure types
-        d['stock'] = int(d.get('stock','0'))
-        items.append(d)
-    return items
 
 def update_stock(item_id, delta):
     rows = read_sheet('inventory')
@@ -99,10 +86,8 @@ def update_stock(item_id, delta):
             return True
     return False
 
-
 def append_loan(loan_row):
     write_row('loans', loan_row)
-
 
 def find_loan_by_code(code):
     rows = read_sheet('loans')
@@ -168,4 +153,140 @@ def update_loan_status(code, item_id, status, proof=''):
             update_cell_range('loans', f'{chr(65+status_idx)}{i}', status)
             if proof:
                 update_cell_range('loans', f'{chr(65+proof_idx)}{i}', proof)
+
+
+# utility khusus inventory
+def generate_item_id():
+    rows = read_sheet('inventory')
+
+    if not rows or len(rows) == 1:
+        return "INV-0001"
+
+    headers = [h.strip().lower() for h in rows[0]]
+    id_index = headers.index("item_id")
+
+    existing_ids = []
+    for r in rows[1:]:
+        if len(r) > id_index and r[id_index].startswith("INV-"):
+            try:
+                num = int(r[id_index].split("-")[1])
+                existing_ids.append(num)
+            except:
+                continue
+
+    next_number = max(existing_ids) + 1 if existing_ids else 1
+    return f"INV-{next_number:04d}"
+
+def get_inventory():
+    rows = read_sheet('inventory')
+    if not rows:
+        return []
+
+    # bersihkan header (strip + lowercase)
+    headers = [h.strip().lower() for h in rows[0]]
+
+    items = []
+    for r in rows[1:]:
+        d = dict(zip(headers, r))
+
+        # pastikan key aman
+        d.setdefault('item_id', '')
+        d.setdefault('name', '')
+        d.setdefault('stock', '0')
+        d.setdefault('uom', '')
+        d.setdefault('condition', '')
+        d.setdefault('location', '')
+        d.setdefault('note', '')
+
+        d['stock'] = int(d.get('stock', '0'))
+        items.append(d)
+
+    return items
+
+def add_inventory(data):
+    row = [
+        data['item_id'],
+        data['name'],
+        str(data['stock']),
+        data['uom'],
+        data['condition'],
+        data['location'],
+        data['note']
+    ]
+    write_row('inventory', row)
+
+def update_inventory(item_id, updated_data):
+    rows = read_sheet('inventory')
+    if not rows:
+        return False
+
+    headers = rows[0]
+
+    for i, row in enumerate(rows[1:], start=2):  # start=2 karena header di row 1
+        if row and row[0] == item_id:
+            updated_row = [
+                updated_data['item_id'],
+                updated_data['name'],
+                str(updated_data['stock']),
+                updated_data['uom'],
+                updated_data['condition'],
+                updated_data['location'],
+                updated_data['note']
+            ]
+
+            service = get_service()
+            service.spreadsheets().values().update(
+                spreadsheetId=SPREADSHEET_ID,
+                range=f"inventory!A{i}:G{i}",
+                valueInputOption='RAW',
+                body={'values': [updated_row]}
+            ).execute()
+
+            return True
+    return False
+
+def delete_inventory(item_id):
+    rows = read_sheet('inventory')
+    if not rows:
+        return False
+
+    service = get_service()
+
+    # Ambil metadata spreadsheet untuk mendapatkan sheetId
+    spreadsheet = service.spreadsheets().get(
+        spreadsheetId=SPREADSHEET_ID
+    ).execute()
+
+    sheet_id = None
+    for sheet in spreadsheet["sheets"]:
+        if sheet["properties"]["title"] == "inventory":
+            sheet_id = sheet["properties"]["sheetId"]
+            break
+
+    if sheet_id is None:
+        return False
+
+    # Cari baris yang cocok
+    for i, row in enumerate(rows[1:], start=1):
+        if row and row[0] == item_id:
+            service.spreadsheets().batchUpdate(
+                spreadsheetId=SPREADSHEET_ID,
+                body={
+                    "requests": [
+                        {
+                            "deleteDimension": {
+                                "range": {
+                                    "sheetId": sheet_id,
+                                    "dimension": "ROWS",
+                                    "startIndex": i,
+                                    "endIndex": i + 1
+                                }
+                            }
+                        }
+                    ]
+                }
+            ).execute()
+            return True
+
+    return False
 

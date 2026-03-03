@@ -12,9 +12,13 @@ from flask import (
 )
 from dotenv import load_dotenv
 from sheets import (
+    generate_item_id,
+    add_inventory,
+    delete_inventory,
     get_inventory,
     append_loan,
     get_loan_with_items,
+    update_inventory,
     update_stock,
     find_loan_by_code,
     update_loan_status,
@@ -372,6 +376,73 @@ def receipt(code):
         abort(404)
 
     return render_template("receipt.html", loan=loan)
+
+
+# =======================
+# INVENTORY SECTION
+# =======================
+# Read inventory list
+@app.route("/inventory")
+@login_required
+def inventory():
+    items = get_inventory()
+    return render_template("inventory/inventory.html", items=items)
+
+# Add inventory item
+@app.route("/inventory/add", methods=["GET", "POST"])
+@login_required
+def inventory_add():
+    if request.method == "POST":
+        data = {
+            "item_id": generate_item_id(),
+            "name": request.form["name"],
+            "stock": int(request.form["stock"]),
+            "uom": request.form["uom"],
+            "condition": request.form["condition"],
+            "location": request.form["location"],
+            "note": request.form["note"]
+        }
+        add_inventory(data)
+        return redirect(url_for("inventory"))
+
+    return render_template("inventory/inventory_form.html")
+
+# Edit inventory item
+@app.route("/inventory/edit/<item_id>", methods=["GET", "POST"])
+@login_required
+def inventory_edit(item_id):
+    items = get_inventory()
+    item = next((x for x in items if x["item_id"] == item_id), None)
+
+    if request.method == "POST":
+        updated_data = {
+            "item_id": item_id,
+            "name": request.form["name"],
+            "stock": int(request.form["stock"]),
+            "uom": request.form["uom"],
+            "condition": request.form["condition"],
+            "location": request.form["location"],
+            "note": request.form["note"]
+        }
+        update_inventory(item_id, updated_data)
+        return redirect(url_for("inventory"))
+
+    return render_template("inventory/inventory_form.html", item=item)
+
+# Delete inventory item
+@app.route("/inventory/delete/<item_id>", methods=["GET", "POST"])
+@login_required
+def inventory_delete(item_id):
+    items = get_inventory()
+    item = next((x for x in items if x["item_id"] == item_id), None)
+
+    if request.method == "POST":
+        delete_inventory(item_id)
+        return redirect(url_for("inventory"))
+
+    return render_template("inventory/inventory_delete.html", item=item)
+
+
 
 
 # =======================

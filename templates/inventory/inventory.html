@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+    <!-- Back -->
+    <a href="#" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 
+          active:scale-95 active:bg-gray-100 group">
+
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+        </svg>
+        <span>Kembali</span>
+    </a>
+
+    <!-- Header -->
+    <div class="mb-6 mt-2 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-gray-900">Inventory Barang</h2>
+            <p class="text-gray-600 text-sm">Kelola data barang inventaris</p>
+        </div>
+
+        <a href="{{ url_for('inventory_add') }}"
+            class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            + Tambah Barang
+        </a>
+    </div>
+
+    <!-- Search -->
+    <div class="mb-4">
+        <div class="relative">
+            <input type="text" id="filter"
+                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="🔍 Cari ID, nama, lokasi...">
+            <div id="searchCount" class="mt-1 text-xs text-gray-500 hidden"></div>
+        </div>
+    </div>
+
+    <div class="bg-white p-2 md:p-4 border border-gray-200 rounded-lg">
+
+        <!-- Info -->
+        <div class="mt-2 text-xs text-gray-500 text-right mb-2">
+            <span id="totalCount">{{ items|length }}</span> barang
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto rounded-lg border border-gray-100">
+            <table class="min-w-full divide-y divide-gray-100">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Nama</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Stock</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">UOM</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Lokasi</th>
+                        <th class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase w-28">Aksi</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tableBody" class="bg-white divide-y divide-gray-100">
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50 text-sm transition" data-row>
+                        <td class="px-3 py-2 whitespace-nowrap">
+                            <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
+                                {{ item.item_id }}
+                            </span>
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap capitalize">
+                            {{ item.name }}
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap">
+                            {{ item.stock }}
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap">
+                            {{ item.uom }}
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap">
+                            {{ item.location }}
+                        </td>
+                        <td class="px-3 py-2 text-center whitespace-nowrap">
+                            <a href="{{ url_for('inventory_edit', item_id=item.item_id) }}"
+                                class="inline-block px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition">
+                                Edit
+                            </a>
+
+                            <a href="{{ url_for('inventory_delete', item_id=item.item_id) }}"
+                                class="inline-block px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded transition">
+                                Hapus
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+            <div class="text-xs text-gray-500 order-2 sm:order-1">
+                Halaman <span id="currentPage" class="font-bold text-gray-900">1</span>
+                dari <span id="totalPages" class="font-bold text-gray-900">1</span>
+            </div>
+
+            <div class="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
+                <button id="prevBtn"
+                    class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
+                    hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
+                    Sebelumnya
+                </button>
+
+                <button id="nextBtn"
+                    class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
+                    hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
+                    Selanjutnya
+                </button>
+            </div>
+        </div>
+
+        <!-- Empty -->
+        <div id="emptyState" class="hidden p-8 text-center">
+            <div class="text-4xl mb-2">📦</div>
+            <p class="text-gray-600 text-sm">Tidak ada data ditemukan</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const filterInput = document.getElementById('filter');
+    const tableBody = document.getElementById('tableBody');
+    const searchCount = document.getElementById('searchCount');
+    const emptyState = document.getElementById('emptyState');
+    const totalCountLabel = document.getElementById('totalCount');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentPageLabel = document.getElementById('currentPage');
+    const totalPagesLabel = document.getElementById('totalPages');
+
+    const allRows = Array.from(tableBody.querySelectorAll('[data-row]'));
+    let filteredRows = [...allRows];
+    let currentPage = 1;
+    const rowsPerPage = 15;
+    let debounceTimer;
+
+    function updateTable() {
+        const totalRows = filteredRows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        allRows.forEach(row => row.style.display = 'none');
+
+        filteredRows.slice(start, end)
+            .forEach(row => row.style.display = '');
+
+        currentPageLabel.textContent = currentPage;
+        totalPagesLabel.textContent = totalPages;
+        totalCountLabel.textContent = totalRows;
+
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+
+        if (totalRows === 0) {
+            emptyState.classList.remove('hidden');
+            tableBody.closest('.overflow-x-auto').classList.add('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            tableBody.closest('.overflow-x-auto').classList.remove('hidden');
+        }
+    }
+
+    filterInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+
+        debounceTimer = setTimeout(() => {
+            const query = e.target.value.toLowerCase().trim();
+
+            filteredRows = allRows.filter(row =>
+                row.textContent.toLowerCase().includes(query)
+            );
+
+            currentPage = 1;
+
+            if (query) {
+                searchCount.textContent = `Ditemukan ${filteredRows.length} data`;
+                searchCount.classList.remove('hidden');
+            } else {
+                searchCount.classList.add('hidden');
+            }
+
+            updateTable();
+        }, 300);
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            updateTable();
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateTable();
+        }
+    });
+
+    updateTable();
+});
+</script>
+
+{% endblock %}
