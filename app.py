@@ -44,6 +44,9 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev")
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER", "static/uploads")
 
+# =========================
+# DETEKSI ENVIRONMENT
+# =========================
 IS_VERCEL = os.getenv("VERCEL") == "1"
 
 ENABLE_SCHEDULER = (
@@ -52,11 +55,6 @@ ENABLE_SCHEDULER = (
 )
 
 app.config["ENABLE_SCHEDULER"] = ENABLE_SCHEDULER
-
-# =========================
-# DETEKSI ENVIRONMENT
-# =========================
-IS_VERCEL = os.getenv("VERCEL") == "1"
 
 # =========================
 # SESSION CONFIG

@@ -11,23 +11,29 @@
 
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
             </path>
         </svg>
         <span>Kembali</span>
     </a>
 
     <!-- Header -->
-    <div class="mb-6 mt-2 flex items-center justify-between">
+    <div class="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-gray-900">Inventory Barang</h2>
-            <p class="text-gray-600 text-sm">Kelola data barang inventaris</p>
+            <h2 class="text-xl font-bold text-gray-900 tracking-tight">Inventory Barang</h2>
+            <p class="text-gray-500 text-sm">Kelola dan pantau data barang inventaris</p>
         </div>
 
         <a href="{{ url_for('inventory_add') }}"
-            class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            + Tambah Barang
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider bg-blue-600 text-white rounded-lg 
+              hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 active:scale-95 transition-all duration-200 group">
+
+            <svg class="w-4 h-4 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+            </svg>
+
+            <span>Tambah Barang</span>
         </a>
     </div>
 
@@ -107,14 +113,12 @@
             </div>
 
             <div class="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
-                <button id="prevBtn"
-                    class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
+                <button id="prevBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
                     hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
                     Sebelumnya
                 </button>
 
-                <button id="nextBtn"
-                    class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
+                <button id="nextBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
                     hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
                     Selanjutnya
                 </button>
@@ -130,95 +134,95 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
 
-    const filterInput = document.getElementById('filter');
-    const tableBody = document.getElementById('tableBody');
-    const searchCount = document.getElementById('searchCount');
-    const emptyState = document.getElementById('emptyState');
-    const totalCountLabel = document.getElementById('totalCount');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const currentPageLabel = document.getElementById('currentPage');
-    const totalPagesLabel = document.getElementById('totalPages');
+        const filterInput = document.getElementById('filter');
+        const tableBody = document.getElementById('tableBody');
+        const searchCount = document.getElementById('searchCount');
+        const emptyState = document.getElementById('emptyState');
+        const totalCountLabel = document.getElementById('totalCount');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentPageLabel = document.getElementById('currentPage');
+        const totalPagesLabel = document.getElementById('totalPages');
 
-    const allRows = Array.from(tableBody.querySelectorAll('[data-row]'));
-    let filteredRows = [...allRows];
-    let currentPage = 1;
-    const rowsPerPage = 15;
-    let debounceTimer;
+        const allRows = Array.from(tableBody.querySelectorAll('[data-row]'));
+        let filteredRows = [...allRows];
+        let currentPage = 1;
+        const rowsPerPage = 15;
+        let debounceTimer;
 
-    function updateTable() {
-        const totalRows = filteredRows.length;
-        const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+        function updateTable() {
+            const totalRows = filteredRows.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
 
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
 
-        const start = (currentPage - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
 
-        allRows.forEach(row => row.style.display = 'none');
+            allRows.forEach(row => row.style.display = 'none');
 
-        filteredRows.slice(start, end)
-            .forEach(row => row.style.display = '');
+            filteredRows.slice(start, end)
+                .forEach(row => row.style.display = '');
 
-        currentPageLabel.textContent = currentPage;
-        totalPagesLabel.textContent = totalPages;
-        totalCountLabel.textContent = totalRows;
+            currentPageLabel.textContent = currentPage;
+            totalPagesLabel.textContent = totalPages;
+            totalCountLabel.textContent = totalRows;
 
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage === totalPages;
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
 
-        if (totalRows === 0) {
-            emptyState.classList.remove('hidden');
-            tableBody.closest('.overflow-x-auto').classList.add('hidden');
-        } else {
-            emptyState.classList.add('hidden');
-            tableBody.closest('.overflow-x-auto').classList.remove('hidden');
-        }
-    }
-
-    filterInput.addEventListener('input', (e) => {
-        clearTimeout(debounceTimer);
-
-        debounceTimer = setTimeout(() => {
-            const query = e.target.value.toLowerCase().trim();
-
-            filteredRows = allRows.filter(row =>
-                row.textContent.toLowerCase().includes(query)
-            );
-
-            currentPage = 1;
-
-            if (query) {
-                searchCount.textContent = `Ditemukan ${filteredRows.length} data`;
-                searchCount.classList.remove('hidden');
+            if (totalRows === 0) {
+                emptyState.classList.remove('hidden');
+                tableBody.closest('.overflow-x-auto').classList.add('hidden');
             } else {
-                searchCount.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                tableBody.closest('.overflow-x-auto').classList.remove('hidden');
             }
-
-            updateTable();
-        }, 300);
-    });
-
-    prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            updateTable();
         }
-    });
 
-    nextBtn.addEventListener('click', () => {
-        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-        if (currentPage < totalPages) {
-            currentPage++;
-            updateTable();
-        }
-    });
+        filterInput.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
 
-    updateTable();
-});
+            debounceTimer = setTimeout(() => {
+                const query = e.target.value.toLowerCase().trim();
+
+                filteredRows = allRows.filter(row =>
+                    row.textContent.toLowerCase().includes(query)
+                );
+
+                currentPage = 1;
+
+                if (query) {
+                    searchCount.textContent = `Ditemukan ${filteredRows.length} data`;
+                    searchCount.classList.remove('hidden');
+                } else {
+                    searchCount.classList.add('hidden');
+                }
+
+                updateTable();
+            }, 300);
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTable();
+            }
+        });
+
+        updateTable();
+    });
 </script>
 
 {% endblock %}

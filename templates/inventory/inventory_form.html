@@ -3,88 +3,130 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-6">
-    <!-- Back -->
     <a href="{{ url_for('inventory') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-       hover:text-blue-600 hover:bg-blue-50 active:scale-95 active:bg-gray-100 group">
-
+              hover:text-blue-600 hover:bg-blue-50 active:scale-95 active:bg-gray-100 group">
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
             </path>
         </svg>
-
         <span>Kembali</span>
     </a>
 
-    <!-- Header -->
-    <div class="mt-3 mb-6">
-        <h2 class="text-xl font-bold text-gray-900">
-            {{ 'Edit Barang' if item else 'Tambah Barang Baru' }}
-        </h2>
-        <p class="text-sm text-gray-500">
-            {{ 'Perbarui data barang di bawah ini' if item else 'Isi data barang dengan lengkap' }}
-        </p>
+    <div class="mb-6 mt-2">
+        <h2 class="text-xl font-bold text-gray-900">{{ 'Edit Inventory' if item else 'Tambah Inventory' }}</h2>
+        <p class="text-gray-600 text-sm">{{ 'Perbarui detail informasi barang inventory' if item else 'Lengkapi formulir
+            untuk menambah barang baru' }}</p>
     </div>
 
-    <!-- Card -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg">
+        <form method="POST" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <form method="POST" class="space-y-5">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
-            {% if item %}
-            <input type="hidden" name="item_id" value="{{ item.item_id }}">
-            {% endif %}
-
-            <!-- Nama -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Nama Barang
-                </label>
-                <input type="text" name="name" required value="{{ item.name if item else '' }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {% if item %}
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Item
+                        ID</label>
+                    <input type="text" name="item_id" required readonly value="{{ item.item_id }}"
+                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg cursor-not-allowed text-sm outline-none">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Nama
+                        Barang</label>
+                    <input type="text" name="name" required value="{{ item.name }}"
+                        placeholder="Masukkan nama barang..."
+                        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
+                </div>
+                {% else %}
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Nama
+                        Barang</label>
+                    <input type="text" name="name" required value="" placeholder="Masukkan nama barang..."
+                        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
+                </div>
+                {% endif %}
             </div>
 
-            <!-- Stock -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Stock
-                </label>
-                <input type="number" name="stock" required value="{{ item.stock if item else '' }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Stock</label>
+                    <input type="number" name="stock" required value="{{ item.stock if item else '' }}" placeholder="0"
+                        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">UOM
+                        (Satuan)</label>
+                    <div class="relative">
+                        <select name="uom" required
+                            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition appearance-none cursor-pointer">
+                            <option value="" disabled {{ 'selected' if not item }}>Pilih Satuan</option>
+                            <option value="Unit" {{ 'selected' if item and item.uom=='Unit' }}>Unit (PC, Monitor)
+                            </option>
+                            <option value="Buah" {{ 'selected' if item and item.uom=='Buah' }}>Buah (Mouse, Keyboard)
+                            </option>
+                            <option value="Set" {{ 'selected' if item and item.uom=='Set' }}>Set (Speaker, Toolkit)
+                            </option>
+                            <option value="Pcs" {{ 'selected' if item and item.uom=='Pcs' }}>Pcs (Komponen)</option>
+                            <option value="Roll" {{ 'selected' if item and item.uom=='Roll' }}>Roll (Kabel)</option>
+                            <option value="Box" {{ 'selected' if item and item.uom=='Box' }}>Box (Connector)</option>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Kondisi</label>
+                    <div class="relative">
+                        <select name="condition" required
+                            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition appearance-none cursor-pointer">
+                            <option value="Baik" {{ 'selected' if item and item.condition=='Baik' }}>Baik</option>
+                            <option value="Rusak Ringan" {{ 'selected' if item and item.condition=='Rusak Ringan' }}>
+                                Rusak Ringan</option>
+                            <option value="Rusak Berat" {{ 'selected' if item and item.condition=='Rusak Berat' }}>Rusak
+                                Berat</option>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- UOM -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    UOM
-                </label>
-                <input type="text" name="uom" required value="{{ item.uom if item else '' }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Lokasi</label>
+                <input type="text" name="location" value="{{ item.location if item else '' }}"
+                    placeholder="Contoh: Gudang Utama, Rak A1"
+                    class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
             </div>
 
-            <!-- Lokasi -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Lokasi
-                </label>
-                <input type="text" name="location" required value="{{ item.location if item else '' }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Catatan</label>
+                <textarea name="note" rows="3" placeholder="Tambahkan keterangan tambahan jika ada..."
+                    class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">{{ item.note if item else '' }}</textarea>
             </div>
 
-            <!-- Buttons -->
-            <div class="flex justify-end gap-3 pt-4">
-                <a href="{{ url_for('inventory') }}" class="px-4 py-2 text-sm font-semibold border border-gray-300 rounded-lg
-                   text-gray-700 hover:bg-gray-50 active:scale-95 transition">
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 mt-2 border-t border-gray-100">
+                <a href="{{ url_for('inventory') }}"
+                    class="w-full sm:w-auto px-6 py-2.5 text-xs font-semibold text-center text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
                     Batal
                 </a>
-
-                <button type="submit" class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg
-                    hover:bg-blue-700 active:scale-95 transition">
-                    {{ 'Update' if item else 'Simpan' }}
+                <button type="submit"
+                    class="w-full sm:w-auto min-w-[120px] px-6 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:scale-95 transition-all cursor-pointer shadow-sm">
+                    {{ 'Perbarui Data' if item else 'Simpan Inventory' }}
                 </button>
             </div>
-
         </form>
     </div>
 </div>

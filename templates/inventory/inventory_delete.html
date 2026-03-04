@@ -3,33 +3,92 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-6">
-    <a href="#" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
-
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
+    <a href="{{ url_for('inventory') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 active:scale-95 group">
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
         </svg>
-
         <span>Kembali</span>
     </a>
 
-  <h2>Konfirmasi Hapus</h2>
+    <div class="mb-8 mt-2">
+        <h2 class="text-xl font-bold text-gray-900">Penghapusan Data</h2>
+        <p class="text-gray-600 text-sm">Konfirmasi terakhir sebelum data dihapus dari database</p>
+    </div>
 
-<p>Apakah Anda yakin ingin menghapus barang berikut?</p>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <div class="lg:col-span-7 space-y-6">
+            <div class="bg-red-50 border border-red-100 rounded-xl p-6">
+                <div class="flex gap-4">
+                    <div class="flex-shrink-0">
+                        <div class="p-2 md:p-3 bg-white rounded-lg shadow-sm">
+                            <svg class="w-4 h-4 md:w-6 md:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-md md:text-lg font-bold text-red-900">Apakah Anda benar-benar yakin?</h3>
+                        <p class="mt-1 text-xs md:text-sm text-red-700 leading-relaxed">
+                            Barang yang dihapus akan hilang secara permanen dari daftar inventory. Riwayat terkait barang ini mungkin akan terpengaruh.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-<ul>
-    <li><strong>ID:</strong> {{ item.item_id }}</li>
-    <li><strong>Nama:</strong> {{ item.name }}</li>
-    <li><strong>Stock:</strong> {{ item.stock }}</li>
-</ul>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <form method="POST" class="w-full sm:w-auto">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" 
+                            class="w-full px-8 py-3 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 active:scale-95 transition-all shadow-md shadow-red-100 cursor-pointer">
+                        Ya, Hapus Sekarang
+                    </button>
+                </form>
+                
+                <a href="{{ url_for('inventory') }}" 
+                   class="w-full sm:w-auto px-8 py-3 text-sm font-semibold text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
+                    Batalkan
+                </a>
+            </div>
+        </div>
 
-<form method="POST">
-     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit">Ya, Hapus</button>
-    <a href="{{ url_for('inventory') }}">Batal</a>
-</form>
+        <div class="lg:col-span-5">
+            <div class="bg-white p-2 md:p-4 border border-gray-200 rounded-lg overflow-hidden">
+                <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Detail Barang</span>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kode Identifikasi</label>
+                        <p class="text-sm font-mono font-medium text-gray-900 bg-gray-50 px-2 py-1 rounded inline-block">
+                            {{ item.item_id }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nama Barang</label>
+                        <p class="text-base font-semibold text-gray-900">{{ item.name }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Sisa Stok</label>
+                            <p class="text-sm text-gray-900">{{ item.stock }} {{ item.uom }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kondisi</label>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                {{ item.condition }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-gray-100">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Lokasi Penyimpanan</label>
+                        <p class="text-sm text-gray-600 italic">"{{ item.location }}"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 {% endblock %}
