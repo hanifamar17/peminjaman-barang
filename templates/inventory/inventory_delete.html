@@ -3,10 +3,12 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-6">
-    <a href="{{ url_for('inventory') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('inventory_list') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 active:scale-95 group">
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
         </svg>
         <span>Kembali</span>
     </a>
@@ -17,37 +19,54 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
         <div class="lg:col-span-7 space-y-6">
             <div class="bg-red-50 border border-red-100 rounded-xl p-6">
                 <div class="flex gap-4">
                     <div class="flex-shrink-0">
                         <div class="p-2 md:p-3 bg-white rounded-lg shadow-sm">
-                            <svg class="w-4 h-4 md:w-6 md:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            <svg class="w-4 h-4 md:w-6 md:h-6 text-red-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                </path>
                             </svg>
                         </div>
                     </div>
                     <div>
                         <h3 class="text-md md:text-lg font-bold text-red-900">Apakah Anda benar-benar yakin?</h3>
                         <p class="mt-1 text-xs md:text-sm text-red-700 leading-relaxed">
-                            Barang yang dihapus akan hilang secara permanen dari daftar inventory. Riwayat terkait barang ini mungkin akan terpengaruh.
+                            Barang yang dihapus akan hilang secara permanen dari daftar inventory. Riwayat terkait
+                            barang ini mungkin akan terpengaruh.
                         </p>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3">
-                <form method="POST" class="w-full sm:w-auto">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" 
-                            class="w-full px-8 py-3 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 active:scale-95 transition-all shadow-md shadow-red-100 cursor-pointer">
-                        Ya, Hapus Sekarang
+                <form id="deleteForm" method="POST" class="w-full sm:w-auto">
+                    <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
+
+                    <button type="submit" id="submitBtn"
+                        class="w-full px-8 py-3 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 active:scale-95 transition-all shadow-md shadow-red-100 cursor-pointer flex items-center justify-center min-w-[180px]">
+
+                        <span id="submitText">Ya, Hapus Sekarang</span>
+
+                        <div id="submitLoader" class="hidden">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                        </div>
                     </button>
                 </form>
-                
-                <a href="{{ url_for('inventory') }}" 
-                   class="w-full sm:w-auto px-8 py-3 text-sm font-semibold text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
+
+                <a href="{{ url_for('inventory_list') }}"
+                    class="w-full sm:w-auto px-8 py-3 text-sm font-semibold text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
                     Batalkan
                 </a>
             </div>
@@ -60,8 +79,10 @@
                 </div>
                 <div class="p-5 space-y-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kode Identifikasi</label>
-                        <p class="text-sm font-mono font-medium text-gray-900 bg-gray-50 px-2 py-1 rounded inline-block">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kode
+                            Identifikasi</label>
+                        <p
+                            class="text-sm font-mono font-medium text-gray-900 bg-gray-50 px-2 py-1 rounded inline-block">
                             {{ item.item_id }}
                         </p>
                     </div>
@@ -76,13 +97,15 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kondisi</label>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
                                 {{ item.condition }}
                             </span>
                         </div>
                     </div>
                     <div class="pt-4 border-t border-gray-100">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Lokasi Penyimpanan</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Lokasi
+                            Penyimpanan</label>
                         <p class="text-sm text-gray-600 italic">"{{ item.location }}"</p>
                     </div>
                 </div>
@@ -91,4 +114,85 @@
 
     </div>
 </div>
+
+<!--Swal mixin-->
+<script>
+    // Mixin untuk toast notifikasi
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Ambil elemen-elemen yang dibutuhkan
+    const deleteForm = document.getElementById('deleteForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitLoader = document.getElementById('submitLoader');
+    const csrfInput = document.getElementById('csrf_token');
+
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Proteksi double click & Animasi Loading: ON
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+            submitText.classList.add('hidden');
+            submitLoader.classList.remove('hidden');
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfInput.value
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.ok) {
+                    // Notifikasi sukses
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Barang berhasil dihapus'
+                    });
+
+                    // Redirect ke daftar inventory setelah toast selesai
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('inventory_list') }}";
+                    }, 1500);
+
+                } else {
+                    throw new Error(result.error || 'Gagal menghapus data');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Terjadi kesalahan sistem'
+                });
+
+                // Reset tombol jika gagal agar user bisa mencoba lagi
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                submitText.classList.remove('hidden');
+                submitLoader.classList.add('hidden');
+            }
+        });
+    }
+});
+</script>
+
 {% endblock %}

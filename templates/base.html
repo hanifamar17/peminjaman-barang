@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Inventory Lab Komp{% endblock %}</title>
+    <title>{% block title %}e-lab{% endblock %}</title>
 
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
 
@@ -74,7 +74,7 @@
                     class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition">
                     <span class="text-white text-xl">💻</span>
                 </div>
-                <span class="font-bold text-gray-800">Inventaris Lab</span>
+                <span class="font-bold text-gray-800">e-labkomp</span>
             </a>
             {% if session.get('user') %}
             <div class="relative inline-block text-left" id="userDropdownContainer">

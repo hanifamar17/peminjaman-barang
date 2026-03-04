@@ -133,10 +133,20 @@ def logout():
     session.clear()
     return redirect(url_for("landing"))
 
-# route: landing
+# landing page
 @app.route("/")
 def landing():
     return render_template("landing.html")
+
+# Landing page peminjaman
+@app.route("/peminjaman")
+def peminjaman_landing():
+    return render_template("peminjaman/landing_peminjaman.html")
+
+# Landing page inventory
+@app.route("/inventory")
+def inventory_landing():
+    return render_template("inventory/landing_inventory.html")
 
 
 # API: search inventory by q
@@ -160,7 +170,7 @@ def api_search():
 @app.route("/borrow")
 @login_required
 def borrow():
-    return render_template("borrow.html")
+    return render_template("peminjaman/borrow.html")
 
 
 # submit borrow
@@ -255,7 +265,7 @@ def borrow_submit():
 @app.route("/return")
 @login_required
 def return_page():
-    return render_template("return.html")
+    return render_template("peminjaman/return.html")
 
 
 # ambil data peminjaman berdasarkan kode
@@ -303,7 +313,7 @@ def history():
 
     rows = read_sheet("loans")
     if not rows:
-        return render_template("history.html", loans=[])
+        return render_template("peminjaman/history.html", loans=[])
 
     headers = rows[0]
     data = [dict(zip(headers, r)) for r in rows[1:]]
@@ -336,7 +346,7 @@ def history():
     # SORT TERKINI DI ATAS
     loans.sort(key=lambda x: x["created_at"] or "", reverse=True)
 
-    return render_template("history.html", loans=loans)
+    return render_template("peminjaman/history.html", loans=loans)
 
 
 @app.route("/loan/<code>")
@@ -363,7 +373,7 @@ def loan_detail(code):
         "data": data,
     }
 
-    return render_template("loan_detail.html", loan=loan, receipt_url=receipt_url)
+    return render_template("peminjaman/loan_detail.html", loan=loan, receipt_url=receipt_url)
 
 
 @app.route("/receipt/<code>")
@@ -373,16 +383,16 @@ def receipt(code):
     if not loan:
         abort(404)
 
-    return render_template("receipt.html", loan=loan)
+    return render_template("peminjaman/receipt.html", loan=loan)
 
 
 # =======================
 # INVENTORY SECTION
 # =======================
 # Read inventory list
-@app.route("/inventory")
+@app.route("/inventory/list")
 @login_required
-def inventory():
+def inventory_list():
     items = get_inventory()
     return render_template("inventory/inventory.html", items=items)
 
@@ -391,21 +401,30 @@ def inventory():
 @login_required
 def inventory_add():
     if request.method == "POST":
-        data = {
-            "item_id": generate_item_id(),
-            "name": request.form["name"],
-            "stock": int(request.form["stock"]),
-            "uom": request.form["uom"],
-            "condition": request.form["condition"],
-            "location": request.form["location"],
-            "note": request.form["note"]
-        }
-        add_inventory(data)
-        return redirect(url_for("inventory"))
+        try:
+            data = {
+                "item_id": generate_item_id(),
+                "name": request.form["name"],
+                "stock": int(request.form["stock"]),
+                "uom": request.form["uom"],
+                "condition": request.form["condition"],
+                "location": request.form["location"],
+                "note": request.form["note"]
+            }
+            add_inventory(data)
+            
+            # Cek jika request datang dari AJAX (JavaScript Fetch)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"ok": True, "message": "Barang berhasil ditambahkan"})
+            
+            return redirect(url_for("inventory_list"))
+        except Exception as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"ok": False, "error": str(e)}), 400
+            return str(e), 400
 
     return render_template("inventory/inventory_form.html")
 
-# Edit inventory item
 @app.route("/inventory/edit/<item_id>", methods=["GET", "POST"])
 @login_required
 def inventory_edit(item_id):
@@ -413,17 +432,26 @@ def inventory_edit(item_id):
     item = next((x for x in items if x["item_id"] == item_id), None)
 
     if request.method == "POST":
-        updated_data = {
-            "item_id": item_id,
-            "name": request.form["name"],
-            "stock": int(request.form["stock"]),
-            "uom": request.form["uom"],
-            "condition": request.form["condition"],
-            "location": request.form["location"],
-            "note": request.form["note"]
-        }
-        update_inventory(item_id, updated_data)
-        return redirect(url_for("inventory"))
+        try:
+            updated_data = {
+                "item_id": item_id,
+                "name": request.form["name"],
+                "stock": int(request.form["stock"]),
+                "uom": request.form["uom"],
+                "condition": request.form["condition"],
+                "location": request.form["location"],
+                "note": request.form["note"]
+            }
+            update_inventory(item_id, updated_data)
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"ok": True, "message": "Barang diperbarui"})
+            
+            return redirect(url_for("inventory_list"))
+        except Exception as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"ok": False, "error": str(e)}), 400
+            return str(e), 400
 
     return render_template("inventory/inventory_form.html", item=item)
 
@@ -435,8 +463,17 @@ def inventory_delete(item_id):
     item = next((x for x in items if x["item_id"] == item_id), None)
 
     if request.method == "POST":
-        delete_inventory(item_id)
-        return redirect(url_for("inventory"))
+        try:
+            delete_inventory(item_id)
+        
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"ok": True, "message": "Barang berhasil dihapus"})
+            
+            return redirect(url_for("inventory_list"))
+        except Exception as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"ok": False, "error": str(e)}), 400
+            return str(e), 400
 
     return render_template("inventory/inventory_delete.html", item=item)
 

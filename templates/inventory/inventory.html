@@ -5,7 +5,7 @@
 <div class="max-w-6xl mx-auto px-4 py-6">
 
     <!-- Back -->
-    <a href="#" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('inventory_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 
           active:scale-95 active:bg-gray-100 group">
 
@@ -23,18 +23,6 @@
             <h2 class="text-xl font-bold text-gray-900 tracking-tight">Inventory Barang</h2>
             <p class="text-gray-500 text-sm">Kelola dan pantau data barang inventaris</p>
         </div>
-
-        <a href="{{ url_for('inventory_add') }}"
-            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider bg-blue-600 text-white rounded-lg 
-              hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 active:scale-95 transition-all duration-200 group">
-
-            <svg class="w-4 h-4 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
-            </svg>
-
-            <span>Tambah Barang</span>
-        </a>
     </div>
 
     <!-- Search -->
@@ -115,12 +103,12 @@
             <div class="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
                 <button id="prevBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
                     hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
-                    Sebelumnya
+                    Prev
                 </button>
 
                 <button id="nextBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
                     hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
-                    Selanjutnya
+                    Next
                 </button>
             </div>
         </div>

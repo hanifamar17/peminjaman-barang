@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-6">
-    <a href="{{ url_for('inventory') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('inventory_list') if item else url_for('inventory_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
               hover:text-blue-600 hover:bg-blue-50 active:scale-95 active:bg-gray-100 group">
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
@@ -21,7 +21,7 @@
 
     <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg">
         <form method="POST" class="space-y-6">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {% if item %}
@@ -118,16 +118,129 @@
             </div>
 
             <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 mt-2 border-t border-gray-100">
-                <a href="{{ url_for('inventory') }}"
+                <a href="{{ url_for('inventory_list') if item else url_for('inventory_landing') }}"
                     class="w-full sm:w-auto px-6 py-2.5 text-xs font-semibold text-center text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
                     Batal
                 </a>
-                <button type="submit"
-                    class="w-full sm:w-auto min-w-[120px] px-6 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:scale-95 transition-all cursor-pointer shadow-sm">
-                    {{ 'Perbarui Data' if item else 'Simpan Inventory' }}
+                <button type="submit" id="submitBtn"
+                    class="w-full sm:w-auto min-w-[140px] px-6 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:scale-95 transition-all cursor-pointer shadow-sm flex items-center justify-center">
+                    <span id="submitText">{{ 'Perbarui Data' if item else 'Simpan Inventory' }}</span>
+
+                    <div id="submitLoader" class="hidden">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                    </div>
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+
+<!--Swal mixin-->
+<script>
+    // Mixin untuk toast notifikasi
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Seleksi Elemen
+        const inventoryForm = document.querySelector('form');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const submitLoader = document.getElementById('submitLoader');
+        const csrfInput = document.getElementById('csrf_token');
+
+        // Fungsi Reset Tombol
+        const resetButton = () => {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+            }
+            if (submitText) submitText.classList.remove('hidden');
+            if (submitLoader) submitLoader.classList.add('hidden');
+        };
+
+        // 3. Event Listener Submit
+        if (inventoryForm) {
+            inventoryForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Validasi CSRF Element
+                if (!csrfInput) {
+                    console.error("Elemen csrf_token tidak ditemukan!");
+                    return;
+                }
+
+                // Animasi Loading: ON
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                }
+                if (submitText) submitText.classList.add('hidden');
+                if (submitLoader) submitLoader.classList.remove('hidden');
+
+                const formData = new FormData(inventoryForm);
+
+                try {
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrfInput.value // Mengambil value token
+                        }
+                    });
+
+                    // Pastikan response oke
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Gagal menyimpan data');
+                    }
+
+                    const result = await response.json();
+
+                    if (result.ok) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: "{{ 'Berhasil diperbarui' if item else 'Berhasil disimpan' }}"
+                        });
+
+                        setTimeout(() => {
+                            window.location.href = "{{ url_for('inventory_list') }}";
+                        }, 1500);
+
+                    } else {
+                        throw new Error(result.error || 'Terjadi kesalahan');
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    Toast.fire({
+                        icon: 'error',
+                        title: error.message || 'Terjadi kesalahan sistem'
+                    });
+                    resetButton();
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-6">
-    <a href="/" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('peminjaman_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 
           active:scale-95 active:bg-gray-100 group">
 
@@ -108,7 +108,7 @@
                    hover:bg-gray-50 
                    active:scale-95 active:bg-gray-100 
                    disabled:opacity-40 disabled:pointer-events-none disabled:scale-100 cursor-pointer">
-                    Sebelumnya
+                    Prev
                 </button>
 
                 <button id="nextBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
@@ -116,7 +116,7 @@
                    hover:bg-gray-50 
                    active:scale-95 active:bg-gray-100 
                    disabled:opacity-40 disabled:pointer-events-none disabled:scale-100 cursor-pointer">
-                    Selanjutnya
+                    Next
                 </button>
             </div>
         </div>
