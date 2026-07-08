@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Jadwal Penggunaan Lab{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-6 sm:py-10">
+
+    <!-- Back -->
+    <a href="{{ url_for('booking_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 
+          active:scale-95 active:bg-gray-100 group">
+
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+        </svg>
+        <span>Kembali</span>
+    </a>
+
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 mt-2">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">Jadwal Lab Komputer</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                MA Nurul Ummah Kotagede &bull; <span class="font-medium text-gray-700">{{ jadwal | length }} total
+                    jadwal</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 id="calendarLabel" class="text-base font-semibold text-gray-800"></h2>
+            <div class="flex items-center gap-1">
+                <span class="mr-3 text-xs text-gray-500 flex items-center gap-1.5 hidden sm:flex">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span> Ada jadwal
+                </span>
+                <button id="prevMonth"
+                    class="p-1.5 rounded-md hover:bg-gray-200 text-gray-500 transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                </button>
+                <button id="nextMonth"
+                    class="p-1.5 rounded-md hover:bg-gray-200 text-gray-500 transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div
+            class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-400 mb-2 cursor-pointer select-none">
+            <div>Min</div>
+            <div>Sen</div>
+            <div>Sel</div>
+            <div>Rab</div>
+            <div>Kam</div>
+            <div>Jum</div>
+            <div>Sab</div>
+        </div>
+
+        <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
+    </div>
+
+    <div class="bg-gray-50/50 rounded-xl p-4 sm:p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 id="selectedDateLabel" class="text-sm font-semibold text-gray-800"></h3>
+            <span id="selectedDateCount"
+                class="text-xs font-medium bg-white px-2 py-1 rounded-md border text-gray-500"></span>
+        </div>
+
+        <div id="dayListBody" class="flex flex-col gap-2"></div>
+    </div>
+
+</div>
+
+<script id="jadwal-data" type="application/json">
+  {{ jadwal_json | tojson | safe }}
+</script>
+
+<script>
+    const jadwalData = JSON.parse(document.getElementById("jadwal-data").textContent);
+
+    const jadwalByDate = {};
+    jadwalData.forEach(j => {
+        const iso = j.tanggal_iso;
+        if (!iso) return;
+        if (!jadwalByDate[iso]) jadwalByDate[iso] = [];
+        jadwalByDate[iso].push(j);
+    });
+
+    const monthNames = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    function isoOfDate(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${dd}`;
+    }
+
+    let viewYear = today.getFullYear();
+    let viewMonth = today.getMonth();
+    let selectedISO = isoOfDate(today);
+
+    const calendarGrid = document.getElementById("calendarGrid");
+    const calendarLabel = document.getElementById("calendarLabel");
+    const selectedDateLabel = document.getElementById("selectedDateLabel");
+    const selectedDateCount = document.getElementById("selectedDateCount");
+    const dayListBody = document.getElementById("dayListBody");
+
+    function isoOf(y, m, d) {
+        const mm = String(m + 1).padStart(2, "0");
+        const dd = String(d).padStart(2, "0");
+        return `${y}-${mm}-${dd}`;
+    }
+
+    function renderCalendar() {
+        calendarLabel.textContent = `${monthNames[viewMonth]} ${viewYear}`;
+        calendarGrid.innerHTML = "";
+
+        const firstDay = new Date(viewYear, viewMonth, 1);
+        const startWeekday = firstDay.getDay();
+        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+        for (let i = 0; i < startWeekday; i++) {
+            calendarGrid.appendChild(document.createElement("div"));
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const iso = isoOf(viewYear, viewMonth, d);
+            const hasJadwal = !!jadwalByDate[iso];
+            const isToday = iso === isoOfDate(today);
+            const isSelected = iso === selectedISO;
+
+            const cell = document.createElement("button");
+            cell.type = "button";
+            cell.dataset.iso = iso;
+            cell.className = [
+                "relative aspect-square flex flex-col items-center justify-center rounded-lg text-sm transition-all",
+                isSelected ? "bg-blue-600 text-white shadow-md font-medium" :
+                    isToday ? "bg-blue-50 text-blue-700 font-semibold" :
+                        "hover:bg-gray-200 text-gray-700 cursor-pointer",
+            ].join(" ");
+
+            cell.innerHTML = `
+        <span>${d}</span>
+        ${hasJadwal ? `<span class="w-1.5 h-1.5 rounded-full mt-0.5 absolute bottom-1.5 ${isSelected ? "bg-white" : "bg-blue-500"}"></span>` : ""}
+      `;
+
+            cell.addEventListener("click", () => {
+                selectedISO = iso;
+                renderCalendar();
+                renderDayList();
+            });
+
+            calendarGrid.appendChild(cell);
+        }
+    }
+
+    function formatLabelDate(iso) {
+        const [y, m, d] = iso.split("-").map(Number);
+        const date = new Date(y, m - 1, d);
+        const hariNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        return `${hariNames[date.getDay()]}, ${d} ${monthNames[m - 1]} ${y}`;
+    }
+
+    function renderDayList() {
+        selectedDateLabel.textContent = formatLabelDate(selectedISO);
+        const entries = jadwalByDate[selectedISO] || [];
+        selectedDateCount.textContent = `${entries.length} jadwal`;
+
+        dayListBody.innerHTML = "";
+
+        if (entries.length === 0) {
+            dayListBody.innerHTML = `
+        <div class="py-10 text-center flex flex-col items-center justify-center text-gray-400">
+          <svg class="w-10 h-10 mb-2 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span class="text-sm">Kosong</span>
+        </div>`;
+            return;
+        }
+
+        entries.forEach(j => {
+            const item = document.createElement("div");
+            // Membentuk card layout untuk setiap jadwal
+            item.className = "flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3 rounded-lg border border-gray-100 shadow-sm gap-2";
+            item.innerHTML = `
+        <div>
+          <p class="text-sm font-medium text-gray-800">${j.nama_kegiatan}</p>
+          <p class="text-xs text-gray-500 mt-0.5">${j.nama_pemesan}</p>
+          <p class="text-xs text-gray-500 mt-2 text-gray-800">Catatan:</p>
+          <p class="text-xs text-gray-500 mt-0.5 mr-5 justify">${j.catatan_tambahan || 'Tidak ada catatan'}</p>
+        </div>
+        <div class="text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md w-fit sm:w-auto self-start sm:self-auto border border-blue-100">
+          ${j.waktu_mulai_raw} - ${j.waktu_selesai_raw}
+        </div>
+      `;
+            dayListBody.appendChild(item);
+        });
+    }
+
+    document.getElementById("prevMonth").addEventListener("click", () => {
+        viewMonth--;
+        if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+        renderCalendar();
+    });
+
+    document.getElementById("nextMonth").addEventListener("click", () => {
+        viewMonth++;
+        if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+        renderCalendar();
+    });
+
+    renderCalendar();
+    renderDayList();
+</script>
+{% endblock %}

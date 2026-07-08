@@ -2,7 +2,7 @@
 {% block title %}Lab Management System{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-6 py-12 sm:py-24">
+<div class="max-w-6xl mx-auto px-6 py-12 sm:py-24">
 
   <div class="text-center mb-16">
     <div class="inline-flex items-center justify-center space-x-2 mb-6">
@@ -18,28 +18,7 @@
     </p>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-    <a href="/peminjaman" class="group relative bg-white p-8 rounded-3xl border border-gray-100 shadow-xl shadow-blue-500/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-blue-500/10 overflow-hidden">
-      <div class="absolute -right-8 -top-8 w-32 h-32 bg-blue-50 rounded-full transition-transform group-hover:scale-150 duration-500"></div>
-      
-      <div class="relative">
-        <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 mb-6 transition-transform group-hover:rotate-6">
-          <span class="text-3xl">📦</span>
-        </div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-2">Manajemen Peminjaman</h3>
-        <p class="text-gray-500 mb-6 leading-relaxed">
-          Kelola transaksi peminjaman, pengembalian barang oleh user, dan pantau riwayat aktivitas lab.
-        </p>
-        <div class="flex items-center text-blue-600 font-bold text-sm uppercase tracking-wider">
-          Buka Modul
-          <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-          </svg>
-        </div>
-      </div>
-    </a>
-
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     <a href="/inventory" class="group relative bg-white p-8 rounded-3xl border border-gray-100 shadow-xl shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-indigo-500/10 overflow-hidden">
       <div class="absolute -right-8 -top-8 w-32 h-32 bg-indigo-50 rounded-full transition-transform group-hover:scale-150 duration-500"></div>
 
@@ -49,9 +28,49 @@
         </div>
         <h3 class="text-2xl font-bold text-gray-900 mb-2">Manajemen Inventaris</h3>
         <p class="text-gray-500 mb-6 leading-relaxed">
-          Atur master data barang, cek ketersediaan stok, kondisi peralatan, dan lokasi penyimpanan.
+          Atur master data barang, cek ketersediaan stok dan kondisi peralatan fisik.
         </p>
         <div class="flex items-center text-indigo-600 font-bold text-sm uppercase tracking-wider">
+          Buka Modul
+          <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>
+        </div>
+      </div>
+    </a>
+
+    <a href="/peminjaman" class="group relative bg-white p-8 rounded-3xl border border-gray-100 shadow-xl shadow-blue-500/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-blue-500/10 overflow-hidden">
+      <div class="absolute -right-8 -top-8 w-32 h-32 bg-blue-50 rounded-full transition-transform group-hover:scale-150 duration-500"></div>
+      
+      <div class="relative">
+        <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 mb-6 transition-transform group-hover:rotate-6">
+          <span class="text-3xl">📦</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Manajemen Peminjaman Barang</h3>
+        <p class="text-gray-500 mb-6 leading-relaxed">
+          Kelola transaksi peminjaman, pengembalian barang, dan pantau riwayat aktivitas peminjaman.
+        </p>
+        <div class="flex items-center text-blue-600 font-bold text-sm uppercase tracking-wider mt-auto">
+          Buka Modul
+          <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>
+        </div>
+      </div>
+    </a>
+
+    <a href="/booking-ruangan" class="group relative bg-white p-8 rounded-3xl border border-gray-100 shadow-xl shadow-emerald-500/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-emerald-500/10 overflow-hidden">
+      <div class="absolute -right-8 -top-8 w-32 h-32 bg-emerald-50 rounded-full transition-transform group-hover:scale-150 duration-500"></div>
+
+      <div class="relative">
+        <div class="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200 mb-6 transition-transform group-hover:rotate-6">
+          <span class="text-3xl">📅</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Manajemen Peminjaman Ruangan</h3>
+        <p class="text-gray-500 mb-6 leading-relaxed">
+          Prosedur booking ruangan, verifikasi pengajuan booking lab, jadwal kalender, serta agenda penggunaan harian.
+        </p>
+        <div class="flex items-center text-emerald-600 font-bold text-sm uppercase tracking-wider">
           Buka Modul
           <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>

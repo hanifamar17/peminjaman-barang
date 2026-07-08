@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Alur Administrasi Peminjaman{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-6 sm:py-10">
+
+    <!-- Back -->
+    <a href="{{ url_for('booking_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 
+          active:scale-95 active:bg-gray-100 group">
+
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+        </svg>
+        <span>Kembali</span>
+    </a>
+
+    <div class="mb-6 mt-2 border-t border-gray-100">
+        <div class="mb-6">
+            <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                    </path>
+                </svg>
+                Alur Administrasi Peminjaman
+            </h2>
+            <p class="text-xs text-gray-500 mt-0.5">Wajib dipatuhi oleh seluruh peminjam sebelum menggunakan ruangan.
+            </p>
+        </div>
+
+        <div class="relative pl-6 border-l-2 border-gray-100 ml-3 space-y-6">
+
+            <div class="relative">
+                <span
+                    class="absolute -left-[35px] top-0 flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-600 shadow-sm">
+                    1
+                </span>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-800">Cek Ketersediaan Jadwal</h3>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Pastikan ruangan kosong melalui <a href="{{ url_for('jadwal_penggunaan') }}"
+                            class="text-blue-600 hover:underline">Jadwal Penggunaan Lab</a>, lalu konfirmasi ke Kepala
+                        Lab.
+                    </p>
+                </div>
+            </div>
+
+            <div class="relative">
+                <span
+                    class="absolute -left-[35px] top-0 flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-600 shadow-sm">
+                    2
+                </span>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-800">Pengajuan Permohonan (H-1)</h3>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Isi formulir peminjaman minimal 1 hari sebelum hari penggunaan melalui <a
+                            href="{{ url_for('booking_form_page') }}" target="_blank"
+                            class="text-blue-600 hover:underline inline-flex items-center gap-0.5">Form Peminjaman
+                            Lab</a>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="relative">
+                <span
+                    class="absolute -left-[35px] top-0 flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-600 shadow-sm">
+                    3
+                </span>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-800">Persetujuan (Approval)</h3>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Tunggu pemberitahuan status pengajuan (disetujui/ditolak) yang akan dikirimkan otomatis melalui
+                        email Anda.
+                    </p>
+                </div>
+            </div>
+
+            <div class="relative">
+                <span
+                    class="absolute -left-[35px] top-0 flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-600 shadow-sm">
+                    4
+                </span>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-sm font-medium text-gray-800">Kontribusi Perawatan</h3>
+                        <span
+                            class="text-[10px] px-1.5 py-0.5 font-medium bg-amber-50 text-amber-700 border border-amber-100 rounded">Khusus
+                            Eksternal</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Peminjam dari luar MA Nurul Ummah wajib menyelesaikan kontribusi biaya pemeliharaan sebelum
+                        kegiatan dimulai.
+                    </p>
+                </div>
+            </div>
+
+            <div class="relative">
+                <span
+                    class="absolute -left-[35px] top-0 flex items-center justify-center w-6 h-6 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-600 shadow-sm">
+                    ✓
+                </span>
+                <div>
+                    <h3 class="text-sm font-medium text-emerald-800">Penggunaan Laboratorium</h3>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Pintu akan dibukakan oleh Kepala Lab. Peminjam wajib mematuhi prosedur, menjaga kebersihan, dan
+                        bertanggung jawab atas keamanan fasilitas.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mt-12 pt-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+                <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l3-3m-3 3l-3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Dokumen Prosedur Lengkap
+                </h2>
+                <p class="text-xs text-gray-500 mt-0.5">Baca detail regulasi penggunaan laboratorium.</p>
+            </div>
+
+            <a href="https://drive.google.com/file/d/1i_LDVmRl6fLK4a72Ndi7pj5JTIQ2M-Wo/view?usp=drive_link" target="_blank"
+                class="inline-flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition sm:w-auto w-full">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                Buka PDF di Tab Baru
+            </a>
+        </div>
+
+        <div class="bg-white border border-gray-150 rounded-xl shadow-sm overflow-hidden">
+            <iframe src="https://drive.google.com/file/d/1i_LDVmRl6fLK4a72Ndi7pj5JTIQ2M-Wo/preview?usp=drive_link" class="w-full h-[50vh] sm:h-[60vh]"
+                allow="autoplay" loading="lazy">
+            </iframe>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
