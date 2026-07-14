@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page {
+        size: A4;
+        margin: 2.5cm 2cm 2cm 2cm;
+    }
+    body {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 12pt;
+        line-height: 1.5;
+        color: #000;
+    }
+    .title {
+        text-align: center;
+        font-weight: bold;
+        text-decoration: underline;
+        font-size: 13pt;
+        margin-bottom: 4px;
+    }
+    .nomor {
+        text-align: center;
+        font-size: 11pt;
+        margin-bottom: 18px;
+    }
+    .content p {
+        text-align: justify;
+        margin: 6px 0;
+    }
+    table.identitas {
+        margin: 8px 0 8px 20px;
+        border-collapse: collapse;
+    }
+    table.identitas td {
+        padding: 2px 6px 2px 0;
+        vertical-align: top;
+    }
+    table.identitas td.label {
+        width: 170px;
+    }
+    table.identitas td.titik {
+        width: 10px;
+    }
+    .section-title {
+        font-weight: bold;
+        text-transform: uppercase;
+        margin: 16px 0 6px 0;
+    }
+    table.barang {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+    }
+    table.barang th, table.barang td {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        font-size: 11pt;
+        text-align: left;
+    }
+    table.barang th {
+        text-align: center;
+        font-weight: bold;
+        background-color: #f0f0f0;
+    }
+    table.barang td.center {
+        text-align: center;
+    }
+    .jaminan-list {
+        margin: 6px 0 6px 20px;
+    }
+    .jaminan-list p {
+        margin: 3px 0;
+    }
+    table.ttd {
+        width: 100%;
+        margin-top: 30px;
+        border-collapse: collapse;
+    }
+    table.ttd td {
+        width: 50%;
+        text-align: center;
+        vertical-align: top;
+        padding: 0 20px;
+    }
+    .ttd-space {
+        height: 70px;
+    }
+</style>
+</head>
+<body>
+
+    <div class="title">SURAT PEMINJAMAN ASET MA NURUL UMMAH</div>
+    <div class="nomor">Nomor: {{ nomor_surat }}</div>
+
+    <div class="content">
+        <p>Saya yang bertanda tangan di bawah ini:</p>
+
+        <table class="identitas">
+            <tr><td class="label">Nama</td><td class="titik">:</td><td>{{ nama }}</td></tr>
+            <tr><td class="label">Jenis Kelamin</td><td class="titik">:</td><td>{{ jenis_kelamin }}</td></tr>
+            <tr><td class="label">Pekerjaan/Instansi</td><td class="titik">:</td><td>{{ pekerjaan }}</td></tr>
+            <tr><td class="label">Alamat</td><td class="titik">:</td><td>{{ alamat }}</td></tr>
+            <tr><td class="label">No. Telepon/WA</td><td class="titik">:</td><td>{{ telepon }}</td></tr>
+            <tr><td class="label">No. Identitas</td><td class="titik">:</td><td>{{ no_identitas }}</td></tr>
+        </table>
+
+        <p>Dengan ini mengajukan permohonan untuk meminjam aset milik:</p>
+
+        <table class="identitas">
+            <tr><td class="label">Nama Lembaga</td><td class="titik">:</td><td>MA Nurul Ummah Yogyakarta</td></tr>
+            <tr><td class="label">Alamat Lembaga</td><td class="titik">:</td><td>Jalan Raden Ronggo KG/II 982, Prenggan, Kotagede, D.I. Yogyakarta</td></tr>
+        </table>
+
+        <div class="section-title">Rincian Barang yang Dipinjam</div>
+
+        <table class="barang">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 30%;">Nama Barang</th>
+                    <th style="width: 27%;">Merek/Spesifikasi</th>
+                    <th style="width: 12%;">Jumlah</th>
+                    <th style="width: 26%;">Kondisi Saat Dipinjam</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in barang %}
+                <tr>
+                    <td class="center">{{ b.no }}</td>
+                    <td>{{ b.nama }}</td>
+                    <td>{{ b.spek }}</td>
+                    <td class="center">{{ b.jumlah }}</td>
+                    <td class="center">{{ b.kondisi }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <table class="identitas">
+            <tr><td class="label">Tujuan Peminjaman</td><td class="titik">:</td><td>{{ tujuan }}</td></tr>
+            <tr><td class="label">Lokasi Penggunaan</td><td class="titik">:</td><td>{{ lokasi_penggunaan }}</td></tr>
+            <tr><td class="label">Tanggal Peminjaman</td><td class="titik">:</td><td>{{ tgl_pinjam }}</td></tr>
+            <tr><td class="label">Tanggal Pengembalian</td><td class="titik">:</td><td>{{ tgl_kembali }}</td></tr>
+        </table>
+
+        <div class="section-title">Jaminan Peminjaman</div>
+        <p>Sebagai bentuk pertanggungjawaban, peminjam menyerahkan jaminan berupa:</p>
+        <div class="jaminan-list">
+            <p>{{ "☑" if jaminan_identitas else "☐" }} Identitas Asli berupa {{ jenis_identitas_jaminan }}</p>
+            <p>{{ "☑" if jaminan_surat else "☐" }} Surat Jaminan dari Instansi/Organisasi</p>
+        </div>
+        <p>Jaminan akan dikembalikan apabila seluruh barang dikembalikan dalam kondisi baik, lengkap, dan tepat waktu.</p>
+
+        <div class="section-title">Pernyataan Tanggung Jawab</div>
+        <p>
+            Saya bertanggung jawab penuh atas penggunaan, perawatan, dan pengembalian
+            barang-barang yang saya pinjam. Jika terjadi kerusakan atau kehilangan,
+            saya bersedia memperbaiki atau mengganti sesuai ketentuan yang berlaku.
+        </p>
+        <p>Demikian surat ini saya buat dengan sebenar-benarnya untuk digunakan sebagaimana mestinya.</p>
+    </div>
+
+    <table class="ttd">
+        <tr>
+            <td>
+                <p>Petugas Lembaga,</p>
+                <div class="ttd-space"></div>
+                <p><strong>{{ nama_petugas }}</strong></p>
+            </td>
+            <td>
+                <p>{{ kota }}, {{ tgl_surat }}</p>
+                <p>Yang Meminjam,</p>
+                <div class="ttd-space"></div>
+                <p><strong>{{ nama }}</strong></p>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

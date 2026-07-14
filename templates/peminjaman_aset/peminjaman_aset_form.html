@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% block title %}Form Peminjaman Aset{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-6">
+  <h1 class="text-lg font-medium mb-4">Form peminjaman aset</h1>
+
+  <form id="borrowForm" method="POST" class="space-y-4">
+    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-sm text-gray-600">Nama lengkap</label>
+        <input name="nama" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">Jenis kelamin</label>
+        <select name="jenis_kelamin" required class="w-full border rounded-lg px-3 py-2 text-sm">
+          <option value="Laki-laki">Laki-laki</option>
+          <option value="Perempuan">Perempuan</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">Pekerjaan/Instansi</label>
+        <input name="pekerjaan" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">No. Telepon/WA</label>
+        <input name="telepon" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div class="col-span-2">
+        <label class="text-sm text-gray-600">Alamat</label>
+        <input name="alamat" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div class="col-span-2">
+        <label class="text-sm text-gray-600">No. Identitas (KTP/SIM/Paspor)</label>
+        <input name="no_identitas" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+    </div>
+
+    <!-- Tabel barang dinamis -->
+    <div>
+      <label class="text-sm text-gray-600 block mb-2">Barang yang dipinjam</label>
+      <div id="barangRows" class="space-y-2">
+        <div class="grid grid-cols-12 gap-2 barang-row">
+          <input name="barang_nama[]" placeholder="Nama barang" required class="col-span-4 border rounded-lg px-2 py-1.5 text-sm">
+          <input name="barang_spek[]" placeholder="Merek/spesifikasi" class="col-span-3 border rounded-lg px-2 py-1.5 text-sm">
+          <input name="barang_jumlah[]" placeholder="Jumlah" required class="col-span-2 border rounded-lg px-2 py-1.5 text-sm">
+          <input name="barang_kondisi[]" placeholder="Kondisi" class="col-span-2 border rounded-lg px-2 py-1.5 text-sm">
+          <button type="button" onclick="removeBarangRow(this)" class="col-span-1 text-red-500 hover:text-red-700 text-sm">✕</button>
+        </div>
+      </div>
+      <button type="button" onclick="addBarangRow()" class="mt-2 text-sm text-blue-600 hover:underline">+ Tambah barang</button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="col-span-2">
+        <label class="text-sm text-gray-600">Tujuan peminjaman</label>
+        <input name="tujuan" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div class="col-span-2">
+        <label class="text-sm text-gray-600">Lokasi penggunaan</label>
+        <input name="lokasi_penggunaan" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">Tanggal peminjaman</label>
+        <input type="date" name="tgl_pinjam" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">Tanggal pengembalian</label>
+        <input type="date" name="tgl_kembali" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">Kota</label>
+        <input name="kota" value="Yogyakarta" class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">Tanggal surat</label>
+        <input type="date" name="tgl_surat" class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+    </div>
+
+    <!-- Petugas lembaga -->
+    <div>
+      <label class="text-sm text-gray-600">Nama petugas lembaga</label>
+      <input name="nama_petugas" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nama petugas yang menyerahkan barang">
+    </div>
+
+    <!-- Jaminan peminjaman -->
+    <div class="border rounded-lg p-3 space-y-2">
+      <label class="text-sm text-gray-600 block mb-1">Jaminan peminjaman</label>
+
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="jaminan_identitas" name="jaminan_identitas" class="rounded">
+        <label for="jaminan_identitas" class="text-sm">Identitas asli</label>
+        <select name="jenis_identitas_jaminan" class="border rounded-lg px-2 py-1 text-sm ml-2">
+          <option value="KTP">KTP</option>
+          <option value="SIM">SIM</option>
+          <option value="Paspor">Paspor</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="jaminan_surat" name="jaminan_surat" class="rounded">
+        <label for="jaminan_surat" class="text-sm">Surat jaminan dari instansi/organisasi</label>
+      </div>
+    </div>
+
+    <button type="submit" class="w-full bg-blue-600 text-white rounded-lg py-2.5 text-sm hover:bg-blue-700">
+      Ajukan peminjaman
+    </button>
+  </form>
+</div>
+
+<!--Swal mixin-->
+<script>
+    // Toast Notification
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        iconColor: "white",
+        customClass: {
+            popup: "colored-toast"
+        },
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+
+    // Tambah baris barang
+    function addBarangRow() {
+        const container = document.getElementById("barangRows");
+
+        const row = document.createElement("div");
+        row.className = "grid grid-cols-12 gap-2 barang-row mt-2";
+
+        row.innerHTML = `
+            <input type="text"
+                name="barang_nama[]"
+                placeholder="Nama barang"
+                required
+                class="col-span-4 border rounded-lg px-2 py-1.5 text-sm">
+
+            <input type="text"
+                name="barang_spek[]"
+                placeholder="Merek/Spesifikasi"
+                class="col-span-3 border rounded-lg px-2 py-1.5 text-sm">
+
+            <input type="number"
+                name="barang_jumlah[]"
+                min="1"
+                required
+                class="col-span-2 border rounded-lg px-2 py-1.5 text-sm">
+
+            <input type="text"
+                name="barang_kondisi[]"
+                placeholder="Kondisi"
+                class="col-span-2 border rounded-lg px-2 py-1.5 text-sm">
+
+            <button type="button"
+                onclick="removeBarangRow(this)"
+                class="col-span-1 text-red-500 hover:text-red-700">
+                ✕
+            </button>
+        `;
+
+        container.appendChild(row);
+    }
+
+    // Hapus baris barang
+    function removeBarangRow(button) {
+        const rows = document.querySelectorAll(".barang-row");
+
+        if (rows.length > 1) {
+            button.closest(".barang-row").remove();
+        } else {
+            Toast.fire({
+                icon: "warning",
+                title: "Minimal harus ada satu barang."
+            });
+        }
+    }
+
+    // Submit Form
+    document.getElementById("borrowForm").addEventListener("submit", async function (e) {
+
+        e.preventDefault();
+
+        const form = this;
+        const formData = new FormData(form);
+
+        const csrfToken = document.getElementById("csrf_token").value;
+
+        const submitBtn = form.querySelector("button[type='submit']");
+        const originalButton = submitBtn.innerHTML;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <svg class="animate-spin h-4 w-4 inline mr-2"
+                 xmlns="http://www.w3.org/2000/svg"
+                 fill="none"
+                 viewBox="0 0 24 24">
+
+                <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4">
+                </circle>
+
+                <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z">
+                </path>
+
+            </svg>
+
+            Memproses...
+        `;
+
+        // Loading Dialog
+        Swal.fire({
+            title: "Sedang Memproses",
+            text: "Menyimpan data dan membuat dokumen...",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+
+            const response = await fetch("{{ url_for('submit_peminjaman_aset') }}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken
+                },
+                body: formData
+            });
+
+            let result;
+
+            try {
+                result = await response.json();
+            } catch (err) {
+                throw new Error("Server tidak mengembalikan JSON.");
+            }
+
+            Swal.close();
+
+            if (response.ok && result.success) {
+
+                await Toast.fire({
+                    icon: "success",
+                    title: result.message || "Pengajuan berhasil disimpan."
+                });
+
+                // Reset Form
+                form.reset();
+
+                // Jika ingin hanya satu baris barang
+                const rows = document.querySelectorAll(".barang-row");
+
+                rows.forEach((row, index) => {
+                    if (index > 0) row.remove();
+                });
+
+                // Jika ingin redirect, ganti dengan:
+                // window.location.href = "{{ url_for('daftar_peminjaman_aset') }}";
+
+            } else {
+
+                Toast.fire({
+                    icon: "error",
+                    title: result.message || "Terjadi kesalahan."
+                });
+
+            }
+
+        } catch (error) {
+
+            Swal.close();
+
+            console.error(error);
+
+            Toast.fire({
+                icon: "error",
+                title: "Tidak dapat terhubung ke server."
+            });
+
+        } finally {
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalButton;
+
+        }
+
+    });
+</script>
+{% endblock %}

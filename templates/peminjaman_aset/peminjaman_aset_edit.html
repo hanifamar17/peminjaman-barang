@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Edit Peminjaman Aset{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-6">
+  <h1 class="text-lg font-medium mb-4">Edit peminjaman aset</h1>
+
+  <form method="POST" action="{{ url_for('admin_edit_peminjaman_aset_submit', record_id=record_id) }}" class="space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-sm text-gray-600">Nama lengkap</label>
+        <input name="nama" value="{{ row['nama'] }}" required class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">Jenis kelamin</label>
+        <select name="jenis_kelamin" class="w-full border rounded-lg px-3 py-2 text-sm">
+          <option value="L" {{ "selected" if row["jenis_kelamin"] == "L" }}>Laki-laki</option>
+          <option value="P" {{ "selected" if row["jenis_kelamin"] == "P" }}>Perempuan</option>
+        </select>
+      </div>
+      <!-- field lain sama pola, isi value dari row[...] -->
+    </div>
+
+    <!-- Catatan: tabel barang tidak tersimpan per-item di Sheet pada desain sebelumnya
+         (hanya nama dokumen jadi). Kalau kamu mau barang bisa di-edit granular,
+         barang perlu disimpan sebagai kolom JSON terpisah di Sheet — beri tahu saya
+         kalau ini diperlukan, saya sesuaikan skema penyimpanannya. -->
+
+    <button type="submit" class="w-full bg-blue-600 text-white rounded-lg py-2.5 text-sm hover:bg-blue-700">
+      Simpan perubahan
+    </button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto py-8 px-4">
+    <h1 class="text-2xl font-bold mb-2">Ringkasan Peminjaman Aset</h1>
+    <p class="text-gray-500 mb-6">No. Surat: <strong>{{ data.nomor_surat }}</strong></p>
+
+    <div class="bg-white border border-gray-200 rounded-lg p-6 space-y-2 mb-6">
+        <p><span class="text-gray-500">Nama:</span> {{ data.nama }}</p>
+        <p><span class="text-gray-500">Pekerjaan:</span> {{ data.pekerjaan }}</p>
+        <p><span class="text-gray-500">Alamat:</span> {{ data.alamat }}</p>
+        <p><span class="text-gray-500">Telepon:</span> {{ data.telepon }}</p>
+        <p><span class="text-gray-500">No. Identitas:</span> {{ data.no_identitas }}</p>
+        <p><span class="text-gray-500">Tujuan:</span> {{ data.tujuan }}</p>
+        <p><span class="text-gray-500">Lokasi Penggunaan:</span> {{ data.lokasi_penggunaan }}</p>
+        <p><span class="text-gray-500">Tgl Pinjam - Kembali:</span> {{ data.tgl_pinjam }} s/d {{ data.tgl_kembali }}</p>
+        <p><span class="text-gray-500">Petugas:</span> {{ data.nama_petugas }}</p>
+        <p><span class="text-gray-500">Jenis Identitas Jaminan:</span> {{ data.jenis_identitas_jaminan }}</p>
+
+        <div class="pt-3">
+            <p class="text-gray-500 mb-1">Barang yang dipinjam:</p>
+            <table class="w-full text-sm border border-gray-100">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-2 py-1 text-left">No</th>
+                        <th class="px-2 py-1 text-left">Nama</th>
+                        <th class="px-2 py-1 text-left">Spek</th>
+                        <th class="px-2 py-1 text-left">Jumlah</th>
+                        <th class="px-2 py-1 text-left">Kondisi</th>
+                    </tr>
+                </thead>
+                <tbody id="barang-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script id="barang-data" type="application/json">{{ data.barang | tojson | safe }}</script>
+
+    {% if data.sudah_generate %}
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+        <span class="text-green-700">PDF sudah dibuat.</span>
+        <a href="{{ url_for('preview_pdf_peminjaman_aset', record_id=record_id) }}" target="_blank"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            Preview Surat PDF
+        </a>
+    </div>
+    {% else %}
+    <form id="generate-form" class="space-y-4">
+        <label class="flex items-start gap-2">
+            <input type="checkbox" id="setuju" name="setuju" class="mt-1">
+            <span>Saya menyatakan dan memastikan data ringkasan peminjaman di atas sudah benar.</span>
+        </label>
+        <button type="submit" id="btn-generate" disabled
+            class="w-full px-4 py-2 rounded-lg bg-gray-300 text-gray-500 cursor-not-allowed transition">
+            Generate PDF
+        </button>
+    </form>
+    <p id="generate-status" class="text-sm mt-3"></p>
+    {% endif %}
+</div>
+
+<script>
+    const barangData = document.getElementById("barang-data");
+    const barang = barangData ? JSON.parse(barangData.textContent || "[]") : [];
+    const tbody = document.getElementById("barang-tbody");
+    if (tbody) {
+        barang.forEach(b => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td class="px-2 py-1">${b.no}</td><td class="px-2 py-1">${b.nama}</td>
+                       <td class="px-2 py-1">${b.spek}</td><td class="px-2 py-1">${b.jumlah}</td>
+                       <td class="px-2 py-1">${b.kondisi}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    const checkbox = document.getElementById("setuju");
+    const btn = document.getElementById("btn-generate");
+    if (checkbox) {
+        checkbox.addEventListener("change", () => {
+            btn.disabled = !checkbox.checked;
+            btn.classList.toggle("bg-gray-300", !checkbox.checked);
+            btn.classList.toggle("text-gray-500", !checkbox.checked);
+            btn.classList.toggle("cursor-not-allowed", !checkbox.checked);
+            btn.classList.toggle("bg-blue-600", checkbox.checked);
+            btn.classList.toggle("text-white", checkbox.checked);
+            btn.classList.toggle("hover:bg-blue-700", checkbox.checked);
+        });
+    }
+
+    const form = document.getElementById("generate-form");
+    if (form) {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const statusEl = document.getElementById("generate-status");
+            btn.disabled = true;
+            btn.textContent = "Membuat PDF...";
+            statusEl.textContent = "";
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfMeta) {
+                statusEl.textContent = "CSRF token tidak ditemukan di halaman.";
+                statusEl.classList.add("text-red-600");
+                btn.disabled = false;
+                btn.textContent = "Generate PDF";
+                return;
+            }
+            const csrfToken = csrfMeta.content;
+
+            try {
+                const res = await fetch(window.location.pathname + "/generate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+                    body: JSON.stringify({ setuju: checkbox.checked }),
+                });
+                const json = await res.json();
+                if (json.success) {
+                    statusEl.textContent = json.message;
+                    statusEl.classList.add("text-green-600");
+                    setTimeout(() => window.location.reload(), 800);
+                } else {
+                    statusEl.textContent = json.message;
+                    statusEl.classList.add("text-red-600");
+                    btn.disabled = false;
+                    btn.textContent = "Generate PDF";
+                }
+            } catch (err) {
+                statusEl.textContent = "Terjadi kesalahan, coba lagi.";
+                statusEl.classList.add("text-red-600");
+                btn.disabled = false;
+                btn.textContent = "Generate PDF";
+            }
+        });
+    }
+</script>
+{% endblock %}

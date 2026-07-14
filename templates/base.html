@@ -64,6 +64,7 @@
         }
     </style>
     {% block head %}{% endblock %}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen flex flex-col">

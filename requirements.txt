@@ -9,3 +9,7 @@ python-dotenv>=1.0.0
 requests>=2.31.0
 python-dotenv
 flask-wtf
+docxtpl
+python-docx --break-system-packages
+google-auth-oauthlib
+reportlab
