@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% block title %}Hapus Inventaris{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <a href="{{ url_for('inventaris.list_inventaris') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 hover:text-blue-600 hover:bg-blue-50 active:scale-95 group">
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        <span>Kembali</span>
+    </a>
+
+    <div class="mb-8 mt-2">
+        <h2 class="text-xl font-bold text-gray-900">Penghapusan Data</h2>
+        <p class="text-gray-600 text-sm">Konfirmasi terakhir sebelum data dihapus dari database</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <div class="lg:col-span-7 space-y-6">
+            
+            {% if item.jumlah_dipinjam and item.jumlah_dipinjam != "0" and item.jumlah_dipinjam != 0 %}
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 text-sm text-yellow-800 flex gap-3.5 items-start">
+                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <div>
+                    <span class="font-bold block text-yellow-900 mb-0.5">Perhatian: Barang Sedang Dipinjam</span>
+                    Barang ini masih tercatat sedang dipinjam sebanyak <strong>{{ item.jumlah_dipinjam }} unit</strong>. Hapus tetap bisa dilakukan, tapi pastikan untuk mengecek riwayat peminjaman terkait terlebih dahulu.
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="bg-red-50 border border-red-100 rounded-xl p-6">
+                <div class="flex gap-4">
+                    <div class="flex-shrink-0">
+                        <div class="p-2 md:p-3 bg-white rounded-lg shadow-sm">
+                            <svg class="w-4 h-4 md:w-6 md:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-md md:text-lg font-bold text-red-900">Apakah Anda benar-benar yakin?</h3>
+                        <p class="mt-1 text-xs md:text-sm text-red-700 leading-relaxed">
+                            Barang yang dihapus akan hilang secara permanen dari daftar inventory. Data yang dihapus tidak dapat dikembalikan lagi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <form id="deleteForm" method="POST" action="{{ url_for('inventaris.hapus_inventaris', item_id=item.id) }}" class="w-full sm:w-auto">
+                    <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
+
+                    <button type="submit" id="submitBtn" class="w-full px-8 py-3 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 active:scale-95 transition-all shadow-md shadow-red-100 cursor-pointer flex items-center justify-center min-w-[180px]">
+                        <span id="submitText">Ya, Hapus Sekarang</span>
+                        <div id="submitLoader" class="hidden">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    </button>
+                </form>
+
+                <a href="{{ url_for('inventaris.list_inventaris') }}" class="w-full sm:w-auto px-8 py-3 text-sm font-semibold text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
+                    Batalkan
+                </a>
+            </div>
+        </div>
+
+        <div class="lg:col-span-5">
+            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Detail Barang</span>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">ID / Kode Identifikasi</label>
+                        <p class="text-sm font-mono font-medium text-gray-900 bg-gray-50 px-2 py-1 rounded inline-block">
+                            {{ item.id }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nama Barang</label>
+                        <p class="text-base font-semibold text-gray-900">{{ item.nama_barang }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Merk</label>
+                            <p class="text-sm font-medium text-gray-900">{{ item.merk }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kondisi</label>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                {{ item.kondisi }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Jumlah Total</label>
+                            <p class="text-sm font-semibold text-gray-900">{{ item.jumlah_total }} Unit</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Sedang Dipinjam</label>
+                            <p class="text-sm font-semibold {{ 'text-amber-600' if item.jumlah_dipinjam and item.jumlah_dipinjam != '0' and item.jumlah_dipinjam != 0 else 'text-gray-900' }}">
+                                {{ item.jumlah_dipinjam }} Unit
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tahun Pengadaan</label>
+                            <p class="text-sm text-gray-700">{{ item.tahun_pengadaan }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Sumber Dana</label>
+                            <p class="text-sm text-gray-700">{{ item.sumber_dana }}</p>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-gray-100">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Sub Bidang & Lokasi</label>
+                        <p class="text-sm font-medium text-gray-800">{{ item.sub_bidang }}</p>
+                        <p class="text-xs text-gray-500 italic mt-0.5">"{{ item.lokasi }}"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.all.min.js"></script>
+<script>
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteForm = document.getElementById('deleteForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const submitLoader = document.getElementById('submitLoader');
+        const csrfInput = document.getElementById('csrf_token');
+
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Proteksi double click & Animasi Loading: ON
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                if (submitText) submitText.classList.add('hidden');
+                if (submitLoader) submitLoader.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(deleteForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrfInput ? csrfInput.value : ''
+                        }
+                    });
+
+                    // Coba parsing JSON dari respons backend
+                    let result = {};
+                    try {
+                        result = await response.json();
+                    } catch (err) {
+                        // Jika backend tidak mengembalikan JSON (misalnya langsung redirect html)
+                        if (response.ok || response.redirected) {
+                            result = { ok: true };
+                        } else {
+                            throw new Error('Gagal menghapus data dari server');
+                        }
+                    }
+
+                    if (response.ok && (result.ok !== false)) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Barang berhasil dihapus'
+                        });
+
+                        setTimeout(() => {
+                            window.location.href = "{{ url_for('inventaris.list_inventaris') }}";
+                        }, 1500);
+
+                    } else {
+                        throw new Error(result.error || 'Gagal menghapus data');
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    Toast.fire({
+                        icon: 'error',
+                        title: error.message || 'Terjadi kesalahan sistem'
+                    });
+
+                    // Reset tombol jika gagal
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                    if (submitText) submitText.classList.remove('hidden');
+                    if (submitLoader) submitLoader.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

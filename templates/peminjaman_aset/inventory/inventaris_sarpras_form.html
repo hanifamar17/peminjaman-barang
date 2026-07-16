@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+  <a href="{{ url_for('inventaris.list_inventaris') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+              hover:text-blue-600 hover:bg-blue-50 active:scale-95 active:bg-gray-100 group">
+    <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+      viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+      </path>
+    </svg>
+    <span>Kembali</span>
+  </a>
+
+  <div class="mb-6 mt-2">
+    <h1 class="text-xl font-bold text-gray-900">
+      {{ "Tambah Inventory" if mode == "tambah" else "Edit Inventory: " + item.id }}
+    </h1>
+    <p class="text-sm text-gray-500">{{"Lengkapi formulir untuk menambah barang baru" if mode == "tambah" else
+      "Perbarui detail informasi barang inventory"}}</p>
+  </div>
+
+  <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg">
+    <form method="POST" class="space-y-6">
+      <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Nama Barang (Full Width) -->
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nama Barang *</label>
+          <input type="text" name="nama_barang" required value="{{ item.nama_barang if item else '' }}"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg cursor-not-allowed text-sm outline-none">
+        </div>
+
+        <!-- Merk -->
+        <div class="md:col-span-1">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Merk *</label>
+          <input type="text" name="merk" required value="{{ item.merk if item else '' }}"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg cursor-not-allowed text-sm outline-none">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Kondisi -->
+        <div class="md:col-span-1">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kondisi</label>
+          <select name="kondisi"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none">
+            {% for k in kondisi_options %}
+            <option value="{{ k }}" {% if item and item.kondisi==k %}selected{% endif %}>{{ k }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Sumber Dana -->
+        <div class="md:col-span-1">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Sumber Dana</label>
+          <select name="sumber_dana"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none">
+            <option value="">- Pilih -</option>
+            {% for s in sumber_dana_options %}
+            <option value="{{ s }}" {% if item and item.sumber_dana==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Jumlah Total -->
+        <div class="sm:col-span-1">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Jumlah Total *</label>
+          <input type="number" name="jumlah_total" min="0" required value="{{ item.jumlah_total if item else 0 }}"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none">
+          {% if item %}
+          <p class="text-xs font-medium text-amber-600 mt-2 bg-amber-50 inline-block px-3 py-1 rounded-lg">
+            Sedang dipinjam: {{ item.jumlah_dipinjam }} (Counter ini tidak diubah lewat form edit)
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Lokasi -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Lokasi *</label>
+          <input type="text" name="lokasi" required value="{{ item.lokasi if item else '' }}"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none">
+        </div>
+
+        <!-- Tahun Pengadaan -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tahun Pengadaan *</label>
+          <input type="number" name="tahun_pengadaan" min="1990" max="2100" required
+            value="{{ item.tahun_pengadaan if item else '' }}"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none">
+        </div>
+
+        <!-- Sub Bidang -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Sub Bidang</label>
+          <select name="sub_bidang"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none">
+            <option value="">- Pilih -</option>
+            {% for s in sub_bidang_options %}
+            <option value="{{ s }}" {% if item and item.sub_bidang==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Tombol Aksi -->
+      <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 mt-2 border-t border-gray-100">
+        
+        <a href="{{ url_for('inventaris.list_inventaris') }}"
+          class="w-full sm:w-auto px-6 py-2.5 text-xs font-semibold text-center text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
+          Batal
+        </a>
+
+        <button type="submit" id="submitBtn"
+          class="w-full sm:w-auto min-w-[140px] px-6 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:scale-95 transition-all cursor-pointer shadow-sm flex items-center justify-center">
+          <span id="submitText">Simpan Data</span>
+          <svg id="submitLoader" class="hidden animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
+            fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <!-- Scripts Tetap Sama -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.all.min.js"></script>
+  <script>
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 2500,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const inventoryForm = document.querySelector('form');
+      const submitBtn = document.getElementById('submitBtn');
+      const submitText = document.getElementById('submitText');
+      const submitLoader = document.getElementById('submitLoader');
+      const csrfInput = document.getElementById('csrf_token');
+
+      const resetButton = () => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+        }
+        if (submitText) submitText.classList.remove('hidden');
+        if (submitLoader) submitLoader.classList.add('hidden');
+      };
+
+      if (inventoryForm) {
+        inventoryForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          if (!csrfInput) {
+            console.error("Elemen csrf_token tidak ditemukan!");
+            return;
+          }
+
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+          }
+          if (submitText) submitText.classList.add('hidden');
+          if (submitLoader) submitLoader.classList.remove('hidden');
+
+          const formData = new FormData(inventoryForm);
+
+          try {
+            const response = await fetch(window.location.href, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfInput.value
+              }
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.ok) {
+              throw new Error(result.error || 'Gagal menyimpan data');
+            }
+
+            await Toast.fire({
+              icon: 'success',
+              title: "{{ 'Berhasil diperbarui' if item else 'Berhasil disimpan' }}"
+            });
+
+            window.location.reload();
+
+          } catch (error) {
+            console.error('Error:', error);
+            Toast.fire({
+              icon: 'error',
+              title: error.message || 'Terjadi kesalahan sistem'
+            });
+            resetButton();
+          }
+        });
+      }
+    });
+  </script>
+  {% endblock %}

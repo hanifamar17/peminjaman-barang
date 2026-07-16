@@ -8,6 +8,7 @@ from peminjaman_aset.drive_uploader import _get_drive_service
 ASET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]  # perlu write access
 ASET_SPREADSHEET_ID = os.getenv("ASET_SPREADSHEET_ID")
 ASET_SHEET_NAME = os.getenv("ASET_SHEET_NAME")
+INV_SHEET_NAME = os.getenv("INV_SHEET_NAME", "inventory")
 
 
 def _get_service():
@@ -126,3 +127,169 @@ def update_row(row_index, updated_row):
         valueInputOption="RAW",
         body={"values": [updated_row]},
     ).execute()
+
+# Inventaris aset (barang) -- sheet terpisah dari peminjaman, tapi masih di spreadsheet yang sama
+def _next_id():
+    rows = get_all_inventaris()
+    nums = []
+    for r in rows:
+        try:
+            nums.append(int(r["id"].split("-")[1]))
+        except (IndexError, ValueError, KeyError):
+            continue
+    nxt = (max(nums) + 1) if nums else 1
+    return f"INV-{nxt:04d}"
+ 
+ 
+def get_all_inventaris():
+    service = _get_service()
+    result = service.spreadsheets().values().get(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{INV_SHEET_NAME}!A:Z",
+    ).execute()
+    rows = result.get("values", [])
+    if len(rows) < 2:
+        return []
+    headers = rows[0]
+    data = [dict(zip(headers, row)) for row in rows[1:]]
+    for r in data:
+        try:
+            total = int(r.get("jumlah_total") or 0)
+            dipinjam = int(r.get("jumlah_dipinjam") or 0)
+        except ValueError:
+            total, dipinjam = 0, 0
+        r["jumlah_tersedia"] = max(total - dipinjam, 0)
+        r["status"] = "Tersedia" if r["jumlah_tersedia"] > 0 else "Habis"
+    return data
+ 
+ 
+def find_inventaris_by_id(item_id):
+    service = _get_service()
+    result = service.spreadsheets().values().get(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{INV_SHEET_NAME}!A:Z",
+    ).execute()
+    rows = result.get("values", [])
+    for i, row in enumerate(rows):
+        if row and row[0] == item_id:
+            return i + 1, row  # 1-indexed, row 1 = header
+    return None, None
+ 
+ 
+def search_inventaris(query, limit=10):
+    """Dipakai untuk autocomplete di form peminjaman."""
+    query = (query or "").strip().lower()
+    if not query:
+        return []
+    rows = get_all_inventaris()
+    matched = [
+        r for r in rows
+        if query in r.get("nama_barang", "").lower()
+        or query in r.get("merk", "").lower()
+    ]
+    return matched[:limit]
+ 
+ 
+def create_inventaris(data):
+    service = _get_service()
+    item_id = _next_id()
+    now = datetime.datetime.now().isoformat()
+    row = [
+        item_id,
+        data["nama_barang"],
+        data.get("merk", ""),
+        data.get("kondisi", "Baik"),
+        data.get("lokasi", ""),
+        data.get("tahun_pengadaan", ""),
+        data.get("sumber_dana", ""),
+        data.get("sub_bidang", ""),
+        str(data.get("jumlah_total", 0)),
+        "0",  # jumlah_dipinjam awal selalu 0
+        now,
+        now,
+    ]
+    service.spreadsheets().values().append(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{INV_SHEET_NAME}!A:Z",
+        valueInputOption="RAW",
+        body={"values": [row]},
+    ).execute()
+    return item_id
+ 
+ 
+def update_inventaris(item_id, data):
+    row_index, row = find_inventaris_by_id(item_id)
+    if row is None:
+        return False
+    jumlah_dipinjam = row[9] if len(row) > 9 else "0"  # pertahankan counter, jangan direset form edit
+    updated_row = [
+        item_id,
+        data["nama_barang"],
+        data.get("merk", ""),
+        data.get("kondisi", "Baik"),
+        data.get("lokasi", ""),
+        data.get("tahun_pengadaan", ""),
+        data.get("sumber_dana", ""),
+        data.get("sub_bidang", ""),
+        str(data.get("jumlah_total", 0)),
+        jumlah_dipinjam,
+        row[10] if len(row) > 10 else datetime.datetime.now().isoformat(),  # created_at asli
+        datetime.datetime.now().isoformat(),  # last_updated
+    ]
+    service = _get_service()
+    service.spreadsheets().values().update(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{INV_SHEET_NAME}!A{row_index}:Z{row_index}",
+        valueInputOption="RAW",
+        body={"values": [updated_row]},
+    ).execute()
+    return True
+ 
+ 
+def delete_inventaris(item_id, row_index=None):
+    """
+    Menghapus baris inventaris berdasarkan row_index dengan mencari GID secara otomatis
+    menggunakan nama sheet yang diatur di INV_SHEET_NAME.
+    """
+    if row_index is None:
+        row_index, row = find_inventaris_by_id(item_id)
+        if row is None:
+            return False
+
+    service = _get_service()
+    try:
+        # 1. Ambil metadata spreadsheet untuk mencari GID berdasarkan nama tab (INV_SHEET_NAME)
+        spreadsheet = service.spreadsheets().get(spreadsheetId=ASET_SPREADSHEET_ID).execute()
+        sheet_id_gid = None
+        
+        for sheet in spreadsheet.get('sheets', []):
+            if sheet['properties']['title'] == INV_SHEET_NAME:
+                sheet_id_gid = sheet['properties']['sheetId']
+                break
+        
+        # Jika nama tab tidak ditemukan di Google Sheets, hentikan proses
+        if sheet_id_gid is None:
+            print(f"Error: Tab dengan nama '{INV_SHEET_NAME}' tidak ditemukan di file Google Sheets Anda.")
+            return False
+
+        # 2. Eksekusi hapus baris menggunakan GID yang sudah ditemukan
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=ASET_SPREADSHEET_ID,
+            body={"requests": [{
+                "deleteDimension": {
+                    "range": {
+                        "sheetId": sheet_id_gid,
+                        "dimension": "ROWS",
+                        "startIndex": row_index - 1, # Google API menggunakan 0-based index
+                        "endIndex": row_index,
+                    }
+                }
+            }]},
+        ).execute()
+        
+        print(f"Berhasil menghapus baris ke-{row_index} pada tab '{INV_SHEET_NAME}' (GID: {sheet_id_gid})")
+        return True
+        
+    except Exception as e:
+        print(f"Error saat menghapus baris di Google Sheets: {e}")
+        return False

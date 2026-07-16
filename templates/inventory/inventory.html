@@ -26,66 +26,78 @@
     </div>
 
     <!-- Search -->
-    <div class="mb-4">
-        <div class="relative">
-            <input type="text" id="filter"
-                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="🔍 Cari ID, nama, lokasi...">
-            <div id="searchCount" class="mt-1 text-xs text-gray-500 hidden"></div>
+    <div class="relative mb-6">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
         </div>
+        <input type="text" id="filter"
+            class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+            placeholder="Cari nama barang, merk, atau lokasi...">
+        <div id="searchCount" class="mt-1 text-xs text-gray-500 hidden"></div>
     </div>
 
-    <div class="bg-white p-2 md:p-4 border border-gray-200 rounded-lg">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         <!-- Info -->
-        <div class="mt-2 text-xs text-gray-500 text-right mb-2">
+        <div class="mt-2 text-xs text-gray-500 text-right mb-2 p-4">
             <span id="totalCount">{{ items|length }}</span> barang
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto rounded-lg border border-gray-100">
-            <table class="min-w-full divide-y divide-gray-100">
-                <thead class="bg-gray-50">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50/50 border-b border-gray-100 text-gray-500">
                     <tr>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Nama</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Stock</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">UOM</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Lokasi</th>
-                        <th class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase w-28">Aksi</th>
+                        <th class="px-6 py-4 font-semibold">Barang & Info</th>
+                        <th class="px-6 py-4 font-semibold">Penempatan</th>
+                        <th class="px-6 py-4 font-semibold">Stock</th>
+                        <th class="px-6 py-4 font-semibold">UOM</th>
+                        <th class="px-6 py-4 font-semibold text-right">Aksi</th>
                     </tr>
                 </thead>
 
                 <tbody id="tableBody" class="bg-white divide-y divide-gray-100">
                     {% for item in items %}
                     <tr class="hover:bg-gray-50 text-sm transition" data-row>
-                        <td class="px-3 py-2 whitespace-nowrap">
-                            <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
-                                {{ item.item_id }}
-                            </span>
+
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-bold text-gray-900">{{ item.name }}</div>
+                            <!--bagian ini harusnya menampilkan merek, tapi belum dibuat-->
+                            <div class="text-xs text-gray-500 mt-1">{{ item.name }} <span class="mx-1">•</span> ID: {{
+                                item.item_id
+                                }}</div>
+                            <!-- Muncul di Mobile Saja (menggantikan kolom penempatan) -->
+                            <div class="text-xs text-indigo-600 sm:hidden mt-1">{{ item.location }}
+                            </div>
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap capitalize">
-                            {{ item.name }}
+
+                        <!-- Kolom 2: Penempatan (Disembunyikan di Mobile) -->
+                        <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                            <div class="font-medium text-gray-700">{{ item.location }}</div>
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap">
+
+                        <td class="px-6 py-4 whitespace-nowrap">
                             {{ item.stock }}
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             {{ item.uom }}
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap">
-                            {{ item.location }}
-                        </td>
-                        <td class="px-3 py-2 text-center whitespace-nowrap">
-                            <a href="{{ url_for('inventory_edit', item_id=item.item_id) }}"
-                                class="inline-block px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition">
-                                Edit
-                            </a>
 
-                            <a href="{{ url_for('inventory_delete', item_id=item.item_id) }}"
-                                class="inline-block px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded transition">
-                                Hapus
-                            </a>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                            <div class="flex items-center justify-end gap-4">
+                                <a href="{{ url_for('inventory_edit', item_id=item.item_id) }}"
+                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium transition">
+                                    Edit
+                                </a>
+
+                                <a href="{{ url_for('inventory_delete', item_id=item.item_id) }}"
+                                    class="text-red-500 hover:text-red-700 text-sm font-medium transition">
+                                    Hapus
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -94,7 +106,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
             <div class="text-xs text-gray-500 order-2 sm:order-1">
                 Halaman <span id="currentPage" class="font-bold text-gray-900">1</span>
                 dari <span id="totalPages" class="font-bold text-gray-900">1</span>

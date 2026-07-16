@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+  <!-- Back -->
+    <a href="{{ url_for('peminjaman_aset_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 
+          active:scale-95 active:bg-gray-100 group">
+
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+        </svg>
+        <span>Kembali</span>
+    </a>
+  
+  <!-- Header Section -->
+  <div class="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Database Inventaris</h1>
+      <p class="text-sm text-gray-500 mt-1">Kelola master data seluruh sub bidang dan ketersediaan stok barang</p>
+    </div>
+    <a href="{{ url_for('inventaris.tambah_inventaris') }}"
+       class="inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 transition-all active:scale-95 w-full sm:w-auto">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+      Tambah Barang
+    </a>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="relative mb-6">
+    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    </div>
+    <input type="text" id="filter-input" placeholder="Cari nama barang, merk, atau lokasi..."
+           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm">
+  </div>
+
+  <!-- Table Card -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm" id="inv-table">
+        <thead class="bg-gray-50/50 border-b border-gray-100 text-gray-500">
+          <tr>
+            <th class="px-6 py-4 font-semibold">Barang & Info</th>
+            <th class="px-6 py-4 font-semibold hidden sm:table-cell">Penempatan</th>
+            <th class="px-6 py-4 font-semibold">Stok & Status</th>
+            <th class="px-6 py-4 font-semibold text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for r in data %}
+          <tr class="inv-row hover:bg-gray-50/50 transition-colors">
+            
+            <!-- Kolom 1: Informasi Barang -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="font-bold text-gray-900">{{ r.nama_barang }}</div>
+              <div class="text-xs text-gray-500 mt-1">{{ r.merk }} <span class="mx-1">•</span> ID: {{ r.id }}</div>
+              <!-- Muncul di Mobile Saja (menggantikan kolom penempatan) -->
+              <div class="text-xs text-indigo-600 sm:hidden mt-1">{{ r.lokasi }} ({{ r.sub_bidang }})</div>
+            </td>
+
+            <!-- Kolom 2: Penempatan (Disembunyikan di Mobile) -->
+            <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+              <div class="font-medium text-gray-700">{{ r.lokasi }}</div>
+              <div class="text-xs text-gray-500 mt-1">{{ r.sub_bidang }}</div>
+            </td>
+
+            <!-- Kolom 3: Stok & Status -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="font-bold text-gray-900">{{ r.jumlah_tersedia }}</span>
+                <span class="text-xs text-gray-500">dari {{ r.jumlah_total }}</span>
+              </div>
+              {% if r.status == "Tersedia" %}
+                <span class="inline-flex px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest border border-emerald-100">Tersedia</span>
+              {% else %}
+                <span class="inline-flex px-2 py-0.5 rounded-md bg-red-50 text-red-700 text-[10px] font-bold uppercase tracking-widest border border-red-100">Habis</span>
+              {% endif %}
+            </td>
+
+            <!-- Kolom 4: Aksi -->
+            <td class="px-6 py-4 whitespace-nowrap text-right">
+              <div class="flex items-center justify-end gap-4">
+                <a href="{{ url_for('inventaris.edit_inventaris', item_id=r.id) }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium transition">Edit</a>
+                <a href="{{ url_for('inventaris.hapus_inventaris', item_id=r.id) }}" class="text-red-500 hover:text-red-700 text-sm font-medium transition">Hapus</a>
+              </div>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SweetAlert2 & Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.all.min.js"></script>
+<script>
+  // Konfigurasi Toast SweetAlert
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    }
+  });
+
+  // Render Flash Messages
+  const flashMessages = JSON.parse('{{ get_flashed_messages() | tojson | safe }}');
+  if (Array.isArray(flashMessages) && flashMessages.length > 0) {
+    flashMessages.forEach(msg => {
+      Toast.fire({ icon: "success", title: msg });
+    });
+  }
+
+  // Live Search Filter (Berfungsi sempurna meski kolom digabung karena membaca textContent per baris)
+  const filterInput = document.getElementById("filter-input");
+  filterInput.addEventListener("input", () => {
+    const q = filterInput.value.toLowerCase();
+    document.querySelectorAll(".inv-row").forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+</script>
+{% endblock %}

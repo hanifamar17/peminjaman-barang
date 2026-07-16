@@ -41,6 +41,7 @@ from flask import request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
 from functools import wraps
 from flask_wtf import CSRFProtect
+from routes_inventaris import inventaris_bp
 
 
 load_dotenv()
@@ -48,6 +49,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev")
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER", "static/uploads")
+app.register_blueprint(inventaris_bp)
 
 # =========================
 # DETEKSI ENVIRONMENT

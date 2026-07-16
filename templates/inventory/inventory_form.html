@@ -14,7 +14,8 @@
     </a>
 
     <div class="mb-6 mt-2">
-        <h2 class="text-xl font-bold text-gray-900">{{ 'Edit Inventory' if item else 'Tambah Inventory' }}</h2>
+        <h2 class="text-xl font-bold text-gray-900">{{ 'Edit Inventory: ' + item.item_id if item else 'Tambah Inventory'
+            }}</h2>
         <p class="text-gray-600 text-sm">{{ 'Perbarui detail informasi barang inventory' if item else 'Lengkapi formulir
             untuk menambah barang baru' }}</p>
     </div>
@@ -24,13 +25,6 @@
             <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {% if item %}
-                <div class="md:col-span-1">
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Item
-                        ID</label>
-                    <input type="text" name="item_id" required readonly value="{{ item.item_id }}"
-                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg cursor-not-allowed text-sm outline-none">
-                </div>
                 <div class="md:col-span-2">
                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Nama
                         Barang</label>
@@ -38,23 +32,15 @@
                         placeholder="Masukkan nama barang..."
                         class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
                 </div>
-                {% else %}
-                <div class="md:col-span-3">
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Nama
-                        Barang</label>
-                    <input type="text" name="name" required value="" placeholder="Masukkan nama barang..."
-                        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label
                         class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Stock</label>
                     <input type="number" name="stock" required value="{{ item.stock if item else '' }}" placeholder="0"
                         class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">UOM
                         (Satuan)</label>
@@ -102,13 +88,14 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Lokasi</label>
-                <input type="text" name="location" value="{{ item.location if item else '' }}"
-                    placeholder="Contoh: Gudang Utama, Rak A1"
-                    class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Lokasi</label>
+                    <input type="text" name="location" value="{{ item.location if item else '' }}"
+                        placeholder="Contoh: Gudang Utama, Rak A1"
+                        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
+                </div>
             </div>
 
             <div>

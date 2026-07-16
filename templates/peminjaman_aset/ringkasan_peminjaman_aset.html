@@ -1,88 +1,194 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-2xl mx-auto py-8 px-4">
-    <h1 class="text-2xl font-bold mb-2">Ringkasan Peminjaman Aset</h1>
-    <p class="text-gray-500 mb-6">No. Surat: <strong>{{ data.nomor_surat }}</strong></p>
+<div class="max-w-6xl mx-auto px-4 py-6">
 
-    <div class="bg-white border border-gray-200 rounded-lg p-6 space-y-2 mb-6">
-        <p><span class="text-gray-500">Nama:</span> {{ data.nama }}</p>
-        <p><span class="text-gray-500">Pekerjaan:</span> {{ data.pekerjaan }}</p>
-        <p><span class="text-gray-500">Alamat:</span> {{ data.alamat }}</p>
-        <p><span class="text-gray-500">Telepon:</span> {{ data.telepon }}</p>
-        <p><span class="text-gray-500">No. Identitas:</span> {{ data.no_identitas }}</p>
-        <p><span class="text-gray-500">Tujuan:</span> {{ data.tujuan }}</p>
-        <p><span class="text-gray-500">Lokasi Penggunaan:</span> {{ data.lokasi_penggunaan }}</p>
-        <p><span class="text-gray-500">Tgl Pinjam - Kembali:</span> {{ data.tgl_pinjam }} s/d {{ data.tgl_kembali }}</p>
-        <p><span class="text-gray-500">Petugas:</span> {{ data.nama_petugas }}</p>
-        <p><span class="text-gray-500">Jenis Identitas Jaminan:</span> {{ data.jenis_identitas_jaminan }}</p>
+    <!-- Back -->
+    <a href="{{ url_for('daftar_peminjaman_aset') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 
+          active:scale-95 active:bg-gray-100 group">
 
-        <div class="pt-3">
-            <p class="text-gray-500 mb-1">Barang yang dipinjam:</p>
-            <table class="w-full text-sm border border-gray-100">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-2 py-1 text-left">No</th>
-                        <th class="px-2 py-1 text-left">Nama</th>
-                        <th class="px-2 py-1 text-left">Spek</th>
-                        <th class="px-2 py-1 text-left">Jumlah</th>
-                        <th class="px-2 py-1 text-left">Kondisi</th>
-                    </tr>
-                </thead>
-                <tbody id="barang-tbody"></tbody>
-            </table>
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+        </svg>
+        <span>Kembali</span>
+    </a>
+
+    <!-- Header Section -->
+    <div class="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900">Ringkasan Peminjaman Aset</h1>
+            <p class="text-sm text-gray-500">
+                No. Surat: <span class="font-mono font-bold bg-gray-100 text-gray-800 px-2 py-0.5 rounded text-xs">{{
+                    data.nomor_surat }}</span>
+            </p>
         </div>
+    </div>
+
+    <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 sm:p-8 mb-6">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nama
+                    Peminjam</label>
+                <p class="text-sm font-semibold text-gray-900">{{ data.nama }}</p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pekerjaan</label>
+                <p class="text-sm text-gray-700">{{ data.pekerjaan }}</p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">No. Telepon /
+                    HP</label>
+                <p class="text-sm text-gray-700 font-mono">{{ data.telepon }}</p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">No.
+                    Identitas</label>
+                <p class="text-sm text-gray-700 font-mono">{{ data.no_identitas }}</p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Jaminan
+                    Identitas</label>
+                <p class="text-sm text-gray-700">{{ data.jenis_identitas_jaminan }}</p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Periode
+                    Pinjam</label>
+                <p class="text-sm font-medium text-indigo-600">{{ data.tgl_pinjam }} s/d {{ data.tgl_kembali }}</p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Lokasi
+                    Penggunaan</label>
+                <p class="text-sm text-gray-700">{{ data.lokasi_penggunaan }}</p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Petugas
+                    Administrasi</label>
+                <p class="text-sm text-gray-700">{{ data.nama_petugas }}</p>
+            </div>
+
+            <div class="sm:col-span-2 md:col-span-3">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Alamat
+                    Lengkap</label>
+                <p class="text-sm text-gray-700 leading-relaxed">{{ data.alamat }}</p>
+            </div>
+
+            <div class="sm:col-span-2 md:col-span-3">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Tujuan
+                    Peminjaman</label>
+                <p class="text-sm text-gray-700 leading-relaxed">{{ data.tujuan }}</p>
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-gray-100">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Daftar Barang Yang Dipinjam</h3>
+
+            <div class="overflow-x-auto border border-gray-100 rounded-xl">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 text-gray-500 border-b border-gray-100">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold w-12 text-center">No</th>
+                            <th class="px-4 py-3 font-semibold">Nama Aset</th>
+                            <th class="px-4 py-3 font-semibold">Spesifikasi</th>
+                            <th class="px-4 py-3 font-semibold w-24">Jumlah</th>
+                            <th class="px-4 py-3 font-semibold w-32">Kondisi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="barang-tbody" class="divide-y divide-gray-100">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script id="barang-data" type="application/json">{{ data.barang | tojson | safe }}</script>
 
     {% if data.sudah_generate %}
-    <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
-        <span class="text-green-700">PDF sudah dibuat.</span>
+    <div
+        class="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-white rounded-lg text-emerald-600 shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <span class="text-sm font-medium text-emerald-800">Dokumen berita acara peminjaman PDF telah berhasil
+                diterbitkan.</span>
+        </div>
         <a href="{{ url_for('preview_pdf_peminjaman_aset', record_id=record_id) }}" target="_blank"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95 transition-all text-center cursor-pointer">
             Preview Surat PDF
         </a>
     </div>
     {% else %}
-    <form id="generate-form" class="space-y-4">
-        <label class="flex items-start gap-2">
-            <input type="checkbox" id="setuju" name="setuju" class="mt-1">
-            <span>Saya menyatakan dan memastikan data ringkasan peminjaman di atas sudah benar.</span>
+    <form id="generate-form" class="space-y-4 bg-gray-50 border border-gray-100 rounded-2xl p-5 sm:p-6">
+        <label class="flex items-start gap-3 cursor-pointer group">
+            <input type="checkbox" id="setuju" name="setuju"
+                class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+            <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors select-none">
+                Saya menyatakan dan memastikan seluruh data informasi ringkasan peminjaman di atas sudah valid dan
+                benar.
+            </span>
         </label>
+
         <button type="submit" id="btn-generate" disabled
-            class="w-full px-4 py-2 rounded-lg bg-gray-300 text-gray-500 cursor-not-allowed transition">
-            Generate PDF
+            class="w-full px-5 py-3 rounded-xl font-medium text-sm bg-gray-300 text-gray-500 cursor-not-allowed transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer">
+            Generate Dokumen PDF
         </button>
     </form>
-    <p id="generate-status" class="text-sm mt-3"></p>
+
+    <p id="generate-status" class="text-sm font-medium mt-3 px-2"></p>
     {% endif %}
 </div>
 
 <script>
+    // Parsing & Render data barang
     const barangData = document.getElementById("barang-data");
     const barang = barangData ? JSON.parse(barangData.textContent || "[]") : [];
     const tbody = document.getElementById("barang-tbody");
     if (tbody) {
         barang.forEach(b => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `<td class="px-2 py-1">${b.no}</td><td class="px-2 py-1">${b.nama}</td>
-                       <td class="px-2 py-1">${b.spek}</td><td class="px-2 py-1">${b.jumlah}</td>
-                       <td class="px-2 py-1">${b.kondisi}</td>`;
+            tr.className = "hover:bg-gray-50/50 transition-colors";
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-gray-500 text-center font-mono">${b.no}</td>
+        <td class="px-4 py-3 text-sm font-semibold text-gray-900">${b.nama}</td>
+        <td class="px-4 py-3 text-sm text-gray-600">${b.spek || '-'}</td>
+        <td class="px-4 py-3 text-sm font-medium text-gray-900">${b.jumlah}</td>
+        <td class="px-4 py-3 text-sm">
+          <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200/60">${b.kondisi}</span>
+        </td>
+      `;
             tbody.appendChild(tr);
         });
     }
 
+    // Interaktivitas persetujuan & form submission
     const checkbox = document.getElementById("setuju");
     const btn = document.getElementById("btn-generate");
-    if (checkbox) {
+    if (checkbox && btn) {
         checkbox.addEventListener("change", () => {
             btn.disabled = !checkbox.checked;
             btn.classList.toggle("bg-gray-300", !checkbox.checked);
             btn.classList.toggle("text-gray-500", !checkbox.checked);
             btn.classList.toggle("cursor-not-allowed", !checkbox.checked);
-            btn.classList.toggle("bg-blue-600", checkbox.checked);
+
+            btn.classList.toggle("bg-indigo-600", checkbox.checked);
             btn.classList.toggle("text-white", checkbox.checked);
-            btn.classList.toggle("hover:bg-blue-700", checkbox.checked);
+            btn.classList.toggle("hover:bg-indigo-700", checkbox.checked);
+            btn.classList.toggle("hover:shadow-lg", checkbox.checked);
+            btn.classList.toggle("hover:shadow-indigo-500/20", checkbox.checked);
         });
     }
 
@@ -91,15 +197,18 @@
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const statusEl = document.getElementById("generate-status");
+
             btn.disabled = true;
-            btn.textContent = "Membuat PDF...";
+            btn.textContent = "Memproses Berkas PDF...";
             statusEl.textContent = "";
+            statusEl.className = "text-sm font-medium mt-3 px-2";
+
             const csrfMeta = document.querySelector('meta[name="csrf-token"]');
             if (!csrfMeta) {
-                statusEl.textContent = "CSRF token tidak ditemukan di halaman.";
+                statusEl.textContent = "Akses ditolak: CSRF token tidak ditemukan di dokumen.";
                 statusEl.classList.add("text-red-600");
                 btn.disabled = false;
-                btn.textContent = "Generate PDF";
+                btn.textContent = "Generate Dokumen PDF";
                 return;
             }
             const csrfToken = csrfMeta.content;
@@ -115,20 +224,20 @@
                 });
                 const json = await res.json();
                 if (json.success) {
-                    statusEl.textContent = json.message;
-                    statusEl.classList.add("text-green-600");
+                    statusEl.textContent = json.message || "Berhasil! Memuat ulang sistem...";
+                    statusEl.classList.add("text-emerald-600");
                     setTimeout(() => window.location.reload(), 800);
                 } else {
-                    statusEl.textContent = json.message;
+                    statusEl.textContent = json.message || "Gagal memproses pembuatan berkas.";
                     statusEl.classList.add("text-red-600");
                     btn.disabled = false;
-                    btn.textContent = "Generate PDF";
+                    btn.textContent = "Generate Dokumen PDF";
                 }
             } catch (err) {
-                statusEl.textContent = "Terjadi kesalahan, coba lagi.";
+                statusEl.textContent = "Terjadi gangguan koneksi jaringan sistem, coba lagi.";
                 statusEl.classList.add("text-red-600");
                 btn.disabled = false;
-                btn.textContent = "Generate PDF";
+                btn.textContent = "Generate Dokumen PDF";
             }
         });
     }
