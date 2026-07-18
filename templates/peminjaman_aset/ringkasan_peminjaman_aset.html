@@ -98,7 +98,7 @@
                         <tr>
                             <th class="px-4 py-3 font-semibold w-12 text-center">No</th>
                             <th class="px-4 py-3 font-semibold">Nama Aset</th>
-                            <th class="px-4 py-3 font-semibold">Spesifikasi</th>
+                            <th class="px-4 py-3 font-semibold">Merk</th>
                             <th class="px-4 py-3 font-semibold w-24">Jumlah</th>
                             <th class="px-4 py-3 font-semibold w-32">Kondisi</th>
                         </tr>
@@ -164,7 +164,7 @@
             tr.innerHTML = `
         <td class="px-4 py-3 text-sm text-gray-500 text-center font-mono">${b.no}</td>
         <td class="px-4 py-3 text-sm font-semibold text-gray-900">${b.nama}</td>
-        <td class="px-4 py-3 text-sm text-gray-600">${b.spek || '-'}</td>
+        <td class="px-4 py-3 text-sm text-gray-600">${b.merk || '-'}</td>
         <td class="px-4 py-3 text-sm font-medium text-gray-900">${b.jumlah}</td>
         <td class="px-4 py-3 text-sm">
           <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200/60">${b.kondisi}</span>

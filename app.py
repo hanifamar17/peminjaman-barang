@@ -35,7 +35,7 @@ from mailer import (
 )
 from peminjaman_aset.document_generator import generate_pdf, generate_nomor_surat
 from peminjaman_aset.drive_uploader import upload_file, delete_drive_file
-from sheets.sheets_peminjaman_aset import append_peminjaman, get_last_sequence_this_month, get_all_peminjaman, find_row_by_id, update_row, get_sheet_headers
+from sheets.sheets_peminjaman_aset import append_peminjaman, get_last_sequence_this_month, get_all_peminjaman, find_row_by_id, update_row, get_sheet_headers, deduct_inventaris_stock, get_all_inventaris, search_inventaris
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
@@ -119,7 +119,7 @@ def login():
 
         if user and check_password_hash(user["password_hash"], password):
             session["user"] = username
-            return redirect(url_for("landing"))
+            return redirect(url_for("repository"))
 
         flash("Username atau password salah.")
         return redirect(url_for("login"))
@@ -138,11 +138,69 @@ def login_required(f):
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("landing"))
+    return redirect(url_for("repository"))
+
+
+# repository page
+@app.route("/repository")
+def repository():
+    repository_data = [
+        {
+            "category": "Sub Bidang Akademik",
+            "color": "blue",
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>',
+            "links": [
+                {"title": "Kalender akademik", "url": "https://drive.google.com/file/d/1x6aKnqR_EMNsUPnn-Zg7hw_vca4fkr3_/view?usp=sharing", "subtext": "Dokumen kalender akademik"},
+                {"title": "Jadwal KBM", "url": "https://drive.google.com/file/d/1x56KSv5q4ihgWq5YGKeRqJauzJGoqL39/view?usp=sharing", "subtext": "Jadwal kegiatan belajar mengajar (KBM)"},
+            ]
+        },
+        {
+            "category": "Sub Bidang Pelaporan Pengajaran",
+            "color": "emerald",
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
+            "links": [
+                {"title": "Jurnal Mengajar Harian Guru", "url": "https://docs.google.com/forms/d/e/1FAIpQLSdGZ7jXITewg7GQM7zoSLmPEUglqbMj3TwGFGWZ46HuGSCotg/viewform", "subtext": "Formulir jurnal mengajar harian guru"},
+                {"title": "Jurnal Ekstrakurikuler", "url": "https://docs.google.com/forms/d/e/1FAIpQLSfu0TYIpe67BVyhjXyaSdkPj5ZdvnynCEB2TXrNnMjuSdqxJQ/viewform", "subtext": "Formulir jurnal kegiatan ekstrakurikuler"},
+                {"title": "Presensi Diniyah", "url": "https://script.google.com/macros/s/AKfycbwv4zVl85NIghhD9qwkSkDuwpwQz4i8py2Erm-RSTWr0l-cm3BQOVs1k0i2ClEVze4W/exec", "subtext": "Formulir presensi kegiatan diniyah"},
+                {"title": "Rapor Digital Madrasah", "url": "#", "subtext": "Coming Soon", "disabled": True}
+            ]
+        },
+        {
+            "category": "Sub Bidang Lab Komp",
+            "color": "indigo",
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>',
+            "links": [
+                {"title": "Inventaris Lab Komp", "url": url_for('inventory_landing'), "subtext": "Master data inventaris lab komputer"},
+                {"title": "Peminjaman Barang", "url": url_for('peminjaman_landing'), "subtext": "Pengelolaan peminjaman barang lab komputer"},
+                {"title": "Peminjaman Ruangan", "url": url_for('booking_landing'), "subtext": "Pengelolaan peminjaman ruangan lab komputer"},
+            ]
+        },
+        {
+            "category": "Sub Bidang Asrama",
+            "color": "violet",
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
+            "links": [
+                {"title": "Presensi kegiatan Asrama", "url": "https://presensimanu.my.id/login", "subtext": "Formulir presensi kegiatan asrama"},
+                {"title": "Berita Acara Persidangan Santri", "url": "https://docs.google.com/forms/d/e/1FAIpQLSc5OG8Kf879_mOgmQNxIRuTfH3beYR_DZ54waDaDjWudECLtQ/viewform", "subtext": "Formulir berita acara persidangan santri"},
+                {"title": "Buku Catatan Santri", "url": "https://docs.google.com/spreadsheets/d/10smJykmE_TgM4JfR5eigez4bUa5LDEgEtxjnyZJyA1Q/edit?gid=0#gid=0", "subtext": "Formulir buku catatan santri"},
+                {"title": "Formulir Perizinan", "url": "https://tally.so/r/w5Gqz6", "subtext": "Formulir perizinan kegiatan"},
+                {"title": "Jurnal Perizinan", "url": "https://datastudio.google.com/u/0/reporting/73d02ac9-ca68-479f-9fd3-e1f40834dc6b/page/OTbEE", "subtext": "Formulir jurnal perizinan"}
+            ]
+        },
+        {
+            "category": "Sub Bidang Sarpras",
+            "color": "rose",
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>',
+            "links": [
+                {"title": "Manajemen sarpras", "url": url_for('peminjaman_aset_landing'), "subtext": "Coming Soon", "disabled": True}
+            ]
+        }
+    ]
+    return render_template('repository/landing_repository.html', repository_data=repository_data)
 
 # landing page
-@app.route("/")
-def landing():
+@app.route("/e-labkomp")
+def labkomp_landing():
     return render_template("landing.html")
 
 # Landing page peminjaman
@@ -430,7 +488,7 @@ def inventory_add():
                 return jsonify({"ok": False, "error": str(e)}), 400
             return str(e), 400
 
-    return render_template("inventory/inventory_form.html")
+    return render_template("inventory/inventory_form.html", item=None)
 
 @app.route("/inventory/edit/<item_id>", methods=["GET", "POST"])
 @login_required
@@ -570,24 +628,67 @@ def peminjaman_aset_landing():
 def peminjaman_aset_form():
     return render_template("peminjaman_aset/peminjaman_aset_form.html")
  
-# Submit peminjaman aset
+# ==== Endpoint search barang (inventory) ====
+@app.route("/peminjaman-aset/search-barang")
+def search_barang_inventaris():
+    q = request.args.get("q", "")
+    if len(q.strip()) < 2:
+        return jsonify({"items": []})
+
+    rows = search_inventaris(q, limit=20)
+    items = [{
+        "id": r.get("id"),
+        "nama_barang": r.get("nama_barang", ""),
+        "merk": r.get("merk", ""),
+        "kondisi": r.get("kondisi", ""),
+        "lokasi": r.get("lokasi", ""),
+        "sub_bidang": r.get("sub_bidang", ""),
+        "jumlah_tersedia": r.get("jumlah_tersedia", 0)
+    } for r in rows]
+
+    items.sort(key=lambda x: x["jumlah_tersedia"] <= 0)
+    return jsonify({"items": items})
+
+
+# ==== Submit peminjaman aset (revisi) ====
 @app.route("/peminjaman-aset/submit", methods=["POST"])
 def submit_peminjaman_aset():
     form = request.form
- 
+
+    id_list = form.getlist("barang_id[]")
     nama_list = form.getlist("barang_nama[]")
-    spek_list = form.getlist("barang_spek[]")
+    merk_list = form.getlist("barang_merk[]")
     jumlah_list = form.getlist("barang_jumlah[]")
     kondisi_list = form.getlist("barang_kondisi[]")
-    barang = [
-        {"no": i + 1, "nama": nama_list[i], "spek": spek_list[i],
-         "jumlah": jumlah_list[i], "kondisi": kondisi_list[i]}
-        for i in range(len(nama_list)) if nama_list[i].strip()
-    ]
- 
-    # nomor langsung "dipesan" walau PDF belum dibuat.
+
+    barang = []
+    for i in range(len(nama_list)):
+        if not nama_list[i].strip():
+            continue
+        item_id = id_list[i].strip() if i < len(id_list) else ""
+        if not item_id:
+            return jsonify({
+                "success": False,
+                "message": f"Barang '{nama_list[i]}' belum dipilih dari daftar pencarian"
+            }), 400
+        try:
+            jumlah = int(jumlah_list[i])
+        except (ValueError, IndexError):
+            return jsonify({"success": False, "message": f"Jumlah barang '{nama_list[i]}' tidak valid"}), 400
+        if jumlah < 1:
+            return jsonify({"success": False, "message": f"Jumlah barang '{nama_list[i]}' harus minimal 1"}), 400
+
+        barang.append({
+            "no": len(barang) + 1,
+            "id": item_id,
+            "nama": nama_list[i],
+            "merk": merk_list[i] if i < len(merk_list) else "",
+            "jumlah": jumlah,
+            "kondisi": kondisi_list[i] if i < len(kondisi_list) else "",
+        })
+
     nomor_surat = generate_nomor_surat(get_last_sequence_this_month)
- 
+
     data = {
         "nomor_surat": nomor_surat,
         "nama": form.get("nama", "").strip(),
@@ -608,7 +709,7 @@ def submit_peminjaman_aset():
         "jaminan_surat": form.get("jaminan_surat") == "on",
         "barang": barang,
     }
- 
+
     required = ["nama", "pekerjaan", "alamat", "telepon", "no_identitas",
                 "tujuan", "lokasi_penggunaan", "tgl_pinjam", "tgl_kembali", "nama_petugas"]
     missing = [f for f in required if not data[f]]
@@ -616,13 +717,18 @@ def submit_peminjaman_aset():
         return jsonify({"success": False, "message": f"Field belum lengkap: {', '.join(missing)}"}), 400
     if not barang:
         return jsonify({"success": False, "message": "Minimal isi 1 barang yang dipinjam"}), 400
- 
+
+    # ==== Validasi + kurangi stok SEBELUM simpan record peminjaman ====
+    deductions = [{"id": b["id"], "jumlah": b["jumlah"]} for b in barang]
+    ok, err_msg = deduct_inventaris_stock(deductions)
+    if not ok:
+        return jsonify({"success": False, "message": err_msg}), 400
+
     try:
         record_id = uuid.uuid4().hex
-        # TIDAK generate PDF di sini. pdf_id & pdf_link sengaja dikirim kosong.
         pdf_placeholder = {"id": "", "webViewLink": ""}
         append_peminjaman(record_id, data, pdf_placeholder)
- 
+
         ringkasan_url = url_for(
             "ringkasan_peminjaman_aset", record_id=record_id, _external=True
         )
@@ -634,7 +740,12 @@ def submit_peminjaman_aset():
         })
     except Exception as e:
         app.logger.error(f"Gagal proses peminjaman aset: {e}")
-        return jsonify({"success": False, "message": "Terjadi kesalahan di server, coba lagi"}), 500
+        # stok sudah terlanjur dikurangi tapi record gagal disimpan -> perlu rollback manual
+        return jsonify({
+            "success": False,
+            "message": "Terjadi kesalahan saat menyimpan data peminjaman. Stok mungkin sudah dikurangi, hubungi admin untuk pengecekan."
+        }), 500
+     
 
 # Riwayat peminjaman aset
 @app.route("/peminjaman-aset/riwayat")

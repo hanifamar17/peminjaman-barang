@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}MANU Digital Repository{% endblock %}
+
+{% block content %}
+<div class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Main Content Wrapper -->
+    <main class="flex-grow py-10 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto space-y-8">
+
+            <!-- Hero / Header Section -->
+            <div class="text-center max-w-2xl mx-auto space-y-4">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                    🔒 Internal Portal
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    MANU Digital Repository
+                </h1>
+                <p class="text-sm font-medium text-indigo-600 uppercase tracking-widest mt-2">Selamat Datang</p>
+                <p class="text-sm sm:text-base text-slate-500 leading-relaxed">
+                    Website ini berisi kumpulan dokumen digital berupa <span class="font-medium text-slate-700">direct
+                        link</span> menuju pencatatan atau dokumentasi yang diperlukan.
+                </p>
+
+                <!-- Privacy Notice Banner -->
+                <div
+                    class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 text-left shadow-sm">
+                    <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                    <div>
+                        <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wide">Pemberitahuan Penting</h4>
+                        <p class="text-xs text-amber-700 mt-0.5 font-medium leading-relaxed">
+                            Khusus untuk kalangan sendiri. Dokumen dan sistem pencatatan di dalam portal ini bersifat
+                            rahasia dan <span class="underline decoration-2 font-semibold">tidak untuk
+                                disebarluaskan</span> kepada pihak luar.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Search Bar -->
+            <div class="max-w-md mx-auto">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="repo-search" placeholder="Cari dokumen, jurnal, atau sub bidang..."
+                        class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm placeholder-slate-400">
+                </div>
+            </div>
+
+            <!-- Repository Grid Layout (Dynamic with Jinja2) -->
+            <div id="repo-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+
+                {% for item in repository_data %}
+                <div
+                    class="category-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-4 hover:shadow-md transition-shadow">
+
+                    <div class="flex items-center gap-3 border-b border-slate-50 pb-3">
+                        <!-- Warna class dinamis berbasis object python -->
+                        <div class="p-2 bg-{{ item.color }}-50 text-{{ item.color }}-600 rounded-lg">
+                            {{ item.icon | safe }}
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase">{{ item.category }}</h3>
+                    </div>
+
+                    <div class="space-y-2">
+                        {% for link in item.links %}
+                        {% if link.disabled %}
+                        <!-- TAMPILAN LINK SAAT NONAKTIF -->
+                        <div
+                            class="block p-3 rounded-xl bg-slate-100/60 text-slate-400 border border-slate-200/50 cursor-not-allowed pointer-events-none select-none">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-slate-400">{{ link.title }}</span>
+                                <!-- Ikon diganti gembok kecil untuk memperjelas status terblokir -->
+                                <svg class="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                    </path>
+                                </svg>
+                            </div>
+                            {% if link.subtext %}
+                            <p class="text-[11px] text-slate-400 mt-1 font-normal">{{ link.subtext }}</p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <!-- TAMPILAN LINK NORMAL/AKTIF -->
+                        <a href="{{ link.url }}"
+                            class="repo-link block p-3 rounded-xl bg-slate-50/70 hover:bg-indigo-50 hover:text-indigo-700 border border-transparent hover:border-indigo-100 transition-all group">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium">{{ link.title }}</span>
+                                <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors shrink-0"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                            {% if link.subtext %}
+                            <p class="text-[11px] text-slate-400 group-hover:text-indigo-500/80 mt-1 font-normal">{{
+                                link.subtext }}</p>
+                            {% endif %}
+                        </a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- State data not found -->
+            <div id="no-result" class="hidden text-center py-12 space-y-2">
+                <span class="text-3xl">🔍</span>
+                <h4 class="text-sm font-bold text-slate-700">Dokumen tidak ditemukan</h4>
+                <p class="text-xs text-slate-400">Pastikan ejaan kata kunci yang Anda masukkan sudah benar.</p>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- Live Search Logic Script -->
+<script>
+    const searchInput = document.getElementById('repo-search');
+    const cards = document.querySelectorAll('.category-card');
+    const noResultText = document.getElementById('no-result');
+
+    searchInput.addEventListener('input', function (e) {
+        const keyword = e.target.value.toLowerCase().trim();
+        let totalVisibleCards = 0;
+
+        cards.forEach(card => {
+            const cardTitle = card.querySelector('h3').textContent.toLowerCase();
+            const links = card.querySelectorAll('.repo-link');
+            let hasMatchLink = false;
+
+            links.forEach(link => {
+                const linkText = link.textContent.toLowerCase();
+                if (linkText.includes(keyword)) {
+                    link.classList.remove('hidden'); // Memperbaiki bug flex agar panah tetap rapi di kanan
+                    hasMatchLink = true;
+                } else {
+                    link.classList.add('hidden');
+                }
+            });
+
+            if (cardTitle.includes(keyword) || hasMatchLink) {
+                card.classList.remove('hidden');
+                totalVisibleCards++;
+
+                if (cardTitle.includes(keyword) && !hasMatchLink && keyword !== '') {
+                    links.forEach(link => link.classList.remove('hidden'));
+                }
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        if (totalVisibleCards === 0) {
+            noResultText.classList.remove('hidden');
+        } else {
+            noResultText.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

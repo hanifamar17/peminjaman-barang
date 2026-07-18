@@ -1,14 +1,21 @@
 import os
 import json
 import datetime
+import logging
+import time
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from peminjaman_aset.drive_uploader import _get_drive_service
+
+logger = logging.getLogger(__name__)
 
 ASET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]  # perlu write access
 ASET_SPREADSHEET_ID = os.getenv("ASET_SPREADSHEET_ID")
 ASET_SHEET_NAME = os.getenv("ASET_SHEET_NAME")
 INV_SHEET_NAME = os.getenv("INV_SHEET_NAME", "inventory")
+
+_inventaris_cache = {"data": None, "ts": 0}
+CACHE_TTL = 30  # detik
 
 
 def _get_service():
@@ -41,6 +48,88 @@ def get_sheet_headers():
 # alamat | telepon | no_identitas | tujuan | lokasi_penggunaan | tgl_pinjam |
 # tgl_kembali | nama_petugas | jaminan_identitas | jenis_identitas_jaminan |
 # jaminan_surat | pdf_id | pdf_link
+
+def _col_letter(idx):
+    """0-based index -> kolom sheet (A, B, ..., Z, AA, AB, ...)"""
+    letters = ""
+    idx += 1
+    while idx > 0:
+        idx, rem = divmod(idx - 1, 26)
+        letters = chr(65 + rem) + letters
+    return letters
+
+# ==== Helper: batch kurangi stok inventaris ====
+def deduct_inventaris_stock(item_deductions):
+    """
+    item_deductions: list of dict {"id": "INV-0001", "jumlah": 2}
+    Return: (success: bool, error_message: str or None)
+    """
+    service = _get_service()
+    result = service.spreadsheets().values().get(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{INV_SHEET_NAME}!A:Z",
+    ).execute()
+    rows = result.get("values", [])
+    if len(rows) < 2:
+        return False, "Data inventaris kosong"
+
+    headers = rows[0]
+    try:
+        idx_id = headers.index("id")
+        idx_total = headers.index("jumlah_total")
+        idx_dipinjam = headers.index("jumlah_dipinjam")
+    except ValueError:
+        return False, "Struktur sheet inventory tidak sesuai (kolom id/jumlah_total/jumlah_dipinjam hilang)"
+
+    row_map = {}
+    for i, row in enumerate(rows[1:], start=2):
+        if row and len(row) > idx_id:
+            row_map[row[idx_id]] = (i, row)
+
+    updates = []
+    for ded in item_deductions:
+        item_id = ded["id"]
+        jumlah_pinjam = ded["jumlah"]
+
+        if item_id not in row_map:
+            return False, f"Barang dengan id {item_id} tidak ditemukan di inventaris"
+
+        row_index, row = row_map[item_id]
+
+        try:
+            total = int(row[idx_total]) if len(row) > idx_total and row[idx_total] else 0
+            dipinjam = int(row[idx_dipinjam]) if len(row) > idx_dipinjam and row[idx_dipinjam] else 0
+        except ValueError:
+            return False, f"Data stok barang {item_id} tidak valid"
+
+        tersedia = total - dipinjam
+        if jumlah_pinjam > tersedia:
+            nama = row[headers.index("nama_barang")] if "nama_barang" in headers else item_id
+            return False, f"Stok {nama} tidak cukup (tersedia: {tersedia}, diminta: {jumlah_pinjam})"
+
+        new_dipinjam = dipinjam + jumlah_pinjam
+        col_letter = _col_letter(idx_dipinjam)  # aman untuk kolom >26
+        updates.append({
+            "range": f"{INV_SHEET_NAME}!{col_letter}{row_index}",
+            "values": [[str(new_dipinjam)]],
+        })
+
+    if not updates:
+        return True, None
+
+    try:
+        service.spreadsheets().values().batchUpdate(
+            spreadsheetId=ASET_SPREADSHEET_ID,
+            body={"valueInputOption": "RAW", "data": updates},
+        ).execute()
+    except Exception as e:
+        logger.error(f"Gagal batchUpdate stok inventaris: {e}")
+        return False, "Gagal mengurangi stok, coba lagi"
+
+    # invalidate cache biar search berikutnya dapat stok terbaru
+    _inventaris_cache["data"] = None
+
+    return True, None
 
 def append_peminjaman(record_id, data, pdf_file):
     """
@@ -140,8 +229,12 @@ def _next_id():
     nxt = (max(nums) + 1) if nums else 1
     return f"INV-{nxt:04d}"
  
- 
+
 def get_all_inventaris():
+    now = time.time()
+    if _inventaris_cache["data"] is not None and (now - _inventaris_cache["ts"]) <= CACHE_TTL:
+        return _inventaris_cache["data"]
+
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
@@ -149,17 +242,21 @@ def get_all_inventaris():
     ).execute()
     rows = result.get("values", [])
     if len(rows) < 2:
-        return []
-    headers = rows[0]
-    data = [dict(zip(headers, row)) for row in rows[1:]]
-    for r in data:
-        try:
-            total = int(r.get("jumlah_total") or 0)
-            dipinjam = int(r.get("jumlah_dipinjam") or 0)
-        except ValueError:
-            total, dipinjam = 0, 0
-        r["jumlah_tersedia"] = max(total - dipinjam, 0)
-        r["status"] = "Tersedia" if r["jumlah_tersedia"] > 0 else "Habis"
+        data = []
+    else:
+        headers = rows[0]
+        data = [dict(zip(headers, row)) for row in rows[1:]]
+        for r in data:
+            try:
+                total = int(r.get("jumlah_total") or 0)
+                dipinjam = int(r.get("jumlah_dipinjam") or 0)
+            except ValueError:
+                total, dipinjam = 0, 0
+            r["jumlah_tersedia"] = max(total - dipinjam, 0)
+            r["status"] = "Tersedia" if r["jumlah_tersedia"] > 0 else "Habis"
+
+    _inventaris_cache["data"] = data
+    _inventaris_cache["ts"] = now
     return data
  
  
@@ -181,11 +278,14 @@ def search_inventaris(query, limit=10):
     query = (query or "").strip().lower()
     if not query:
         return []
+
     rows = get_all_inventaris()
     matched = [
         r for r in rows
         if query in r.get("nama_barang", "").lower()
         or query in r.get("merk", "").lower()
+        or query in r.get("sub_bidang", "").lower()
+        or query in r.get("lokasi", "").lower()
     ]
     return matched[:limit]
  
