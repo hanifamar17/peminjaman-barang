@@ -141,6 +141,11 @@ def logout():
     return redirect(url_for("repository"))
 
 
+# main page
+@app.route("/")
+def index():
+    return redirect(url_for("repository"))
+
 # repository page
 @app.route("/repository")
 def repository():
