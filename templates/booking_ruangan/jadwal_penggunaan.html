@@ -5,9 +5,22 @@
 <div class="max-w-3xl mx-auto px-4 py-6 sm:py-10">
 
     <!-- Back -->
-    <a href="{{ url_for('booking_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
+    <!-- Logika Deteksi Halaman Asal -->
+    {% set back_url = url_for('booking_landing') %} {# URL Cadangan jika masuk langsung/tanpa referrer #}
+    {% if request.referrer %}
+        {% if 'repository' in request.referrer %}
+        {% set back_url = url_for('repository') %} {# fungsi route repository#}
+        {% elif 'booking-lab' in request.referrer %}
+        {% set back_url = url_for('booking_landing') %}
+        {% else %}
+        {% set back_url = request.referrer %} {# Kembali ke halaman persis sebelumnya jika ada di internal web #}
+        {% endif %}
+    {% endif %}
+
+    <!-- Tombol Back Terkustomisasi -->
+    <a href="{{ back_url }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+      hover:text-blue-600 hover:bg-blue-50 
+      active:scale-95 active:bg-gray-100 group">
 
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
@@ -20,9 +33,9 @@
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 mt-2">
         <!-- SISI KIRI: Judul & Subjudul -->
         <div>
-            <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">Jadwal Lab Komputer</h1>
+            <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">Kalender Akademik</h1>
             <p class="text-sm text-gray-700 mt-1">
-                MA Nurul Ummah Kotagede
+                Dan jadwal penggunaan lab komputer
             </p>
         </div>
 
@@ -39,10 +52,10 @@
         <div class="flex items-center justify-between mb-4">
             <h2 id="calendarLabel" class="text-base font-semibold text-gray-800"></h2>
             <div class="flex items-center gap-1">
-                <span class="mr-3 text-xs text-gray-500 flex items-center gap-1.5 hidden sm:flex">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span> <span
-                        class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span> Ada jadwal
-                </span>
+                <button id="todayBtn"
+                    class="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 hover:border-blue-200 active:scale-95 transition cursor-pointer">
+                    Hari ini
+                </button>
                 <button id="prevMonth"
                     class="p-1.5 rounded-md hover:bg-gray-200 text-gray-500 transition cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,6 +326,14 @@
         viewMonth++;
         if (viewMonth > 11) { viewMonth = 0; viewYear++; }
         renderCalendar();
+    });
+
+    document.getElementById("todayBtn").addEventListener("click", () => {
+        viewYear = today.getFullYear();
+        viewMonth = today.getMonth();
+        selectedISO = isoOfDate(today);
+        renderCalendar();
+        renderDayList();
     });
 
     renderCalendar();

@@ -2,12 +2,25 @@
 {% block title %}Form Peminjaman Aset{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+  <!-- Back -->
+  <a href="{{ url_for('peminjaman_aset_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+          hover:text-blue-600 hover:bg-blue-50 
+          active:scale-95 active:bg-gray-100 group">
+
+    <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
+      viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+      </path>
+    </svg>
+    <span>Kembali</span>
+  </a>
 
   <!-- Header Aplikasi -->
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Formulir Peminjaman Aset</h1>
-    <p class="text-sm text-gray-500 mt-1">Lengkapi informasi data diri dan pilih inventaris yang ingin diajukan.</p>
+  <div class="mb-6 mt-2">
+    <h1 class="text-xl font-bold text-gray-900">Formulir Peminjaman Aset</h1>
+    <p class="text-sm text-gray-500">Lengkapi informasi data diri dan pilih inventaris yang ingin diajukan.</p>
   </div>
 
   <form id="borrowForm" method="POST">
@@ -58,7 +71,7 @@
           <div class="mt-8">
             <div class="flex items-center justify-between">
               <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Daftar Aset Dipilih</label>
-              <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full font-mono"
+              <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full font-mono mb-2"
                 id="selectedItemLabel">0</span>
             </div>
 
