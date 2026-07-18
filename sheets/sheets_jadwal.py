@@ -11,10 +11,14 @@ from googleapiclient.discovery import build
 JADWAL_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 JADWAL_SPREADSHEET_ID = os.getenv("JADWAL_SPREADSHEET_ID")
 JADWAL_SHEET_NAME = os.getenv("JADWAL_SHEET_NAME", "Form Responses 1")
+KALENDER_SHEET_NAME = os.getenv("KALENDER_SHEET_NAME", "kalender_akademik")
 
 # Cache sederhana in-memory supaya tidak fetch ke Sheets API setiap request
 _cache = {"data": None, "fetched_at": None}
 CACHE_TTL_SECONDS = int(os.getenv("JADWAL_CACHE_TTL", "120"))  # default 2 menit
+
+_kalender_cache = {"data": None, "fetched_at": None}
+KALENDER_CACHE_TTL_SECONDS = int(os.getenv("KALENDER_CACHE_TTL", "3600"))  # jarang berubah, TTL bisa lebih lama
 
 
 def _get_jadwal_service():
@@ -153,3 +157,62 @@ def get_jadwal(force_refresh=False):
 def get_jadwal_by_date(tanggal_iso_str):
     """tanggal_iso_str format: YYYY-MM-DD"""
     return [e for e in get_jadwal() if e["tanggal_iso"] == tanggal_iso_str]
+
+def _read_kalender_raw():
+    service = _get_jadwal_service()  # scope readonly sama, bisa reuse
+    range_name = f"{KALENDER_SHEET_NAME}!A:Z"
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=JADWAL_SPREADSHEET_ID, range=range_name)
+        .execute()
+    )
+    return result.get("values", [])
+
+def get_kalender_akademik(force_refresh=False):
+    """
+    Ambil data kalender akademik (libur/agenda madrasah).
+    Cache in-memory terpisah dari jadwal lab.
+    """
+    now = datetime.datetime.now()
+    if (
+        not force_refresh
+        and _kalender_cache["data"] is not None
+        and _kalender_cache["fetched_at"] is not None
+        and (now - _kalender_cache["fetched_at"]).total_seconds() < KALENDER_CACHE_TTL_SECONDS
+    ):
+        return _kalender_cache["data"]
+
+    raw = _read_kalender_raw()
+    if not raw:
+        _kalender_cache["data"] = []
+        _kalender_cache["fetched_at"] = now
+        return []
+
+    header = raw[0]
+    rows = raw[1:]
+    events = []
+    for row in rows:
+        record = dict(zip(header, row))
+        tgl_mulai = _parse_tanggal(record.get("tanggal_mulai"))
+        tgl_selesai = _parse_tanggal(record.get("tanggal_selesai")) or tgl_mulai
+        if not tgl_mulai:
+            continue
+        events.append({
+            "tanggal_mulai_iso": tgl_mulai.isoformat(),
+            "tanggal_selesai_iso": tgl_selesai.isoformat(),
+            "keterangan": record.get("keterangan", ""),
+            "kategori": record.get("kategori", ""),
+        })
+
+    _kalender_cache["data"] = events
+    _kalender_cache["fetched_at"] = now
+    return events
+
+def get_kalender_by_date(tanggal_iso_str):
+    """Ambil semua event kalender akademik yang mencakup tanggal tsb (untuk rentang tanggal)."""
+    result = []
+    for e in get_kalender_akademik():
+        if e["tanggal_mulai_iso"] <= tanggal_iso_str <= e["tanggal_selesai_iso"]:
+            result.append(e)
+    return result
