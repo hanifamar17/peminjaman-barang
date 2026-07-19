@@ -6,12 +6,12 @@
 
     <!-- Back -->
     <!-- Logika Deteksi Halaman Asal -->
-    {% set back_url = url_for('booking_landing') %} {# URL Cadangan jika masuk langsung/tanpa referrer #}
+    {% set back_url = url_for('booking_ruangan.booking_landing') %} {# URL Cadangan jika masuk langsung/tanpa referrer #}
     {% if request.referrer %}
         {% if 'repository' in request.referrer %}
         {% set back_url = url_for('repository') %} {# fungsi route repository#}
         {% elif 'booking-lab' in request.referrer %}
-        {% set back_url = url_for('booking_landing') %}
+        {% set back_url = url_for('booking_ruangan.booking_landing') %}
         {% else %}
         {% set back_url = request.referrer %} {# Kembali ke halaman persis sebelumnya jika ada di internal web #}
         {% endif %}

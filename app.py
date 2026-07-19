@@ -1,4 +1,4 @@
-import os, uuid, datetime, time
+import os, uuid, time
 from flask import (
     Flask,
     abort,
@@ -12,36 +12,24 @@ from flask import (
     send_from_directory,
 )
 from dotenv import load_dotenv
-from sheets.sheets import (
-    generate_item_id,
-    add_inventory,
-    delete_inventory,
-    get_inventory,
-    append_loan,
-    get_loan_with_items,
-    update_inventory,
-    update_stock,
-    find_loan_by_code,
-    update_loan_status,
-    read_sheet,
-)
-from sheets.sheets_jadwal import get_jadwal, get_kalender_akademik
+from sheets.sheets import read_sheet
 from mailer import (
     mail,
     init_app,
-    send_loan_email,
-    schedule_return_reminder,
-    reminder_send_email,
 )
 from peminjaman_aset.document_generator import generate_pdf, generate_nomor_surat
-from peminjaman_aset.drive_uploader import upload_file, delete_drive_file
-from sheets.sheets_peminjaman_aset import append_peminjaman, get_last_sequence_this_month, get_all_peminjaman, find_row_by_id, update_row, get_sheet_headers, deduct_inventaris_stock, get_all_inventaris, search_inventaris
-from werkzeug.security import generate_password_hash, check_password_hash
+from peminjaman_aset.drive_uploader import upload_file
+from sheets.sheets_peminjaman_aset import append_peminjaman, get_last_sequence_this_month, get_all_peminjaman, find_row_by_id, update_row, get_sheet_headers, deduct_inventaris_stock, search_inventaris
+from werkzeug.security import check_password_hash
 from flask import request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
 from functools import wraps
 from flask_wtf import CSRFProtect
-from routes_inventaris import inventaris_bp
+from routes.routes_inventory_aset import inventaris_bp
+from routes.routes_booking_ruangan import booking_ruangan_bp
+from routes.routes_inventory_komp import inventory_labkomp_bp
+from routes.routes_peminjaman import peminjaman_invlabkomp_bp
+
 
 
 load_dotenv()
@@ -50,6 +38,9 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev")
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER", "static/uploads")
 app.register_blueprint(inventaris_bp)
+app.register_blueprint(booking_ruangan_bp)
+app.register_blueprint(inventory_labkomp_bp)
+app.register_blueprint(peminjaman_invlabkomp_bp)
 
 # =========================
 # DETEKSI ENVIRONMENT
@@ -155,7 +146,7 @@ def repository():
             "color": "blue",
             "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>',
             "links": [
-                {"title": "Kalender akademik", "url": url_for('jadwal_penggunaan'), "subtext": "Dokumen kalender akademik"},
+                {"title": "Kalender akademik", "url": url_for('booking_ruangan.jadwal_penggunaan'), "subtext": "Dokumen kalender akademik"},
                 {"title": "Jadwal KBM", "url": "https://drive.google.com/file/d/1x56KSv5q4ihgWq5YGKeRqJauzJGoqL39/view?usp=sharing", "subtext": "Jadwal kegiatan belajar mengajar (KBM)"},
             ]
         },
@@ -176,9 +167,9 @@ def repository():
             "color": "indigo",
             "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>',
             "links": [
-                {"title": "Inventaris Lab Komp", "url": url_for('inventory_landing'), "subtext": "Master data inventaris lab komputer"},
-                {"title": "Peminjaman Barang", "url": url_for('peminjaman_landing'), "subtext": "Pengelolaan peminjaman barang lab komputer"},
-                {"title": "Peminjaman Ruangan", "url": url_for('booking_landing'), "subtext": "Pengelolaan peminjaman ruangan lab komputer"},
+                {"title": "Inventaris Lab Komp", "url": url_for('inventory_labkomp.inventory_landing'), "subtext": "Master data inventaris lab komputer"},
+                {"title": "Peminjaman Barang", "url": url_for('peminjaman_invlabkomp.peminjaman_landing'), "subtext": "Pengelolaan peminjaman barang lab komputer"},
+                {"title": "Peminjaman Ruangan", "url": url_for('booking_ruangan.booking_landing'), "subtext": "Pengelolaan peminjaman ruangan lab komputer"},
             ]
         },
         {
@@ -208,418 +199,6 @@ def repository():
 @app.route("/e-labkomp")
 def labkomp_landing():
     return render_template("landing.html")
-
-# Landing page peminjaman
-@app.route("/peminjaman")
-def peminjaman_landing():
-    return render_template("peminjaman/landing_peminjaman.html")
-
-# Landing page inventory
-@app.route("/inventory")
-def inventory_landing():
-    return render_template("inventory/landing_inventory.html")
-
-
-# API: search inventory by q
-@app.route("/api/search")
-def api_search():
-    q = request.args.get("q", "").strip().lower()
-    items = get_inventory()
-    if not q:
-        return jsonify(items[:20])
-    results = [
-        i
-        for i in items
-        if q in i.get("name", "").lower() or q in i.get("description", "").lower()
-    ]
-    return jsonify(results[:50])
-
-
-# =======================
-# BORROWING PAGE
-# =======================
-@app.route("/borrow")
-@login_required
-def borrow():
-    return render_template("peminjaman/borrow.html")
-
-
-# submit borrow
-@app.route("/borrow/submit", methods=["POST"])
-def borrow_submit():
-    data = request.get_json()
-    note = data.get("note", "")
-
-    if not data:
-        return jsonify({"ok": False, "error": "Data tidak valid"}), 400
-
-    items = data.get("items", [])
-    if not items:
-        return jsonify({"ok": False, "error": "Minimal pilih 1 barang"}), 400
-
-    required = ["borrower_name", "borrower_email", "loan_date", "return_date"]
-    for r in required:
-        if not data.get(r):
-            return jsonify({"ok": False, "error": f"{r} wajib diisi"}), 400
-
-    now = datetime.datetime.now()
-    code = now.strftime("LAB-%d%m%y-%H%M")
-    created_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
-
-    # =====================
-    # SIMPAN SETIAP BARANG
-    # =====================
-    for item in items:
-        qty = int(item.get("qty", 1))
-
-        loan_row = [
-            code,
-            item["item_id"],
-            item["name"],
-            data["borrower_name"],
-            data["borrower_email"],
-            "",
-            str(qty),
-            data["loan_date"],
-            data["return_date"],
-            "dipinjam",
-            note,
-            created_at,
-            "",
-        ]
-
-        append_loan(loan_row)
-
-        # update stok per item
-        update_stock(item["item_id"], -qty)
-
-    # kirim email konfirmasi peminjaman
-    receipt_url = url_for('receipt', code=code, _external=True)
-    try:
-        send_loan_email(
-            [data["borrower_email"]],
-            code=code,
-            borrower_name=data["borrower_name"],
-            items=items,
-            loan_date=data["loan_date"],
-            return_date=data["return_date"],
-            receipt_url=receipt_url,
-            note=note,
-        )
-    except Exception as e:
-        app.logger.warning(f"Email gagal dikirim: {e}")
-
-    # jadwalkan reminder H-1
-    try:
-        return_dt = datetime.datetime.fromisoformat(data['return_date'])
-        remind_at = return_dt - datetime.timedelta(days=1)
-        if remind_at > datetime.datetime.utcnow():
-            schedule_return_reminder(
-                job_id=f'reminder-{code}',
-                run_at_dt=remind_at,
-                func=reminder_send_email,
-                args=(
-                    [data['borrower_email']],
-                    f'Pengingat Pengembalian ({code})',
-                    f'Besok adalah batas pengembalian barang Anda ({receipt_url})'
-                )
-            )
-    except Exception as e:
-        app.logger.warning(f'Reminder gagal dijadwalkan: {e}')
-
-    return jsonify({"ok": True, "code": code})
-
-
-# =======================
-# HALAMAN PENGEMBALIAN
-# =======================
-@app.route("/return")
-@login_required
-def return_page():
-    return render_template("peminjaman/return.html")
-
-
-# ambil data peminjaman berdasarkan kode
-@app.route("/api/loan/<code>")
-def api_loan(code):
-    loan = get_loan_with_items(code)
-
-    if not loan:
-        return jsonify(ok=False, error="Peminjaman tidak ditemukan")
-
-    return jsonify(ok=True, loan=loan)
-
-
-# submit pengembalian
-@app.route("/return/submit", methods=["POST"])
-def return_submit():
-    code = request.form.get("code")
-    proof = request.form.get("proof", "")
-
-    loan = get_loan_with_items(code)
-    if not loan:
-        return jsonify(ok=False, error="Peminjaman tidak ditemukan")
-
-    # loop SEMUA barang dalam 1 kode peminjaman
-    for item in loan["items"]:
-        item_id = item["item_id"]
-        qty = int(item["qty"])
-
-        # 1️⃣ update status per item
-        update_loan_status(code, item_id, "dikembalikan", proof)
-
-        # 2️⃣ kembalikan stok per item
-        update_stock(item_id, qty)
-
-    return jsonify(ok=True)
-
-
-# =======================
-# RIWAYAT PEMINJAMAN
-# =======================
-@app.route("/history")
-@login_required
-def history():
-    from sheets.sheets import read_sheet
-
-    rows = read_sheet("loans")
-    if not rows:
-        return render_template("peminjaman/history.html", loans=[])
-
-    headers = rows[0]
-    data = [dict(zip(headers, r)) for r in rows[1:]]
-
-    grouped = {}
-    for d in data:
-        code = d["code"]
-        if code not in grouped:
-            grouped[code] = {
-                "code": code,
-                "borrower_name": d["borrower_name"],
-                "status": d["status"],
-                "loan_date": d["loan_date"],
-                "created_at": d.get("created_at"),  # ⬅penting
-                "items": [],
-            }
-        grouped[code]["items"].append(d["item_name"])
-
-    loans = []
-    for g in grouped.values():
-        loans.append({
-            "code": g["code"],
-            "borrower_name": g["borrower_name"],
-            "status": g["status"],
-            "loan_date": g["loan_date"],
-            "created_at": g["created_at"],
-            "item_name": ", ".join(g["items"]),
-        })
-
-    # SORT TERKINI DI ATAS
-    loans.sort(key=lambda x: x["created_at"] or "", reverse=True)
-
-    return render_template("peminjaman/history.html", loans=loans)
-
-
-@app.route("/loan/<code>")
-@login_required
-def loan_detail(code):
-    from sheets.sheets import read_sheet
-
-    rows = read_sheet("loans")
-    headers = rows[0]
-    data = [dict(zip(headers, r)) for r in rows[1:] if r[headers.index("code")] == code]
-    receipt_url = url_for("receipt", code=code, _external=True)
-
-    if not data:
-        abort(404)
-
-    loan = {
-        "code": code,
-        "borrower_name": data[0]["borrower_name"],
-        "loan_date": data[0]["loan_date"],
-        "return_date": data[0]["return_date"],
-        "status": data[0]["status"],
-        "note": data[0]["note"],
-        "borrower_email": data[0]["borrower_email"],
-        "data": data,
-    }
-
-    return render_template("peminjaman/loan_detail.html", loan=loan, receipt_url=receipt_url)
-
-
-@app.route("/receipt/<code>")
-def receipt(code):
-    loan = get_loan_with_items(code)
-
-    if not loan:
-        abort(404)
-
-    return render_template("peminjaman/receipt.html", loan=loan)
-
-
-# =======================
-# INVENTORY SECTION
-# =======================
-# Read inventory list
-@app.route("/inventory/list")
-@login_required
-def inventory_list():
-    items = get_inventory()
-    return render_template("inventory/inventory.html", items=items)
-
-# Add inventory item
-@app.route("/inventory/add", methods=["GET", "POST"])
-@login_required
-def inventory_add():
-    if request.method == "POST":
-        try:
-            data = {
-                "item_id": generate_item_id(),
-                "name": request.form["name"],
-                "stock": int(request.form["stock"]),
-                "uom": request.form["uom"],
-                "condition": request.form["condition"],
-                "location": request.form["location"],
-                "note": request.form["note"]
-            }
-            add_inventory(data)
-            
-            # Cek jika request datang dari AJAX (JavaScript Fetch)
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({"ok": True, "message": "Barang berhasil ditambahkan"})
-            
-            return redirect(url_for("inventory_list"))
-        except Exception as e:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({"ok": False, "error": str(e)}), 400
-            return str(e), 400
-
-    return render_template("inventory/inventory_form.html", item=None)
-
-@app.route("/inventory/edit/<item_id>", methods=["GET", "POST"])
-@login_required
-def inventory_edit(item_id):
-    items = get_inventory()
-    item = next((x for x in items if x["item_id"] == item_id), None)
-
-    if request.method == "POST":
-        try:
-            updated_data = {
-                "item_id": item_id,
-                "name": request.form["name"],
-                "stock": int(request.form["stock"]),
-                "uom": request.form["uom"],
-                "condition": request.form["condition"],
-                "location": request.form["location"],
-                "note": request.form["note"]
-            }
-            update_inventory(item_id, updated_data)
-
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({"ok": True, "message": "Barang diperbarui"})
-            
-            return redirect(url_for("inventory_list"))
-        except Exception as e:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({"ok": False, "error": str(e)}), 400
-            return str(e), 400
-
-    return render_template("inventory/inventory_form.html", item=item)
-
-# Delete inventory item
-@app.route("/inventory/delete/<item_id>", methods=["GET", "POST"])
-@login_required
-def inventory_delete(item_id):
-    items = get_inventory()
-    item = next((x for x in items if x["item_id"] == item_id), None)
-
-    if request.method == "POST":
-        try:
-            delete_inventory(item_id)
-        
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({"ok": True, "message": "Barang berhasil dihapus"})
-            
-            return redirect(url_for("inventory_list"))
-        except Exception as e:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({"ok": False, "error": str(e)}), 400
-            return str(e), 400
-
-    return render_template("inventory/inventory_delete.html", item=item)
-
-
-
-
-
-# =======================
-# JADWAL PENGGUNAAN LAB (booking ruangan)
-# =======================
-@app.route("/booking-ruangan")
-def booking_landing():
-    return render_template("booking_ruangan/booking_landing.html")
-
-@app.route("/booking-ruangan/prosedur")
-def booking_prosedur():
-    return render_template("booking_ruangan/booking_prosedur.html")
-
-@app.route("/booking-ruangan/jadwal")
-def jadwal_penggunaan():
-    jadwal = get_jadwal()
-    booking_form_url = "https://s.id/booking-lab-komp"
-
-    jadwal_json = [
-        {
-            "nama_pemesan": j["nama_pemesan"],
-            "nama_kegiatan": j["nama_kegiatan"],
-            "tanggal": j["tanggal"],
-            "tanggal_iso": j.get("tanggal_iso"),
-            "waktu_mulai_raw": j["waktu_mulai_raw"],
-            "waktu_selesai_raw": j["waktu_selesai_raw"],
-            "catatan_tambahan": j.get("catatan_tambahan", ""),
-        }
-        for j in jadwal
-    ]
-
-    return render_template(
-        "booking_ruangan/jadwal_penggunaan.html",
-        jadwal=jadwal,
-        jadwal_json=jadwal_json,
-        booking_form_url=booking_form_url,
-        kalender_json=get_kalender_akademik()
-    )
-
-
-# API: jadwal dalam format JSON (opsional, untuk fetch dari JS/kalender)
-@app.route("/api/jadwal")
-def api_jadwal():
-    jadwal = get_jadwal()
-    data = [
-        {
-            "nama_pemesan": j["nama_pemesan"],
-            "nama_kegiatan": j["nama_kegiatan"],
-            "tanggal": j["tanggal"],
-            "waktu_mulai": j["waktu_mulai_raw"],
-            "waktu_selesai": j["waktu_selesai_raw"],
-            "conflict": j["conflict"],
-        }
-        for j in jadwal
-    ]
-    return jsonify(data)
-
-@app.route("/booking-ruangan/form")
-def booking_form_page():
-    booking_form_url = "https://docs.google.com/forms/d/e/1FAIpQLSc7oMnechEl_sMkKAtWGsHsES9LKhZYirz9qUXErYi588lfgg/viewform"
-    # Ganti dengan URL embed asli dari Google Form kamu
-    # (Format: https://docs.google.com/forms/d/e/FORM_ID/viewform?embedded=true)
-    booking_form_embed_url = os.getenv("BOOKING_FORM_EMBED_URL", booking_form_url)
-    return render_template(
-        "booking_ruangan/form_peminjaman.html",
-        booking_form_url=booking_form_url,
-        booking_form_embed_url=booking_form_embed_url,
-    )
-
-
 
 # =======================
 # PEMINJAMAN ASET SECTION (SARPRAS)

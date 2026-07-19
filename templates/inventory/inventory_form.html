@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-6">
-    <a href="{{ url_for('inventory_list') if item else url_for('inventory_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
               hover:text-blue-600 hover:bg-blue-50 active:scale-95 active:bg-gray-100 group">
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
@@ -48,11 +48,11 @@
                         <select name="uom" required
                             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition appearance-none cursor-pointer">
                             <option value="" disabled {{ 'selected' if not item }}>Pilih Satuan</option>
-                            <option value="Unit" {{ 'selected' if item and item.uom=='Unit' }}>Unit (PC, Monitor)
+                            <option value="Unit" {{ 'selected' if item and item.uom=='Unit' }}>Unit (PC, Monitor, dll)
                             </option>
-                            <option value="Buah" {{ 'selected' if item and item.uom=='Buah' }}>Buah (Mouse, Keyboard)
+                            <option value="Buah" {{ 'selected' if item and item.uom=='Buah' }}>Buah (Mouse, Keyboard, dll)
                             </option>
-                            <option value="Set" {{ 'selected' if item and item.uom=='Set' }}>Set (Speaker, Toolkit)
+                            <option value="Set" {{ 'selected' if item and item.uom=='Set' }}>Set (Speaker, Toolkit, dll)
                             </option>
                             <option value="Pcs" {{ 'selected' if item and item.uom=='Pcs' }}>Pcs (Komponen)</option>
                             <option value="Roll" {{ 'selected' if item and item.uom=='Roll' }}>Roll (Kabel)</option>
@@ -105,7 +105,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 mt-2 border-t border-gray-100">
-                <a href="{{ url_for('inventory_list') if item else url_for('inventory_landing') }}"
+                <a href="{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}"
                     class="w-full sm:w-auto px-6 py-2.5 text-xs font-semibold text-center text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
                     Batal
                 </a>
@@ -211,7 +211,7 @@
                         });
 
                         setTimeout(() => {
-                            window.location.href = "{{ url_for('inventory_list') }}";
+                            window.location.href = "{{ url_for('inventory_labkomp.inventory_list') }}";
                         }, 1500);
 
                     } else {

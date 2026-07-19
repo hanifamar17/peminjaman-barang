@@ -4,7 +4,7 @@
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 py-6">
 
-    <a href="/history" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('peminjaman_invlabkomp.history') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 
           active:scale-95 active:bg-gray-100 group">
 
@@ -116,7 +116,7 @@
             <span class="text-xs text-gray-400">Bagikan detail peminjaman ini:</span>
 
             <div class="flex w-full sm:w-auto gap-3">
-                <a href="{{ receipt_url }}" target="_blank"
+                <a href="{{ url_for('peminjaman_invlabkomp.receipt', code=loan.code) }}" target="_blank"
                     class="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-all active:scale-95 shadow-sm hover:shadow focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

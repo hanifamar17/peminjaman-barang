@@ -26,7 +26,7 @@
   <div class="space-y-3.5">
 
     <!-- Tombol 1: Peminjaman Barang -->
-    <a href="/borrow" 
+    <a href="{{ url_for('peminjaman_invlabkomp.borrow') }}" 
        class="block p-4 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:border-indigo-200 active:scale-[0.98] active:bg-slate-50 transition-all duration-200 cursor-pointer group">
       <div class="flex items-center gap-3.5">
         <!-- Wadah Ikon Box/Borrow -->
@@ -48,7 +48,7 @@
     </a>
 
     <!-- Tombol 2: Pengembalian Barang -->
-    <a href="/return" 
+    <a href="{{ url_for('peminjaman_invlabkomp.return_page') }}" 
        class="block p-4 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:border-indigo-200 active:scale-[0.98] active:bg-slate-50 transition-all duration-200 cursor-pointer group">
       <div class="flex items-center gap-3.5">
         <!-- Wadah Ikon Return/Loop -->
@@ -70,7 +70,7 @@
     </a>
 
     <!-- Tombol 3: Riwayat Peminjaman -->
-    <a href="/history" 
+    <a href="{{ url_for('peminjaman_invlabkomp.history') }}" 
        class="block p-4 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:border-indigo-200 active:scale-[0.98] active:bg-slate-50 transition-all duration-200 cursor-pointer group">
       <div class="flex items-center gap-3.5">
         <!-- Wadah Ikon History/Clock -->

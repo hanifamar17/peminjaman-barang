@@ -5,7 +5,7 @@
 <div class="max-w-3xl mx-auto px-4 py-6 sm:py-10">
 
     <!-- Back -->
-    <a href="{{ url_for('booking_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('booking_ruangan.booking_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 
           active:scale-95 active:bg-gray-100 group">
 
@@ -41,7 +41,7 @@
                 <div>
                     <h3 class="text-sm font-medium text-gray-800">Cek Ketersediaan Jadwal</h3>
                     <p class="text-xs text-gray-500 mt-1">
-                        Pastikan ruangan kosong melalui <a href="{{ url_for('jadwal_penggunaan') }}"
+                        Pastikan ruangan kosong melalui <a href="{{ url_for('booking_ruangan.jadwal_penggunaan') }}"
                             class="text-blue-600 hover:underline">Jadwal Penggunaan Lab</a>, lalu konfirmasi ke Kepala
                         Lab.
                     </p>
@@ -57,7 +57,7 @@
                     <h3 class="text-sm font-medium text-gray-800">Pengajuan Permohonan (H-1)</h3>
                     <p class="text-xs text-gray-500 mt-1">
                         Isi formulir peminjaman minimal 1 hari sebelum hari penggunaan melalui <a
-                            href="{{ url_for('booking_form_page') }}" target="_blank"
+                            href="{{ url_for('booking_ruangan.booking_form_page') }}" target="_blank"
                             class="text-blue-600 hover:underline inline-flex items-center gap-0.5">Form Peminjaman
                             Lab</a>.
                     </p>

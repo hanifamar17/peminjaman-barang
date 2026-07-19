@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-6">
-    <a href="{{ url_for('inventory_list') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('inventory_labkomp.inventory_list') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 active:scale-95 group">
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
@@ -65,7 +65,7 @@
                     </button>
                 </form>
 
-                <a href="{{ url_for('inventory_list') }}"
+                <a href="{{ url_for('inventory_labkomp.inventory_list') }}"
                     class="w-full sm:w-auto px-8 py-3 text-sm font-semibold text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
                     Batalkan
                 </a>
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Redirect ke daftar inventory setelah toast selesai
                     setTimeout(() => {
-                        window.location.href = "{{ url_for('inventory_list') }}";
+                        window.location.href = "{{ url_for('inventory_labkomp.inventory_list') }}";
                     }, 1500);
 
                 } else {

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 py-6">
 
-    <a href="/peminjaman" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('peminjaman_invlabkomp.peminjaman_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 
           active:scale-95 active:bg-gray-100 group">
 
@@ -173,6 +173,7 @@
         const submitBtn = document.getElementById('submitBtn');
         const submitText = document.getElementById('submitText');
         const submitLoader = document.getElementById('submitLoader');
+        const searchUrl = "{{ url_for('inventory_labkomp.api_search') }}";
 
         const searchInventory = debounce(async (q) => {
             if (!q) {
@@ -184,7 +185,7 @@
             loader.classList.remove('hidden');
 
             try {
-                const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+                const res = await fetch(`${searchUrl}?q=${encodeURIComponent(q)}`);
                 const data = await res.json();
 
                 searchResult.innerHTML = '';
@@ -296,7 +297,7 @@
                     items: selectedItems
                 };
 
-                const res = await fetch('/borrow/submit', {
+                const res = await fetch('{{ url_for("peminjaman_invlabkomp.borrow_submit") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -314,7 +315,7 @@
                     });
 
                     setTimeout(() => {
-                        location.href = '/history';
+                        location.href = '{{ url_for("peminjaman_invlabkomp.history") }}';
                     }, 1200);
                 } else {
                     Toast.fire({

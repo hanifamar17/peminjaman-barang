@@ -5,7 +5,7 @@
 <div class="max-w-6xl mx-auto px-4 py-6">
 
     <!-- Back -->
-    <a href="{{ url_for('inventory_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
+    <a href="{{ url_for('inventory_labkomp.inventory_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
           hover:text-blue-600 hover:bg-blue-50 
           active:scale-95 active:bg-gray-100 group">
 
@@ -88,12 +88,12 @@
 
                         <td class="px-6 py-4 whitespace-nowrap text-right">
                             <div class="flex items-center justify-end gap-4">
-                                <a href="{{ url_for('inventory_edit', item_id=item.item_id) }}"
+                                <a href="{{ url_for('inventory_labkomp.inventory_edit', item_id=item.item_id) }}"
                                     class="text-indigo-600 hover:text-indigo-900 text-sm font-medium transition">
                                     Edit
                                 </a>
 
-                                <a href="{{ url_for('inventory_delete', item_id=item.item_id) }}"
+                                <a href="{{ url_for('inventory_labkomp.inventory_delete', item_id=item.item_id) }}"
                                     class="text-red-500 hover:text-red-700 text-sm font-medium transition">
                                     Hapus
                                 </a>

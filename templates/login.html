@@ -92,9 +92,7 @@
             input:-webkit-autofill:hover,
             input:-webkit-autofill:focus {
                 -webkit-text-fill-color: #0f172a !important;
-                /* text-slate-900 */
                 -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-                /* Memaksa bg tetap putih bersih */
                 transition: background-color 5000s ease-in-out 0s;
             }
         </style>
@@ -123,19 +121,33 @@
             {% endwith %}
 
             <!-- ========================================== -->
-            <!-- HEADER LOGIN                               -->
+            <!-- HEADER LOGIN (Pendekatan Low-Profile)      -->
             <!-- ========================================== -->
             <div class="mb-8">
+                <!-- Badge diubah menjadi 'Konsol Internal' agar terkesan rutin/biasa saja -->
                 <span
                     class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-slate-100 text-slate-500 border border-slate-200/60 mb-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Autentikasi
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Konsol Internal
                 </span>
                 <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">
-                    Login Sistem
+                    Pintu Masuk Sistem
                 </h2>
                 <p class="text-xs text-slate-400 mt-1">
-                    Silakan masuk untuk mengakses seluruh layanan platform.
+                    Silakan identifikasi akun Anda untuk melanjutkan ke panel kerja.
                 </p>
+
+                <!-- Banner Informasi yang Netral & Tidak Menantang (Menggunakan ikon info lingkaran) -->
+                <div class="mt-4 p-3 bg-slate-50 border border-slate-200/60 rounded-xl flex items-start gap-2.5">
+                    <svg class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-[11px] leading-normal text-slate-500 font-medium">
+                        Modul ini hanya dikelola oleh tim operasional internal. Jika Anda memerlukan hak akses
+                        tambahan, silakan hubungi administrator.
+                    </p>
+                </div>
             </div>
 
             <!-- ========================================== -->
@@ -149,7 +161,6 @@
                     <input type="text" name="username" id="floating_username"
                         class="block py-2.5 px-1 w-full text-sm text-slate-900 bg-transparent border-0 border-b-2 border-slate-200 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer transition-colors duration-200"
                         placeholder=" " required />
-                    <!-- Perbaikan pada class label: hapus -z-10, tambah pointer-events-none & peer-autofill -->
                     <label for="floating_username"
                         class="absolute text-sm text-slate-400 duration-200 transform -translate-y-5 scale-75 top-2.5 origin-[0] pointer-events-none peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-indigo-500 peer-focus:font-semibold peer-autofill:scale-75 peer-autofill:-translate-y-5 peer-autofill:text-indigo-500">
                         Username
@@ -161,7 +172,6 @@
                     <input type="password" name="password" id="floating_password"
                         class="block py-2.5 px-1 w-full text-sm text-slate-900 bg-transparent border-0 border-b-2 border-slate-200 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer transition-colors duration-200"
                         placeholder=" " required />
-                    <!-- Perbaikan pada class label: hapus -z-10, tambah pointer-events-none & peer-autofill -->
                     <label for="floating_password"
                         class="absolute text-sm text-slate-400 duration-200 transform -translate-y-5 scale-75 top-2.5 origin-[0] pointer-events-none peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-indigo-500 peer-focus:font-semibold peer-autofill:scale-75 peer-autofill:-translate-y-5 peer-autofill:text-indigo-500">
                         Password
@@ -179,7 +189,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h5a3 3 0 013 3v1" />
                             </svg>
-                            Login
+                            Masuk
                         </span>
                         <svg id="spinner" class="hidden w-4 h-4 animate-spin text-white" fill="none"
                             viewBox="0 0 24 24">
