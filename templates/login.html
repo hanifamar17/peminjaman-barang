@@ -1,237 +1,86 @@
-<!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Inventory Lab Komp{% endblock %}</title>
+{% block content %}
 
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-
-    <!-- Tailwind CSS (dihasilkan oleh Tailwind CLI) -->
-    <link href="{{ url_for('static', filename='/output.css') }}" rel="stylesheet">
-
-    <!-- Font dari Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Font Awesome untuk ikon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+<main class="max-w-[480px] mx-auto px-5 pt-12 pb-16 font-sans text-zinc-900 select-none">
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .progress-bar {
-            height: 6px;
-            border-radius: 3px;
-        }
-
-        .nav-link {
-            position: relative;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
-            background-color: #4f46e5;
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .section-fade {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .section-fade.visible {
-            opacity: 1;
-            transform: translateY(0);
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #18181b !important;
+            -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
     </style>
-    {% block head %}{% endblock %}
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
 
-<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen flex flex-col">
-    <nav class="bg-white/70 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2 group">
-                <div
-                    class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
-                    <i class="fa-solid fa-graduation-cap text-xl"></i>
-                </div>
-                <span class="font-bold text-gray-800">e-manu</span>
-            </a>
-
-            <a href="{{ base_url }}" target="_blank" rel="noopener noreferrer"
-                class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-sm font-bold text-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all duration-300 border border-blue-100">
-                <span>manulab</span>
-            </a>
-
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="mb-8 border-l-2 border-zinc-900 pl-3" role="alert">
+        <div class="space-y-1 text-sm font-semibold text-zinc-900">
+            {% for msg in messages %}
+            <span class="block">{{ msg }}</span>
+            {% endfor %}
         </div>
-    </nav>
+    </div>
+    {% endif %}
+    {% endwith %}
 
-    <main class="min-h-screen bg-slate-50/50 flex items-center justify-center px-6 select-none">
-        <!-- Trik CSS untuk menjinakkan warna background autofill bawaan browser -->
-        <style>
-            input:-webkit-autofill,
-            input:-webkit-autofill:hover,
-            input:-webkit-autofill:focus {
-                -webkit-text-fill-color: #0f172a !important;
-                -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-                transition: background-color 5000s ease-in-out 0s;
-            }
-        </style>
+    <h1 class="text-2xl font-bold tracking-tight leading-snug mt-2 mb-2.5">
+        Pintu Masuk Sistem
+    </h1>
+    <p class="text-sm leading-relaxed text-zinc-500 mb-2 max-w-[36ch]">
+        Silakan identifikasi akun Anda untuk melanjutkan ke panel kerja.
+    </p>
+    <p class="text-xs text-zinc-400 mb-9 max-w-[40ch] border-l border-zinc-200 pl-3 py-0.5">
+        Modul hanya dikelola tim operasional internal. Hubungi administrator untuk hak akses.
+    </p>
 
-        <div class="w-full max-w-sm bg-white border border-slate-200/80 rounded-2xl p-8 shadow-sm">
+    <form method="post" action="{{ url_for('login') }}" class="space-y-8">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <!-- ========================================== -->
-            <!-- NOTIFIKASI FLASH MESSAGES                  -->
-            <!-- ========================================== -->
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <div class="p-3.5 mb-6 text-xs font-medium text-amber-700 rounded-xl bg-amber-50/60 border border-amber-100 flex items-start gap-2.5"
-                role="alert">
-                <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div class="flex-1 space-y-0.5">
-                    {% for msg in messages %}
-                    <span class="block">{{ msg }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            {% endwith %}
+        <div class="relative z-0 w-full group">
+            <input type="text" name="username" id="floating_username"
+                class="block py-2.5 px-0 w-full text-sm text-zinc-900 bg-transparent border-0 border-b border-zinc-200 appearance-none focus:outline-none focus:ring-0 focus:border-zinc-900 peer transition-colors duration-150 rounded-none"
+                placeholder=" " required />
+            <label for="floating_username"
+                class="absolute text-sm text-zinc-400 duration-150 transform -translate-y-5 scale-75 top-2.5 origin-[0] pointer-events-none peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-zinc-900 peer-focus:font-semibold peer-autofill:scale-75 peer-autofill:-translate-y-5 peer-autofill:text-zinc-900">
+                Username
+            </label>
+        </div>
 
-            <!-- ========================================== -->
-            <!-- HEADER LOGIN (Pendekatan Low-Profile)      -->
-            <!-- ========================================== -->
-            <div class="mb-8">
-                <!-- Badge diubah menjadi 'Konsol Internal' agar terkesan rutin/biasa saja -->
-                <span
-                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-slate-100 text-slate-500 border border-slate-200/60 mb-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Konsol Internal
+        <div class="relative z-0 w-full group">
+            <input type="password" name="password" id="floating_password"
+                class="block py-2.5 px-0 w-full text-sm text-zinc-900 bg-transparent border-0 border-b border-zinc-200 appearance-none focus:outline-none focus:ring-0 focus:border-zinc-900 peer transition-colors duration-150 rounded-none"
+                placeholder=" " required />
+            <label for="floating_password"
+                class="absolute text-sm text-zinc-400 duration-150 transform -translate-y-5 scale-75 top-2.5 origin-[0] pointer-events-none peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-zinc-900 peer-focus:font-semibold peer-autofill:scale-75 peer-autofill:-translate-y-5 peer-autofill:text-zinc-900">
+                Password
+            </label>
+        </div>
+
+        <div class="pt-4">
+            <button id="loginBtn" type="submit"
+                class="w-full flex items-center justify-center gap-2 bg-zinc-900 text-white text-[13px] font-semibold py-4 px-5 transition-all duration-150 ease-out hover:bg-zinc-800 active:scale-[0.99] cursor-pointer touch-manipulation select-none">
+                <span id="btnText" class="flex items-center gap-1.5">
+                    Masuk &rarr;
                 </span>
-                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">
-                    Pintu Masuk Sistem
-                </h2>
-                <p class="text-xs text-slate-400 mt-1">
-                    Silakan identifikasi akun Anda untuk melanjutkan ke panel kerja.
-                </p>
-
-                <!-- Banner Informasi yang Netral & Tidak Menantang (Menggunakan ikon info lingkaran) -->
-                <div class="mt-4 p-3 bg-slate-50 border border-slate-200/60 rounded-xl flex items-start gap-2.5">
-                    <svg class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-[11px] leading-normal text-slate-500 font-medium">
-                        Modul ini hanya dikelola oleh tim operasional internal. Jika Anda memerlukan hak akses
-                        tambahan, silakan hubungi administrator.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ========================================== -->
-            <!-- FORMULIR INPUT                             -->
-            <!-- ========================================== -->
-            <form method="post" action="{{ url_for('login') }}" class="space-y-6">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                <!-- Input: Username -->
-                <div class="relative z-0 w-full group">
-                    <input type="text" name="username" id="floating_username"
-                        class="block py-2.5 px-1 w-full text-sm text-slate-900 bg-transparent border-0 border-b-2 border-slate-200 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer transition-colors duration-200"
-                        placeholder=" " required />
-                    <label for="floating_username"
-                        class="absolute text-sm text-slate-400 duration-200 transform -translate-y-5 scale-75 top-2.5 origin-[0] pointer-events-none peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-indigo-500 peer-focus:font-semibold peer-autofill:scale-75 peer-autofill:-translate-y-5 peer-autofill:text-indigo-500">
-                        Username
-                    </label>
-                </div>
-
-                <!-- Input: Password -->
-                <div class="relative z-0 w-full group">
-                    <input type="password" name="password" id="floating_password"
-                        class="block py-2.5 px-1 w-full text-sm text-slate-900 bg-transparent border-0 border-b-2 border-slate-200 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer transition-colors duration-200"
-                        placeholder=" " required />
-                    <label for="floating_password"
-                        class="absolute text-sm text-slate-400 duration-200 transform -translate-y-5 scale-75 top-2.5 origin-[0] pointer-events-none peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-indigo-500 peer-focus:font-semibold peer-autofill:scale-75 peer-autofill:-translate-y-5 peer-autofill:text-indigo-500">
-                        Password
-                    </label>
-                </div>
-
-                <!-- ========================================== -->
-                <!-- TOMBOL AKSI / SUBMIT                       -->
-                <!-- ========================================== -->
-                <div class="flex items-center gap-3 pt-2">
-                    <button id="loginBtn" type="submit"
-                        class="flex-1 flex items-center justify-center gap-2 text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] font-bold rounded-xl text-xs uppercase tracking-wider px-5 py-3 transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/10">
-                        <span id="btnText" class="flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h5a3 3 0 013 3v1" />
-                            </svg>
-                            Masuk
-                        </span>
-                        <svg id="spinner" class="hidden w-4 h-4 animate-spin text-white" fill="none"
-                            viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                            </circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                        </svg>
-                    </button>
-
-                    <a href="{{ url_for('repository') }}"
-                        class="flex-1 flex items-center justify-center text-slate-500 bg-slate-50 border border-slate-200/70 hover:bg-slate-100 hover:text-slate-700 active:scale-[0.98] font-bold rounded-xl text-xs uppercase tracking-wider px-5 py-3 transition-all duration-200 no-underline">
-                        <span>Beranda</span>
-                    </a>
-                </div>
-            </form>
-
+                <svg id="spinner" class="hidden w-4 h-4 animate-spin text-zinc-300" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                    </circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+            </button>
         </div>
-    </main>
+    </form>
 
-    <footer class="bg-gradient-to-r from-gray-900 to-slate-800 text-white py-6 mt-auto">
-        <div class="max-w-5xl mx-auto px-6 text-center space-y-2">
-            <div class="flex items-center justify-center gap-3 text-xs font-medium tracking-wide">
-                <span class="opacity-90">e-manu portal</span>
-                <span class="text-gray-600">•</span>
-                <a href="https://github.com/hanifamar17/peminjaman-barang" target="_blank"
-                    class="flex items-center gap-1.5 hover:text-blue-400 transition-colors">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                    </svg>
-                    GitHub
-                </a>
-            </div>
+    <a href="{{ url_for('repository') }}" class="inline-flex items-center gap-1.5 mt-8 text-[13px] font-semibold text-zinc-500 no-underline
+           transition-all duration-150
+           hover:text-zinc-900 hover:-translate-x-0.5
+           active:scale-[0.97]
+           cursor-pointer select-none touch-manipulation">
+        <span class="transition-transform duration-150">&larr;</span> Kembali ke Dashboard Utama
+    </a>
+</main>
 
-            <p class="text-[10px] text-gray-500 tracking-widest">&copy; <span id="current-year"></span> —
-                Dibuat dengan 🫰</p>
-        </div>
-    </footer>
-
-    <script>
-        document.getElementById("current-year").textContent = new Date().getFullYear();
-    </script>
-</body>
-
-</html>
+{% endblock %}

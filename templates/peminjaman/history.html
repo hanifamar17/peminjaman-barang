@@ -2,129 +2,90 @@
 {% block title %}Riwayat{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
-    <a href="{{ url_for('peminjaman_invlabkomp.peminjaman_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
+<div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
 
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
-        </svg>
-
-        <span>Kembali</span>
+    <a href="{{ url_for('peminjaman_invlabkomp.peminjaman_landing') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
     </a>
 
-    <!-- Header -->
-    <div class="mb-6 mt-2">
-        <div class="flex items-center gap-3 mb-1">
-            <h2 class="text-xl font-bold text-gray-900">Riwayat Peminjaman</h2>
-        </div>
-        <p class="text-gray-600 text-sm">Lihat semua riwayat peminjaman barang</p>
+    <div class="mt-8 mb-10">
+        <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Riwayat Peminjaman</h1>
+        <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Lihat semua riwayat
+            peminjaman barang. Total: <span id="totalCount">{{ loans|length }}</span>.</p>
     </div>
 
-    <!-- Search Bar -->
-    <div class="mb-4">
-        <div class="relative">
-            <input type="text" id="filter"
-                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="🔍 Cari kode, barang, atau peminjam...">
-            <div id="searchCount" class="mt-1 text-xs text-gray-500 hidden"></div>
-        </div>
+    <div class="relative z-0 w-full max-w-sm mb-6">
+        <input type="text" id="filter"
+            class="block py-2.5 px-0 w-full text-sm text-zinc-900 bg-transparent border-0 border-b border-zinc-200 appearance-none focus:outline-none focus:ring-0 focus:border-zinc-900 transition-colors duration-150 rounded-none placeholder-zinc-400"
+            placeholder="Cari kode, barang, atau peminjam...">
+        <div id="searchCount" class="text-xs text-zinc-500 mt-2 hidden"></div>
     </div>
 
-    <div class="bg-white p-2 md:p-4 border border-gray-200 rounded-lg">
-        <!-- Info Footer -->
-        <div class="mt-4 text-xs text-gray-500 text-right mb-2">
-            <span id="totalCount">{{ loans|length }}</span> peminjaman
-        </div>
+    <div class="overflow-x-auto border-t border-[#e6e0d6]">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="border-b border-[#e6e0d6] text-[11px] font-semibold text-[#a49b8c] uppercase tracking-wider">
+                    <th class="py-2 pr-6 w-12">No</th>
+                    <th class="py-2 pr-6">Kode</th>
+                    <th class="py-2 pr-6">Tanggal</th>
+                    <th class="py-2 pr-6">Barang & Peminjam</th>
+                    <th class="py-2 pr-6">Status</th>
+                    <th class="py-2 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for l in loans %}
+                <tr class="group border-b border-[#e6e0d6] hover:bg-[#f3f0ea] transition-colors" data-row>
+                    <td class="py-2 pr-6 text-[13px] font-medium text-[#a49b8c]">
+                        {{ "%02d" | format(loop.index) }}
+                    </td>
+                    <td class="py-2 pr-6">
+                        <span
+                            class="text-[12px] font-mono font-semibold text-[#1f1c19] bg-[#e6e0d6]/50 px-1.5 py-0.5">{{
+                            l.code }}</span>
+                    </td>
+                    <td class="py-2 pr-6 text-[13px] text-[#6b6459]">
+                        {{ l.loan_date[8:10] }}/{{ l.loan_date[5:7] }}/{{ l.loan_date[0:4] }}
+                    </td>
+                    <td class="py-2 pr-6">
+                        <div class="text-[14px] font-semibold text-[#1f1c19]">{{ l.item_name }}</div>
+                        <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ l.borrower_name }}</div>
+                    </td>
+                    <td class="py-2 pr-6">
+                        <span
+                            class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight border 
+                        {{ 'bg-amber-50 text-amber-700 border-amber-200' if l.status == 'dipinjam' else 'bg-[#f3f0ea] text-[#6b6459] border-[#e6e0d6]' }}">
+                            {{ l.status }}
+                        </span>
+                    </td>
+                    <td class="py-2 text-right">
+                        <a href="{{ url_for('peminjaman_invlabkomp.loan_detail', code=l.code) }}"
+                            class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline">Detail</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-        <!-- Table Wrapper -->
-        <div class="overflow-x-auto rounded-lg border border-gray-100">
-            <table class="min-w-full divide-y divide-gray-100">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Kode</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Tanggal</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Barang</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Peminjam</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Status</th>
-                        <th
-                            class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">
-                            Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody" class="bg-white divide-y divide-gray-100">
-                    {% for l in loans %}
-                    <tr class="hover:bg-gray-100 text-sm transition" data-row>
-                        <td class="px-3 py-2 whitespace-nowrap">
-                            <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ l.code }}</span>
-                        </td>
-                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">{{ l.loan_date[8:10] }}/{{ l.loan_date[5:7] }}/{{ l.loan_date[0:4] }}</td>
-                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">{{ l.item_name }}</td>
-                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">{{ l.borrower_name }}</td>
-                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
-                            {% if l.status == 'dipinjam' %}
-                            <span
-                                class="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded">
-                                Dipinjam
-                            </span>
-                            {% elif l.status == 'dikembalikan' %}
-                            <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
-                                Dikembalikan
-                            </span>
-                            {% else %}
-                            <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
-                                {{ l.status }}
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
-                            <a href="{{ url_for('peminjaman_invlabkomp.loan_detail', code=l.code) }}"
-                                class="inline-block px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition">
-                                Detail
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
-            <div class="text-xs text-gray-500 order-2 sm:order-1">
-                Halaman <span id="currentPage" class="font-bold text-gray-900">1</span> dari <span id="totalPages"
-                    class="font-bold text-gray-900">1</span>
-            </div>
+    <div id="emptyState" class="hidden py-10 text-center text-[13px] font-semibold text-zinc-400">
+        Tidak ada data ditemukan
+    </div>
 
-            <div class="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
-                <button id="prevBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
-                   transition-all duration-200
-                   hover:bg-gray-50 
-                   active:scale-95 active:bg-gray-100 
-                   disabled:opacity-40 disabled:pointer-events-none disabled:scale-100 cursor-pointer">
-                    Prev
-                </button>
-
-                <button id="nextBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
-                   transition-all duration-200
-                   hover:bg-gray-50 
-                   active:scale-95 active:bg-gray-100 
-                   disabled:opacity-40 disabled:pointer-events-none disabled:scale-100 cursor-pointer">
-                    Next
-                </button>
-            </div>
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden p-8 text-center">
-            <div class="text-4xl mb-2">🔍</div>
-            <p class="text-gray-600 text-sm">Tidak ada data ditemukan</p>
+    <div
+        class="flex items-center justify-between py-5 border-b border-zinc-200 text-[13px] font-semibold text-zinc-500">
+        <div>Hal <span id="currentPage" class="text-zinc-900">1</span>/<span id="totalPages"
+                class="text-zinc-900">1</span></div>
+        <div class="flex gap-5">
+            <button id="prevBtn"
+                class="uppercase hover:text-zinc-900 active:scale-[0.97] disabled:opacity-30 disabled:pointer-events-none transition-all touch-manipulation cursor-pointer">
+                &larr; Prev
+            </button>
+            <button id="nextBtn"
+                class="uppercase hover:text-zinc-900 active:scale-[0.97] disabled:opacity-30 disabled:pointer-events-none transition-all touch-manipulation cursor-pointer">
+                Next &rarr;
+            </button>
         </div>
     </div>
 

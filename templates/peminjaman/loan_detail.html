@@ -2,160 +2,89 @@
 {% block title %}Detail Peminjaman #{{ loan.code }}{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-6">
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[var(--ink)]">
 
-    <a href="{{ url_for('peminjaman_invlabkomp.history') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
-
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
-        </svg>
-
-        <span>Kembali</span>
+    <a href="{{ url_for('peminjaman_invlabkomp.history') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
     </a>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 mt-2">
+    <div class="flex items-center justify-between mt-8 mb-10">
         <div>
-            <h2 class="text-xl font-bold text-gray-900">
-                Detail Peminjaman
-            </h2>
-            <p class="text-gray-600 text-sm">Informasi lengkap status dan barang.</p>
+            <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Detail Peminjaman
+            </h1>
+            <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Informasi status dan
+                data barang.</p>
         </div>
-        <div class="mt-4 sm:mt-0">
-            {% if loan.status|lower == 'dikembalikan' %}
-            <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
-                Dikembalikan
-            </span>
-            {% else %}
-            <span class="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded">
-                Dipinjam
-            </span>
-            {% endif %}
-        </div>
+        <span
+            class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border 
+            {{ 'bg-amber-50 text-amber-700 border-amber-200' if loan.status|lower == 'dipinjam' else 'bg-[#f3f0ea] text-[#6b6459] border-[#e6e0d6]' }}">
+            {{ loan.status }}
+        </span>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-lg p-0 md:p-4">
 
-        <div class="bg-gray-50/50 p-4 md:p-6 border-b border-gray-100">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Kode Referensi</p>
-                    <p class="mt-1 text-sm font-mono font-medium text-gray-900 select-all">{{ loan.code }}</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Nama Peminjam</p>
-                    <p class="mt-1 text-sm font-medium text-gray-900">{{ loan.borrower_name }}</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Tanggal Pinjam</p>
-                    <p class="mt-1 text-sm font-medium text-gray-900 flex items-center">
-                        {{ loan.loan_date[8:10] }}/{{ loan.loan_date[5:7] }}/{{ loan.loan_date[0:4] }}
-                    </p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Batas Kembali</p>
-                    <p class="mt-1 text-sm font-medium text-gray-900 flex items-center">
-                        {{ loan.return_date[8:10] }}/{{ loan.loan_date[5:7] }}/{{ loan.loan_date[0:4] }}
-                    </p>
-                </div>
+    <div class="space-y-8">
+        <div class="border-t border-[#e6e0d6] pt-6 grid grid-cols-2 gap-6">
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Kode
+                    Referensi</span>
+                <span class="text-[14px] font-mono font-semibold bg-[#e6e0d6]/50 px-2 py-0.5">{{ loan.code }}</span>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Peminjam</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19]">{{ loan.borrower_name }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Tgl Pinjam</span>
+                <p class="text-[14px] font-semibold">{{ loan.loan_date[8:10] }}/{{ loan.loan_date[5:7] }}/{{
+                    loan.loan_date[0:4] }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Batas
+                    Kembali</span>
+                <p class="text-[14px] font-semibold">{{ loan.return_date[8:10] }}/{{ loan.return_date[5:7] }}/{{
+                    loan.return_date[0:4] }}</p>
             </div>
         </div>
 
         {% if loan.note %}
-        <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
-            <div>
-                <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Catatan Tambahan</p>
-                <p class="mt-1 text-sm text-amber-900 font-mono line-clamp-3">"{{ loan.note }}"</p>
-            </div>
+        <div class="pt-4 border-t border-[#e6e0d6]">
+            <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Catatan</span>
+            <p class="text-[14px] text-[#6b6459] italic">"{{ loan.note }}"</p>
         </div>
         {% endif %}
 
-        <div class="p-2 md:p-4 mt-2">
-            <h3 class="text-sm font-semibold uppercase text-gray-900 mb-4 flex items-center gap-2">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                    </path>
-                </svg>
-                Daftar Barang
-            </h3>
-
-            <div class="overflow-x-auto rounded-lg border border-gray-100">
-                <table class="min-w-full divide-y divide-gray-100">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col"
-                                class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                Barang</th>
-                            <th scope="col"
-                                class="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                Jumlah (Qty)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-100">
-                        {% for i in loan.data %}
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
-                                {{ i.item_name }}
-                            </td>
-                            <td class="px-3 py-2 capitalize whitespace-nowrap text-sm text-right font-mono">
-                                {{ i.qty }} unit
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="pt-4 border-t border-[#e6e0d6]">
+            <h3 class="text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-4">Daftar Barang</h3>
+            <table class="w-full text-left text-[14px]">
+                <tbody class="divide-y divide-[#e6e0d6]">
+                    {% for i in loan.data %}
+                    <tr>
+                        <td class="py-0.5 font-medium">{{ i.item_name }}</td>
+                        <td class="py-0.5 text-right font-mono text-[#6b6459]">{{ i.qty }} unit</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
-        <div
-            class="bg-gray-50 px-2 md:px-6 py-4 flex flex-col sm:flex-row gap-3 items-center justify-between border-t border-gray-100">
-            <span class="text-xs text-gray-400">Bagikan detail peminjaman ini:</span>
-
-            <div class="flex w-full sm:w-auto gap-3">
-                <a href="{{ url_for('peminjaman_invlabkomp.receipt', code=loan.code) }}" target="_blank"
-                    class="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-all active:scale-95 shadow-sm hover:shadow focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 whitespace-nowrap">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
-                        </path>
-                    </svg>
-                    Ringkasan
-                </a>
-
-                <button id="btnShare" data-link="{{ receipt_url }}"
-                    class="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-all focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
-                        </path>
-                    </svg>
-                </button>
-                
-                {% set wa_message =
-                "*DETAIL PEMINJAMAN INVENTARIS*\n" ~
-                "--------------------------------\n" ~
-                "*Kode:* " ~ loan.code ~ "\n" ~
-                "*Nama:* " ~ loan.borrower_name ~ "\n" ~
-                "*Tgl Pinjam:* " ~ loan.loan_date ~ "\n" ~
-                "*Status:* " ~ loan.status ~ "\n\n" ~
-                "*Notifikasi email telah dikirimkan ke:* " ~ loan.borrower_email ~ "\n\n" ~
-                "Lihat bukti peminjaman selengkapnya di sini:\n" ~
-                receipt_url
-                %}
-
-                <a href="https://wa.me/?text={{ wa_message | urlencode }}" target="_blank"
-                    class="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-all shadow-sm active:scale-95 focus:ring-2 focus:ring-offset-1 focus:ring-green-500 whitespace-nowrap">
-
-                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                    </svg>
-                </a>
-            </div>
+        <div class="pt-6 border-t border-[#e6e0d6] grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a href="{{ url_for('peminjaman_invlabkomp.receipt', code=loan.code) }}" target="_blank"
+                class="text-center bg-[#1f1c19] text-white text-[13px] font-semibold py-3.5 hover:bg-[#a8501f] transition-all cursor-pointer">
+                Ringkasan &rarr;
+            </a>
+            <button id="btnShare" data-link="{{ receipt_url }}"
+                class="bg-[#f3f0ea] text-[#1f1c19] text-[13px] font-semibold py-3.5 hover:bg-[#e6e0d6] transition-all cursor-pointer">
+                Salin Link
+            </button>
+            {% set wa_message = "*DETAIL PEMINJAMAN INVENTARIS*\n" ~ "*Kode:* " ~ loan.code ~ "\n" ~ "*Nama:* " ~
+            loan.borrower_name ~ "\n" ~ "*Tgl Pinjam:* " ~ loan.loan_date ~ "\n" ~ "*Status:* " ~ loan.status ~
+            "\n\nLihat bukti lengkap:\n" ~ receipt_url %}
+            <a href="https://wa.me/?text={{ wa_message | urlencode }}" target="_blank"
+                class="text-center bg-[#1f1c19] text-white text-[13px] font-semibold py-3.5 hover:bg-[#a8501f] transition-all cursor-pointer">
+                WhatsApp
+            </a>
         </div>
     </div>
 </div>

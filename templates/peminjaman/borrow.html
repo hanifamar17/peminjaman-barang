@@ -1,337 +1,217 @@
 {% extends 'base.html' %}
+
 {% block title %}Peminjaman Barang{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-6">
-
-    <a href="{{ url_for('peminjaman_invlabkomp.peminjaman_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
-
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[#1f1c19]">
+    <a href="{{ url_for('peminjaman_invlabkomp.peminjaman_landing') }}"
+        class="inline-flex items-center gap-2 mb-8 text-[13px] font-medium text-[#6b6459] transition-all hover:text-[#1f1c19] hover:-translate-x-[2px]">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.667 8H3.333" />
+            <path d="M8 12.667 3.333 8 8 3.333" />
         </svg>
-
-        <span>Kembali</span>
+        Kembali
     </a>
 
-    <!-- Header -->
-    <div class="mb-6 mt-2">
-        <div class="flex items-center gap-3 mb-1">
-            <h1 class="text-xl font-bold text-gray-900">Peminjaman Inventaris</h1>
-        </div>
-        <p class="text-gray-600 text-sm">Pilih barang yang ingin dipinjam</p>
+    <div class="mb-10">
+        <h1 class="text-[26px] leading-[1.15] font-semibold font-['Source_Serif_4',serif] tracking-[-0.01em] mb-2">
+            Peminjaman Inventaris</h1>
+        <p class="text-[14px] text-[#6b6459]">Pilih barang dari sistem inventaris lab.</p>
     </div>
 
-    <!-- Search -->
-    <div class="bg-white rounded-lg border border-slate-200 p-6 mb-4">
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cari Barang</label>
+    <div class="relative mb-8">
+        <label class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-2">Cari Barang</label>
         <div class="relative">
             <input id="searchItem" type="text"
-                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Ketik nama barang...">
-            <div id="loader" class="hidden absolute right-3 top-3">
-                <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                class="block w-full py-3 px-4 text-[14px] bg-[#f3f0ea] border-none focus:ring-2 focus:ring-[#1f1c19] transition-all"
+                placeholder="Cari nama barang...">
+            <div id="loader" class="hidden absolute right-4 top-3.5">
+                <div class="w-4 h-4 border-2 border-[#1f1c19] border-t-transparent rounded-full animate-spin"></div>
             </div>
             <div id="searchResult"
-                class="mt-2 border border-gray-200 rounded-lg bg-white divide-y overflow-hidden hidden"></div>
+                class="absolute left-0 right-0 mt-2 bg-white border border-[#e6e0d6] shadow-lg z-50 hidden overflow-hidden">
+            </div>
         </div>
     </div>
 
-    <!-- Form -->
-    <form id="borrowForm" class="space-y-4 hidden">
+    <form id="borrowForm" class="space-y-8 hidden">
         <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
-        <!-- Selected Items -->
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-            <p class="text-xs font-medium text-blue-700 mb-1">BARANG DIPILIH</p>
-            <p id="selectedItem" class="text-sm text-gray-900 font-medium">-</p>
+
+        <div>
+            <h3 class="text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-4">Daftar Barang</h3>
+            <!-- Tabel Barang -->
+            <table class="w-full text-left text-[14px] mt-4">
+                <thead class="text-[11px] font-bold text-[#a49b8c] uppercase border-b border-[#e6e0d6]">
+                    <tr>
+                        <th class="py-2">Barang</th>
+                        <th class="py-2 text-center w-20">Qty</th>
+                        <th class="py-2 text-center w-10">✕</th>
+                    </tr>
+                </thead>
+                <tbody id="selectedItems" class="divide-y divide-[#e6e0d6]"></tbody>
+            </table>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-            <!-- Items Table -->
-            <div>
-                <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                        </path>
-                    </svg>
-                    Daftar Barang
-                </h3>
-                <div class="overflow-x-auto rounded-lg border border-gray-100">
-                    <table class="min-w-full divide-y divide-gray-100">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th
-                                    class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Barang</th>
-                                <th
-                                    class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">
-                                    Qty</th>
-                                <th
-                                    class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">
-                                    ×</th>
-                            </tr>
-                        </thead>
-                        <tbody id="selectedItems" class="bg-white divide-y divide-gray-100"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Borrower Info -->
-            <div class="grid sm:grid-cols-2 gap-3">
+        <div class="pt-6 border-t border-[#e6e0d6] space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+                    <label class="block text-[11px] font-bold text-[#a49b8c] uppercase mb-1.5">Nama Lengkap</label>
                     <input type="text" name="borrower_name" required
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        placeholder="Nama lengkap">
+                        class="w-full py-2.5 bg-transparent border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <label class="block text-[11px] font-bold text-[#a49b8c] uppercase mb-1.5">Email</label>
                     <input type="email" name="borrower_email" required
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        placeholder="email@example.com">
+                        class="w-full py-2.5 bg-transparent border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
                 </div>
-            </div>
-
-            <div class="grid sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tgl Pinjam</label>
+                    <label class="block text-[11px] font-bold text-[#a49b8c] uppercase mb-1.5">Tgl Pinjam</label>
                     <input type="date" name="loan_date" required
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full py-2.5 bg-transparent border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tgl Kembali</label>
+                    <label class="block text-[11px] font-bold text-[#a49b8c] uppercase mb-1.5">Tgl Kembali</label>
                     <input type="date" name="return_date" required
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full py-2.5 bg-transparent border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
                 </div>
             </div>
-
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+                <label class="block text-[11px] font-bold text-[#a49b8c] uppercase mb-1.5">Catatan</label>
                 <textarea name="note" rows="2"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                    placeholder="Catatan opsional..."></textarea>
+                    class="w-full py-2.5 bg-transparent border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px] resize-none"></textarea>
             </div>
         </div>
 
-        <!-- Preview -->
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p class="font-semibold text-gray-900 mb-2">📋 Ringkasan</p>
-            <pre id="previewText" class="text-sm text-gray-700 whitespace-pre-wrap">Lengkapi form</pre>
+        <div class="border-t border-[#e6e0d6] pt-6">
+            <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-2">Ringkasan</span>
+            <pre id="previewText"
+                class="text-[12px] font-mono text-[#6b6459] bg-[#f3f0ea] p-4 whitespace-pre-wrap">Lengkapi form</pre>
         </div>
 
-        <!-- Submit -->
         <button type="submit" id="submitBtn"
-            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-lg font-semibold transition-all cursor-pointer">
-            <span id="submitText">📦 Konfirmasi Peminjaman</span>
-            <span id="submitLoader" class="hidden">
-                <div class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
-                </div>
-            </span>
+            class="w-full bg-[#1f1c19] text-white text-[13px] font-semibold py-4 hover:bg-[#a8501f] transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <span id="submitText">Konfirmasi Peminjaman &rarr;</span>
+            <div id="submitLoader"
+                class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
         </button>
     </form>
-
 </div>
 
-<!--Swal mixin-->
 <script>
-    // Mixin untuk toast notifikasi
-    const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 2500,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.addEventListener("mouseenter", Swal.stopTimer);
-            toast.addEventListener("mouseleave", Swal.resumeTimer);
-        }
-    });
-</script>
+    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true });
 
-<script>
     document.addEventListener('DOMContentLoaded', () => {
-        const debounce = (fn, delay = 500) => {
-            let timer;
-            return (...args) => {
-                clearTimeout(timer);
-                timer = setTimeout(() => fn(...args), delay);
-            };
-        };
-
         let selectedItems = [];
+        const borrowForm = document.getElementById('borrowForm');
+        const selectedItemsTable = document.getElementById('selectedItems');
         const searchInput = document.getElementById('searchItem');
         const searchResult = document.getElementById('searchResult');
         const loader = document.getElementById('loader');
-        const borrowForm = document.getElementById('borrowForm');
-        const selectedItemLabel = document.getElementById('selectedItem');
-        const selectedItemsTable = document.getElementById('selectedItems');
         const previewText = document.getElementById('previewText');
-        const submitBtn = document.getElementById('submitBtn');
-        const submitText = document.getElementById('submitText');
-        const submitLoader = document.getElementById('submitLoader');
-        const searchUrl = "{{ url_for('inventory_labkomp.api_search') }}";
+
+        const debounce = (fn, delay = 500) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; };
+
+        const updatePreview = () => {
+            const f = borrowForm;
+            const itemsText = selectedItems.length ? selectedItems.map(i => `- ${i.name} × ${i.qty}`).join('\n') : '-';
+            previewText.textContent = `Barang:\n${itemsText}\n\nPeminjam: ${f.borrower_name.value || '-'}\nEmail: ${f.borrower_email.value || '-'}\nTgl Pinjam: ${f.loan_date.value || '-'}\nTgl Kembali: ${f.return_date.value || '-'}`.trim();
+        };
 
         const searchInventory = debounce(async (q) => {
-            if (!q) {
-                searchResult.classList.add('hidden');
-                loader.classList.add('hidden');
-                return;
-            }
-
+            if (!q) { searchResult.classList.add('hidden'); loader.classList.add('hidden'); return; }
             loader.classList.remove('hidden');
-
             try {
-                const res = await fetch(`${searchUrl}?q=${encodeURIComponent(q)}`);
+                const res = await fetch(`{{ url_for('inventory_labkomp.api_search') }}?q=${encodeURIComponent(q)}`);
                 const data = await res.json();
-
                 searchResult.innerHTML = '';
                 searchResult.classList.remove('hidden');
-
                 data.forEach(item => {
-                    if (parseInt(item.stock) <= 0) return;
-
+                    if (item.stock <= 0) return;
                     const el = document.createElement('div');
-                    el.className = 'p-3 hover:bg-gray-50 cursor-pointer';
-                    el.innerHTML = `<b class="text-sm">${item.name}</b><br><span class="text-xs text-gray-600">Stok: ${item.stock}</span>`;
-                    el.onclick = () => {
-                        addItem(item);
-                        searchResult.classList.add('hidden');
-                        borrowForm.classList.remove('hidden');
-                        searchInput.value = '';
-                    };
+                    el.className = 'p-3 hover:bg-[#f3f0ea] cursor-pointer text-[13px]';
+                    el.innerHTML = `<div class="font-semibold">${item.name}</div><div class="text-[#a49b8c]">Stok: ${item.stock}</div>`;
+                    el.onclick = () => { addItem(item); searchResult.classList.add('hidden'); borrowForm.classList.remove('hidden'); searchInput.value = ''; };
                     searchResult.appendChild(el);
                 });
-            } catch (e) {
-                console.error(e);
-            } finally {
-                loader.classList.add('hidden');
-            }
+            } catch (e) { console.error(e); }
+            finally { loader.classList.add('hidden'); }
         }, 500);
 
-        searchInput.addEventListener('input', e => searchInventory(e.target.value.trim()));
+        searchInput.addEventListener('input', e => searchInventory(e.target.value));
 
-        function addItem(item) {
+        window.addItem = (item) => {
             const exist = selectedItems.find(i => i.item_id === item.item_id);
-            if (exist) {
-                if (exist.qty < item.stock) exist.qty++;
-            } else {
-                selectedItems.push({ item_id: item.item_id, name: item.name, stock: item.stock, qty: 1 });
-            }
-            renderSelectedItems();
-            updatePreview();
-        }
+            if (exist) { if (exist.qty < item.stock) exist.qty++; }
+            else { selectedItems.push({ ...item, qty: 1 }); }
+            render();
+        };
 
-        function renderSelectedItems() {
+        window.removeItem = (idx) => { selectedItems.splice(idx, 1); render(); };
+
+        function render() {
             selectedItemsTable.innerHTML = '';
             selectedItems.forEach((item, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">${item.name}</td>
-                <td class="px-3 py-2 capitalize whitespace-nowrap text-center">
-                    <input type="number" min="1" max="${item.stock}" value="${item.qty}"
-                        class="border w-16 p-1 text-xs text-center rounded"
-                        onchange="updateQty(${idx}, this.value)">
-                </td>
-                <td class="px-3 py-2 capitalize whitespace-nowrap text-center">
-                    <button type="button" onclick="removeItem(${idx})" class="text-red-600 hover:text-red-800">✕</button>
-                </td>
-            `;
+            <td class="py-3 font-medium text-[#1f1c19]">${item.name}</td>
+            <td class="py-3">
+                <input type="number" value="${item.qty}" min="1" max="${item.stock}" 
+                class="w-16 bg-transparent border-b border-[#e6e0d6] text-center focus:border-[#1f1c19] outline-none" 
+                onchange="updateQty(${idx}, this.value)">
+            </td>
+            <td class="py-3 text-center">
+                <button type="button" onclick="removeItem(${idx})" class="text-[#a49b8c] hover:text-red-500">✕</button>
+            </td>
+        `;
                 selectedItemsTable.appendChild(tr);
             });
-            selectedItemLabel.textContent = selectedItems.map(i => `${i.name} (${i.qty})`).join(', ');
+            updatePreview();
         }
 
-        window.updateQty = (idx, val) => {
-            selectedItems[idx].qty = parseInt(val);
-            updatePreview();
-        };
-
-        window.removeItem = (idx) => {
-            selectedItems.splice(idx, 1);
-            renderSelectedItems();
-            updatePreview();
-        };
-
-        function updatePreview() {
-            const f = borrowForm;
-            const itemsText = selectedItems.length ? selectedItems.map(i => `- ${i.name} × ${i.qty}`).join('\n') : '-';
-            previewText.textContent = `Barang:\n${itemsText}\n\nPeminjam: ${f.borrower_name.value || '-'}\nEmail: ${f.borrower_email.value || '-'}\nTgl Pinjam: ${f.loan_date.value || '-'}\nTgl Kembali: ${f.return_date.value || '-'}`.trim();
-        }
-
+        window.updateQty = (idx, val) => { selectedItems[idx].qty = parseInt(val); updatePreview(); };
         borrowForm.addEventListener('input', updatePreview);
 
         borrowForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!selectedItems.length) return Toast.fire({ icon: 'warning', title: 'Pilih barang' });
+            
+            const confirm = await Swal.fire({ title: 'Lanjutkan Peminjaman?', icon: 'question', showCancelButton: true, confirmButtonText: 'Ya, Lanjutkan' });
+            if (!confirm.isConfirmed) return;
 
-            const csrfToken = document.getElementById('csrf_token').value;
-
-            if (!selectedItems.length) {
-                Swal.fire('Oops', 'Pilih minimal 1 barang', 'warning');
-                return;
-            }
-
-            const result = await Swal.fire({
-                title: 'Konfirmasi Peminjaman?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Pinjam'
-            });
-
-            if (!result.isConfirmed) return;
-
-            submitBtn.disabled = true;
-            submitText.classList.add('hidden');
-            submitLoader.classList.remove('hidden');
+            const btn = document.getElementById('submitBtn');
+            const loader = document.getElementById('submitLoader');
+            const text = document.getElementById('submitText');
+            
+            btn.disabled = true;
+            loader.classList.remove('hidden');
+            text.innerText = 'Memproses...';
 
             try {
-                const payload = {
-                    borrower_name: borrowForm.borrower_name.value,
-                    borrower_email: borrowForm.borrower_email.value,
-                    loan_date: borrowForm.loan_date.value,
-                    return_date: borrowForm.return_date.value,
-                    note: borrowForm.note.value,
-                    items: selectedItems
-                };
-
                 const res = await fetch('{{ url_for("peminjaman_invlabkomp.borrow_submit") }}', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+                    body: JSON.stringify({
+                        borrower_name: borrowForm.borrower_name.value,
+                        borrower_email: borrowForm.borrower_email.value,
+                        loan_date: borrowForm.loan_date.value,
+                        return_date: borrowForm.return_date.value,
+                        note: borrowForm.note.value,
+                        items: selectedItems
+                    })
                 });
-
                 const json = await res.json();
-
                 if (json.ok) {
-                    Toast.fire({
-                        icon: 'success',
-                        title: `Berhasil disimpan · Kode ${json.code}`
-                    });
-
-                    setTimeout(() => {
-                        location.href = '{{ url_for("peminjaman_invlabkomp.history") }}';
-                    }, 1200);
+                    await Toast.fire({ icon: 'success', title: 'Berhasil dipinjam' });
+                    location.href = '{{ url_for("peminjaman_invlabkomp.history") }}';
                 } else {
-                    Toast.fire({
-                        icon: 'error',
-                        title: json.error || 'Gagal menyimpan data'
-                    });
+                    Toast.fire({ icon: 'error', title: json.error || 'Gagal' });
                 }
-            } catch (e) {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Terjadi kesalahan sistem'
-                });
-            } finally {
-                submitBtn.disabled = false;
-                submitText.classList.remove('hidden');
-                submitLoader.classList.add('hidden');
+            } catch (e) { Toast.fire({ icon: 'error', title: 'Sistem Error' }); }
+            finally { 
+                btn.disabled = false; 
+                loader.classList.add('hidden');
+                text.innerText = 'Konfirmasi Peminjaman →';
             }
         });
     });

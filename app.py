@@ -148,18 +148,48 @@ def repository():
             "links": [
                 {"title": "Kalender akademik", "url": url_for('booking_ruangan.jadwal_penggunaan'), "subtext": "Dokumen kalender akademik"},
                 {"title": "Jadwal KBM", "url": "https://drive.google.com/file/d/1x56KSv5q4ihgWq5YGKeRqJauzJGoqL39/view?usp=sharing", "subtext": "Jadwal kegiatan belajar mengajar (KBM)"},
+                {"title": "Rapor Digital Madrasah", "url": "#", "subtext": "Coming Soon", "disabled": True}
             ]
         },
         {
-            "category": "Pengajaran",
+            "category": "Sekolah",
             "color": "emerald",
-            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/></svg>',
             "links": [
-                {"title": "Jurnal Mengajar Harian Guru", "url": "https://docs.google.com/forms/d/e/1FAIpQLSdGZ7jXITewg7GQM7zoSLmPEUglqbMj3TwGFGWZ46HuGSCotg/viewform", "subtext": "Formulir jurnal mengajar harian guru"},
-                {"title": "Presensi Diniyah", "url": "https://script.google.com/macros/s/AKfycbwv4zVl85NIghhD9qwkSkDuwpwQz4i8py2Erm-RSTWr0l-cm3BQOVs1k0i2ClEVze4W/exec", "subtext": "Formulir presensi kegiatan diniyah"},
-                {"title": "Jurnal Ekstrakurikuler", "url": "https://docs.google.com/forms/d/e/1FAIpQLSfu0TYIpe67BVyhjXyaSdkPj5ZdvnynCEB2TXrNnMjuSdqxJQ/viewform", "subtext": "Formulir jurnal kegiatan ekstrakurikuler"},
-                {"title": "Presensi Ekstrakurikuler", "url": "https://script.google.com/macros/s/AKfycbxiuxLz2L7ob5jAG9KUKwT2-uXDtzhGG9VCuBfky6-rLp8cHsv9tG3OW3SVck8ny8dh/exec", "subtext": "Formulir presensi kegiatan ekstrakurikuler"},
-                {"title": "Rapor Digital Madrasah", "url": "#", "subtext": "Coming Soon", "disabled": True}
+                {"title": "Presensi Sekolah", "url": "", "subtext": "Coming Soon", "disabled": True},
+                {"title": "Presensi Diniyah", "url": "https://script.google.com/macros/s/AKfycbwv4zVl85NIghhD9qwkSkDuwpwQz4i8py2Erm-RSTWr0l-cm3BQOVs1k0i2ClEVze4W/exec", "subtext": "Formulir presensi kegiatan kelas diniyyah", "disabled": False},
+                {"title": "Jurnal Mapel", "url": "https://docs.google.com/forms/d/e/1FAIpQLSdGZ7jXITewg7GQM7zoSLmPEUglqbMj3TwGFGWZ46HuGSCotg/viewform", "subtext": "Formulir jurnal kegiatan belajar mengajar mata pelajaran", "disabled": False},
+                {"title": "Supervisi", "url": "#", "subtext": "Coming Soon", "disabled": True},
+            ]
+        },
+        {
+            "category": "Ekstrakurikuler",
+            "color": "amber",
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22a3.5 3.5 0 01-3.5-3.5c0-2 1.5-3.5 3.5-5.5 2 2 3.5 3.5 3.5 5.5A3.5 3.5 0 0112 22zM12 13V2M12 2c-2.5 2.5-6 3.5-8 3.5M12 2c2.5 2.5 6 3.5 8 3.5M12 6.5c-2 2-4 2.5-6 2.5M12 6.5c2 2 4 2.5 6 2.5"/></svg>',
+            "links": [
+                {"title": "Presensi Ekstrakurikuler", "url": "https://script.google.com/macros/s/AKfycbxiuxLz2L7ob5jAG9KUKwT2-uXDtzhGG9VCuBfky6-rLp8cHsv9tG3OW3SVck8ny8dh/exec", "subtext": "Formulir presensi kegiatan ekstrakurikuler", "disabled": False},
+                {"title": "Jurnal Ekstrakurikuler", "url": "https://docs.google.com/forms/d/e/1FAIpQLSfu0TYIpe67BVyhjXyaSdkPj5ZdvnynCEB2TXrNnMjuSdqxJQ/viewform", "subtext": "Formulir jurnal kegiatan ekstrakurikuler", "disabled": False}
+            ]
+        },
+        {
+            "category": "Asrama",
+            "color": "violet",
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
+            "links": [
+                {"title": "Presensi kegiatan Asrama", "url": "https://presensimanu.my.id/login", "subtext": "Formulir presensi kegiatan asrama"},
+                {"title": "Berita Acara Persidangan Santri", "url": "https://docs.google.com/forms/d/e/1FAIpQLSc5OG8Kf879_mOgmQNxIRuTfH3beYR_DZ54waDaDjWudECLtQ/viewform", "subtext": "Formulir berita acara persidangan santri"},
+                {"title": "Buku Catatan Santri", "url": "https://docs.google.com/spreadsheets/d/10smJykmE_TgM4JfR5eigez4bUa5LDEgEtxjnyZJyA1Q/edit?gid=0#gid=0", "subtext": "Under maintenance", "disabled": True},
+                {"title": "Formulir Perizinan", "url": "https://tally.so/r/w5Gqz6", "subtext": "Under maintenance", "disabled": True},
+                {"title": "Jurnal Perizinan", "url": "https://datastudio.google.com/u/0/reporting/73d02ac9-ca68-479f-9fd3-e1f40834dc6b/page/OTbEE", "subtext": "Under maintenance", "disabled": True},
+                {"title": "Tabungan Santri", "url": "#", "subtext": "Under maintenance", "disabled": True}
+            ]
+        },
+        {
+            "category": "Sarpras",
+            "color": "rose",
+            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>',
+            "links": [
+                {"title": "Manajemen sarpras", "url": url_for('peminjaman_aset_landing'), "subtext": "Coming Soon", "disabled": True}
             ]
         },
         {
@@ -172,28 +202,10 @@ def repository():
                 {"title": "Peminjaman Ruangan", "url": url_for('booking_ruangan.booking_landing'), "subtext": "Pengelolaan peminjaman ruangan lab komputer"},
             ]
         },
-        {
-            "category": "Asrama",
-            "color": "violet",
-            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
-            "links": [
-                {"title": "Presensi kegiatan Asrama", "url": "https://presensimanu.my.id/login", "subtext": "Formulir presensi kegiatan asrama"},
-                {"title": "Berita Acara Persidangan Santri", "url": "https://docs.google.com/forms/d/e/1FAIpQLSc5OG8Kf879_mOgmQNxIRuTfH3beYR_DZ54waDaDjWudECLtQ/viewform", "subtext": "Formulir berita acara persidangan santri"},
-                {"title": "Buku Catatan Santri", "url": "https://docs.google.com/spreadsheets/d/10smJykmE_TgM4JfR5eigez4bUa5LDEgEtxjnyZJyA1Q/edit?gid=0#gid=0", "subtext": "Formulir buku catatan santri"},
-                {"title": "Formulir Perizinan", "url": "https://tally.so/r/w5Gqz6", "subtext": "Formulir perizinan kegiatan"},
-                {"title": "Jurnal Perizinan", "url": "https://datastudio.google.com/u/0/reporting/73d02ac9-ca68-479f-9fd3-e1f40834dc6b/page/OTbEE", "subtext": "Formulir jurnal perizinan"}
-            ]
-        },
-        {
-            "category": "Sarpras",
-            "color": "rose",
-            "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>',
-            "links": [
-                {"title": "Manajemen sarpras", "url": url_for('peminjaman_aset_landing'), "subtext": "Coming Soon", "disabled": True}
-            ]
-        }
     ]
     return render_template('repository/landing_repository.html', repository_data=repository_data)
+
+
 
 # landing page
 @app.route("/e-labkomp")

@@ -3,212 +3,200 @@
 {% block title %}Portal e-Manu{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-slate-50/60 flex flex-col md:flex-row antialiased relative overflow-x-hidden">
-    
-    <!-- ========================================== -->
-    <!-- TOP BAR MOBILE (Header khusus HP)          -->
-    <!-- ========================================== -->
-    <div class="md:hidden bg-white border-b border-slate-200 p-4 sticky top-0 z-30 flex items-center justify-between hover:border-indigo-200 active:scale-[0.98] active:bg-slate-50 transition-all duration-200 group">
-        <!-- Tombol Pemicu Sidebar (Besar & Jelas untuk Orang Tua) -->
-        <button id="mobile-sidebar-open" class="flex items-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs transition active:scale-95 cursor-pointer">
-            <i class="fa-solid fa-bars text-sm"></i>
-            <span>PILIH LAYANAN</span>
+<style>
+  #manu-page{
+    --font-display: 'Source Serif 4', ui-serif, Georgia, serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --color-paper: #faf8f5;
+    --color-ink: #1f1c19;
+    --color-ink-soft: #6b6459;
+    --color-ink-faint: #a49b8c;
+    --color-line: #e6e0d6;
+    --color-accent: #a8501f;
+    --color-accent-soft: #f3e6dc;
+  }
+  #manu-page{ background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); overflow-x: clip; }
+  #manu-page h1, #manu-page .idx{ font-family: var(--font-display); font-style: normal; }
+  #manu-page .idx{ font-variant-numeric: tabular-nums; }
+  #manu-page .eyebrow{ font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-ink-faint); }
+  #manu-page .item:hover{ padding-left: 6px; background: rgba(31,28,25,0.03); }
+  #manu-page .item:active{ background: var(--color-accent-soft); transform: scale(0.99); }
+  #manu-page .item:hover .idx, #manu-page .item:hover h3{ color: var(--color-accent); }
+  #manu-page .item:hover .arrow{ color: var(--color-accent); transform: translateX(3px); }
+  #manu-page .sidebar-btn.is-active{ color: var(--color-accent); background: var(--color-accent-soft); border-left-color: var(--color-accent); padding-left: 14px; font-weight: 600; }
+  #manu-page .sidebar-btn:not(.is-active):hover{ color: var(--color-ink); background: rgba(31,28,25,0.03); padding-left: 14px; border-left-color: var(--color-line); }
+</style>
+ 
+<div id="manu-page"
+    class="min-h-screen flex flex-col md:flex-row antialiased relative max-w-[1200px] mx-auto px-5">
+ 
+    <!-- MOBILE HEADER -->
+    <div class="md:hidden px-5 py-4 sticky top-0 z-30 flex items-center justify-between transition-all duration-150"
+         style="border-bottom:1px solid var(--color-line); background:var(--color-paper);">
+        <button id="mobile-sidebar-open"
+            class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-widest active:scale-[0.97] touch-manipulation cursor-pointer"
+            style="color:var(--color-ink);">
+            <i class="fa-solid fa-bars text-base"></i>
+            <span>Menu</span>
         </button>
-        
-        <!-- Penanda Kategori Aktif di Header Mobile -->
-        <span id="mobile-active-badge" class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg max-w-[180px] truncate">
+        <span id="mobile-active-badge" class="text-[11px] font-bold uppercase tracking-widest truncate" style="color:var(--color-ink-faint);">
             {{ repository_data[0].category }}
         </span>
     </div>
-
-    <!-- ========================================== -->
-    <!-- BACKDROP GELAP (Untuk menutup menu HP)     -->
-    <!-- ========================================== -->
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/40 z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"></div>
-
-    <!-- ========================================== -->
-    <!-- UNIFIED RESPONSIVE SIDEBAR (Desktop & HP)  -->
-    <!-- ========================================== -->
-    <aside id="main-sidebar" class="fixed md:sticky top-0 left-0 z-50 md:z-0 w-72 md:w-80 h-full md:h-screen bg-white border-r border-slate-200/80 p-6 flex flex-col justify-between transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shrink-0">
-        <div>
-            <!-- Header Sidebar khusus Mobile (Ada Tombol Silang) -->
-            <div class="flex items-center justify-between md:hidden mb-6 pb-2 border-b border-slate-100 hover:border-indigo-200 active:scale-[0.98] active:bg-slate-50 transition-all duration-200 group">
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pilih Layanan</p>
-                <button id="mobile-sidebar-close" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition cursor-pointer">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Header Sidebar khusus Desktop -->
-            <div class="hidden md:block mb-5 px-2">
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Menu Layanan</p>
-            </div>
-
-            <!-- List Menu Navigasi (Tombol Dibuat Tinggi/py-4 agar Mudah Ditekan Jari) -->
-            <nav class="space-y-2 overflow-y-auto max-h-[calc(100vh-140px)] md:max-h-none pr-1">
-                {% for item in repository_data %}
-                <button data-target="pane-{{ loop.index0 }}" data-category-name="{{ item.category }}"
-                        class="sidebar-btn w-full flex items-center gap-3.5 px-4 py-3.5 md:py-3 rounded-xl text-left text-sm font-semibold transition-all group cursor-pointer
-                               {{ 'bg-indigo-600 text-white shadow-md shadow-indigo-100' if loop.first else 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                    
-                    <div class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors 
-                                {{ 'bg-indigo-700/50 text-white' if loop.first else 'bg-slate-100 text-slate-500 group-hover:bg-slate-200/80' }}">
-                        {{ item.icon | safe }}
-                    </div>
-                    <span class="truncate text-base md:text-sm tracking-wide">{{ item.category }}</span>
-                </button>
-                {% endfor %}
-            </nav>
+ 
+    <!-- BACKDROP -->
+    <div id="sidebar-backdrop"
+        class="fixed inset-0 bg-zinc-900/50 z-40 hidden opacity-0 transition-opacity duration-150 md:hidden"></div>
+ 
+    <!-- SIDEBAR -->
+    <aside id="main-sidebar"
+        class="fixed md:sticky top-0 left-0 z-50 md:z-0 w-72 h-full px-5 py-8 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-out shrink-0 overflow-y-auto"
+        style="background:var(--color-paper); border-right:1px solid var(--color-line);">
+ 
+        <!-- Mobile Close -->
+        <div class="flex items-center justify-between md:hidden mb-8 pb-4" style="border-bottom:1px solid var(--color-line);">
+            <p class="eyebrow">Pilih Layanan</p>
+            <button id="mobile-sidebar-close"
+                class="transition-colors active:scale-[0.97] cursor-pointer touch-manipulation"
+                style="color:var(--color-ink-faint);">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
         </div>
+ 
+        <!-- Desktop Header -->
+        <div class="hidden md:block mb-8 pb-4" style="border-bottom:1px solid var(--color-line);">
+            <p class="eyebrow">Kategori Layanan</p>
+        </div>
+ 
+        <!-- Nav -->
+        <nav class="space-y-0">
+            {% for item in repository_data %}
+            <button data-target="pane-{{ loop.index0 }}" data-category-name="{{ item.category }}"
+                class="sidebar-btn {{ 'is-active' if loop.first else '' }} w-full flex items-center gap-3 px-2 py-3.5 text-left transition-all duration-150 ease-out cursor-pointer touch-manipulation group text-[13px]"
+                style="border-bottom:1px solid var(--color-line); border-left:2px solid transparent; color:var(--color-ink-soft);">
+ 
+                <div class="shrink-0 w-5 flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity">
+                    {{ item.icon | safe }}
+                </div>
+                <span class="uppercase tracking-wide truncate">{{ item.category }}</span>
+            </button>
+            {% endfor %}
+        </nav>
     </aside>
-
-    <!-- ========================================== -->
-    <!-- PANEL KONTEN UTAMA (Sisi Kanan)            -->
-    <!-- ========================================== -->
-    <main class="flex-1 p-4 sm:p-8 md:p-12 max-w-4xl w-full mx-auto">
-        
-        <!-- Banner Informasi Terbatas -->
-        <div class="mb-6 p-4 bg-slate-100 border border-slate-200/80 rounded-2xl flex items-start gap-3.5">
-            <div class="w-9 h-9 rounded-xl bg-white text-indigo-600 flex items-center justify-center shrink-0 border border-slate-200 shadow-sm">
-                <i class="fa-solid fa-shield-halved text-sm"></i>
-            </div>
-            <div class="min-w-0">
-                <h2 class="text-sm font-bold text-slate-800 tracking-wide">MANU Digital Repository</h2>
-                <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                    Selamat datang di layanan pengarsipan resmi. Halaman ini merupakan portal terintegrasi yang bersifat <span class="font-semibold text-slate-700">terbatas hanya untuk kalangan internal</span> lingkungan madrasah.
+ 
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-5 md:p-12 lg:px-16 overflow-y-auto">
+        <div class="max-w-3xl mx-auto">
+ 
+            <!-- BANNER -->
+            <div class="mb-12 pl-4 py-1" style="border-left:2px solid var(--color-accent);">
+                <h2 class="eyebrow" style="color:var(--color-ink);">MANU Digital Repository</h2>
+                <p class="text-sm mt-2 leading-relaxed max-w-[40ch]" style="color:var(--color-ink-soft);">
+                    Layanan pengarsipan resmi. Terbatas hanya untuk kalangan internal lingkungan madrasah.
                 </p>
             </div>
-        </div>
-
-        <!-- Wadah Link per Kategori -->
-        {% for item in repository_data %}
-        <div id="pane-{{ loop.index0 }}" class="content-pane {{ 'block' if loop.first else 'hidden' }} space-y-6">
-            
-            <!-- Judul Sub Bidang yang Sedang Aktif -->
-            <div class="border-b border-slate-200/60 pb-4">
-                <h2 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">{{ item.category }}</h2>
-                <p class="text-sm text-slate-500 mt-1">Silakan pilih menu aplikasi atau formulir di bawah ini.</p>
-            </div>
-
-            <!-- Susunan Kartu Tautan -->
-            <div class="space-y-3">
-                {% for link in item.links %}
+ 
+            {% for item in repository_data %}
+            <div id="pane-{{ loop.index0 }}" class="content-pane {{ 'block' if loop.first else 'hidden' }}">
+ 
+                <h1 class="text-2xl font-semibold tracking-tight leading-snug mb-2.5">{{ item.category }}</h1>
+                <p class="text-sm leading-relaxed mb-9 max-w-[36ch]" style="color:var(--color-ink-soft);">Silakan pilih menu aplikasi atau
+                    formulir di bawah ini.</p>
+ 
+                <div style="border-top:1px solid var(--color-line);">
+                    {% for link in item.links %}
+ 
                     {% if link.disabled %}
-                        <!-- Link Nonaktif -->
-                        <div class="block p-4 rounded-2xl bg-slate-200/40 text-slate-400 border border-slate-200/60 cursor-not-allowed pointer-events-none select-none">
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="min-w-0">
-                                    <h3 class="text-base font-bold text-slate-400">{{ link.title }}</h3>
-                                    {% if link.subtext %}
-                                        <p class="text-xs text-slate-400 mt-1 font-normal line-clamp-1">{{ link.subtext }}</p>
-                                    {% endif %}
-                                </div>
-                                <div class="w-8 h-8 bg-slate-200/80 rounded-full flex items-center justify-center text-slate-400 shrink-0">
-                                    <i class="fa-solid fa-lock text-xs"></i>
-                                </div>
-                            </div>
+                    <div class="flex items-center gap-4 py-5 px-0.5 select-none opacity-40 grayscale cursor-not-allowed"
+                        style="border-bottom:1px solid var(--color-line);">
+                        <span class="idx text-[15px] w-6 shrink-0" style="color:var(--color-ink-faint);">{{ "%02d" | format(loop.index) }}</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-[15px] font-semibold m-0" style="color:var(--color-ink);">{{ link.title }}</h3>
+                            {% if link.subtext %}
+                            <p class="text-xs mt-0.5 m-0 truncate" style="color:var(--color-ink-soft);">{{ link.subtext }}</p>
+                            {% endif %}
                         </div>
+                        <i class="fa-solid fa-lock text-sm shrink-0" style="color:var(--color-ink-faint);"></i>
+                    </div>
+ 
                     {% else %}
-                        <!-- Link Aktif -->
-                        <a href="{{ link.url }}" class="block p-4 rounded-2xl bg-white hover:bg-indigo-50/60 border border-slate-200/80 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all group active:scale-[0.98] active:bg-slate-50 transition-all duration-200 group">
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="min-w-0">
-                                    <h3 class="text-base font-bold text-slate-700 group-hover:text-indigo-900 transition-colors">
-                                        {{ link.title }}
-                                    </h3>
-                                    {% if link.subtext %}
-                                        <p class="text-xs text-slate-400 group-hover:text-indigo-900/60 mt-1 font-normal tracking-wide line-clamp-2">
-                                            {{ link.subtext }}
-                                        </p>
-                                    {% endif %}
-                                </div>
-                                <div class="w-8 h-8 bg-slate-50 text-slate-400 group-hover:bg-indigo-600 group-hover:text-white rounded-full flex items-center justify-center transition-all shrink-0">
-                                    <i class="fa-solid fa-chevron-right text-xs transition-transform group-hover:translate-x-0.5"></i>
-                                </div>
-                            </div>
-                        </a>
+                    <a href="{{ link.url }}"
+                        class="item group flex items-center gap-4 py-5 px-0.5 no-underline text-inherit transition-all duration-150 ease-out cursor-pointer touch-manipulation"
+                        style="border-bottom:1px solid var(--color-line);">
+                        <span class="idx text-[15px] w-6 shrink-0 transition-colors duration-150" style="color:var(--color-ink-faint);">{{ "%02d" | format(loop.index) }}</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-[15px] font-semibold m-0 transition-colors duration-150" style="color:var(--color-ink);">{{ link.title }}</h3>
+                            {% if link.subtext %}
+                            <p class="text-xs mt-0.5 m-0 truncate" style="color:var(--color-ink-soft);">{{ link.subtext }}</p>
+                            {% endif %}
+                        </div>
+                        <span class="arrow text-2xl shrink-0 transition-all duration-150" style="color:var(--color-ink-faint);">&rarr;</span>
+                    </a>
                     {% endif %}
-                {% endfor %}
+ 
+                    {% endfor %}
+                </div>
+ 
             </div>
+            {% endfor %}
+ 
         </div>
-        {% endfor %}
-
     </main>
+ 
 </div>
 
 <!-- ========================================== -->
 <!-- JAVASCRIPT CONTROLLER (TAB & MOBILE DRAWER)-->
 <!-- ========================================== -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
-    const sidebar = document.getElementById('main-sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    const btnOpen = document.getElementById('mobile-sidebar-open');
-    const btnClose = document.getElementById('mobile-sidebar-close');
-    const sidebarButtons = document.querySelectorAll('.sidebar-btn');
-    const contentPanes = document.querySelectorAll('.content-pane');
-    const mobileActiveBadge = document.getElementById('mobile-active-badge');
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('main-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const btnOpen = document.getElementById('mobile-sidebar-open');
+        const btnClose = document.getElementById('mobile-sidebar-close');
+        const sidebarButtons = document.querySelectorAll('.sidebar-btn');
+        const contentPanes = document.querySelectorAll('.content-pane');
+        const mobileActiveBadge = document.getElementById('mobile-active-badge');
 
-    // --- LOGIKA MENURUTI INTERAKSI SIDEBAR MOBILE ---
-    function openMobileSidebar() {
-        backdrop.classList.remove('hidden');
-        setTimeout(() => backdrop.classList.add('opacity-100'), 10);
-        sidebar.classList.remove('-translate-x-full');
-    }
-
-    function closeMobileSidebar() {
-        sidebar.classList.add('-translate-x-full');
-        backdrop.classList.remove('opacity-100');
-        setTimeout(() => backdrop.classList.add('hidden'), 300); // Sinkron durasi transisi Tailwind
-    }
-
-    btnOpen?.addEventListener('click', openMobileSidebar);
-    btnClose?.addEventListener('click', closeMobileSidebar);
-    backdrop?.addEventListener('click', closeMobileSidebar);
-
-    // --- LOGIKA PERPINDAHAN MENU (TAB) ---
-    function switchTab(targetId, categoryName) {
-        // 1. Ganti panel konten
-        contentPanes.forEach(pane => {
-            if (pane.id === targetId) {
-                pane.classList.remove('hidden');
-                pane.classList.add('block');
-            } else {
-                pane.classList.remove('block');
-                pane.classList.add('hidden');
-            }
-        });
-
-        // 2. Ganti style aktif tombol sidebar
-        sidebarButtons.forEach(btn => {
-            const iconContainer = btn.querySelector('.shrink-0');
-            if (btn.getAttribute('data-target') === targetId) {
-                btn.className = "sidebar-btn w-full flex items-center gap-3.5 px-4 py-3.5 md:py-3 rounded-xl text-left text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-100 group cursor-pointer";
-                if(iconContainer) iconContainer.className = "shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-700/50 text-white transition-colors";
-            } else {
-                btn.className = "sidebar-btn w-full flex items-center gap-3.5 px-4 py-3.5 md:py-3 rounded-xl text-left text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all group cursor-pointer";
-                if(iconContainer) iconContainer.className = "shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 text-slate-500 group-hover:bg-slate-200/80 transition-colors";
-            }
-        });
-
-        // 3. Update teks kategori aktif di Top Bar HP
-        if (mobileActiveBadge && categoryName) {
-            mobileActiveBadge.textContent = categoryName;
+        function openMobileSidebar() {
+            backdrop.classList.remove('hidden');
+            setTimeout(() => backdrop.classList.add('opacity-100'), 10);
+            sidebar.classList.remove('-translate-x-full');
         }
 
-        // 4. Otomatis tutup sidebar jika dibuka dari perangkat mobile
-        closeMobileSidebar();
-    }
+        function closeMobileSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.remove('opacity-100');
+            setTimeout(() => backdrop.classList.add('hidden'), 150);
+        }
 
-    // Daftarkan event klik pada setiap menu di dalam sidebar
-    sidebarButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetId = button.getAttribute('data-target');
-            const catName = button.getAttribute('data-category-name');
-            switchTab(targetId, catName);
+        btnOpen?.addEventListener('click', openMobileSidebar);
+        btnClose?.addEventListener('click', closeMobileSidebar);
+        backdrop?.addEventListener('click', closeMobileSidebar);
+
+        function switchTab(targetId, categoryName) {
+            contentPanes.forEach(pane => {
+                pane.classList.toggle('block', pane.id === targetId);
+                pane.classList.toggle('hidden', pane.id !== targetId);
+            });
+
+            sidebarButtons.forEach(btn => {
+                const isActive = btn.getAttribute('data-target') === targetId;
+                btn.classList.toggle('is-active', isActive);
+            });
+ 
+            if (mobileActiveBadge && categoryName) {
+                mobileActiveBadge.textContent = categoryName;
+            }
+
+            closeMobileSidebar();
+        }
+
+        sidebarButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                switchTab(button.getAttribute('data-target'), button.getAttribute('data-category-name'));
+            });
         });
     });
-});
 </script>
 {% endblock %}

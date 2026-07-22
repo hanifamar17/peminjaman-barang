@@ -2,133 +2,83 @@
 {% block title %}Inventory{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
+<div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
 
-    <!-- Back -->
-    <a href="{{ url_for('inventory_labkomp.inventory_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
-
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
-        </svg>
-        <span>Kembali</span>
+    <a href="{{ url_for('inventory_labkomp.inventory_landing') }}" class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
     </a>
 
-    <!-- Header -->
-    <div class="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h2 class="text-xl font-bold text-gray-900 tracking-tight">Inventory Barang</h2>
-            <p class="text-gray-500 text-sm">Kelola dan pantau data barang inventaris</p>
-        </div>
+    <div class="mt-8 mb-10">
+        <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Inventory Barang</h1>
+        <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Kelola dan pantau data barang inventaris. Total: <span id="totalCount" class="font-semibold text-[#1f1c19]">{{ items|length }}</span>.</p>
     </div>
 
-    <!-- Search -->
-    <div class="relative mb-6">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-        </div>
+    <div class="relative z-0 w-full max-w-sm mb-8">
         <input type="text" id="filter"
-            class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
-            placeholder="Cari nama barang, merk, atau lokasi...">
-        <div id="searchCount" class="mt-1 text-xs text-gray-500 hidden"></div>
+            class="block py-2.5 px-0 w-full text-sm text-[#1f1c19] bg-transparent border-0 border-b border-[#e6e0d6] appearance-none focus:outline-none focus:ring-0 focus:border-[#a8501f] peer transition-colors duration-150 rounded-none placeholder-[#a49b8c]"
+            placeholder="Cari nama, merk, lokasi...">
+        <div id="searchCount" class="text-xs text-[#a49b8c] mt-2 hidden"></div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto border-t border-[#e6e0d6]">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="border-b border-[#e6e0d6] text-[11px] font-semibold text-[#a49b8c] uppercase tracking-wider">
+                    <th class="py-2 pr-6 w-12">No</th>
+                    <th class="py-2 pr-6">Barang & Info</th>
+                    <th class="py-2 pr-6 hidden sm:table-cell">Penempatan</th>
+                    <th class="py-2 pr-6">Stock</th>
+                    <th class="py-2 pr-6">UOM</th>
+                    <th class="py-2 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for item in items %}
+                <tr class="group border-b border-[#e6e0d6] hover:bg-[#f3f0ea] transition-colors" data-row>
+                    <td class="py-2 pr-6 text-[13px] font-medium text-[#a49b8c]">
+                        {{ "%02d" | format(loop.index) }}
+                    </td>
+                    <td class="py-2 pr-6">
+                        <div class="text-[14px] font-semibold text-[#1f1c19]">{{ item.name }}</div>
+                        <div class="text-[12px] text-[#a49b8c] mt-0.5">ID: {{ item.item_id }}</div>
+                        <div class="text-[12px] text-[#6b6459] sm:hidden mt-1">{{ item.location }}</div>
+                    </td>
+                    <td class="py-2 pr-6 text-[13px] text-[#6b6459] hidden sm:table-cell">
+                        {{ item.location }}
+                    </td>
+                    <td class="py-2 pr-6 text-[13px] font-semibold text-[#1f1c19]">
+                        {{ item.stock }}
+                    </td>
+                    <td class="py-2 pr-6 text-[13px] text-[#6b6459]">
+                        {{ item.uom }}
+                    </td>
+                    <td class="py-2 text-right">
+                        <div class="flex items-center justify-end gap-4">
+                            <a href="{{ url_for('inventory_labkomp.inventory_edit', item_id=item.item_id) }}"
+                                class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline">Edit</a>
+                            <a href="{{ url_for('inventory_labkomp.inventory_delete', item_id=item.item_id) }}"
+                                class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline">Hapus</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-        <!-- Info -->
-        <div class="mt-2 text-xs text-gray-500 text-right mb-2 p-4">
-            <span id="totalCount">{{ items|length }}</span> barang
-        </div>
+    <div id="emptyState" class="hidden py-10 text-center text-[13px] font-semibold text-[#a49b8c]">
+        Tidak ada data ditemukan
+    </div>
 
-        <!-- Table -->
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50/50 border-b border-gray-100 text-gray-500">
-                    <tr>
-                        <th class="px-6 py-4 font-semibold">Barang & Info</th>
-                        <th class="px-6 py-4 font-semibold">Penempatan</th>
-                        <th class="px-6 py-4 font-semibold">Stock</th>
-                        <th class="px-6 py-4 font-semibold">UOM</th>
-                        <th class="px-6 py-4 font-semibold text-right">Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody id="tableBody" class="bg-white divide-y divide-gray-100">
-                    {% for item in items %}
-                    <tr class="hover:bg-gray-50 text-sm transition" data-row>
-
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="font-bold text-gray-900">{{ item.name }}</div>
-                            <!--bagian ini harusnya menampilkan merek, tapi belum dibuat-->
-                            <div class="text-xs text-gray-500 mt-1">{{ item.name }} <span class="mx-1">•</span> ID: {{
-                                item.item_id
-                                }}</div>
-                            <!-- Muncul di Mobile Saja (menggantikan kolom penempatan) -->
-                            <div class="text-xs text-indigo-600 sm:hidden mt-1">{{ item.location }}
-                            </div>
-                        </td>
-
-                        <!-- Kolom 2: Penempatan (Disembunyikan di Mobile) -->
-                        <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                            <div class="font-medium text-gray-700">{{ item.location }}</div>
-                        </td>
-
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {{ item.stock }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {{ item.uom }}
-                        </td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
-                            <div class="flex items-center justify-end gap-4">
-                                <a href="{{ url_for('inventory_labkomp.inventory_edit', item_id=item.item_id) }}"
-                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium transition">
-                                    Edit
-                                </a>
-
-                                <a href="{{ url_for('inventory_labkomp.inventory_delete', item_id=item.item_id) }}"
-                                    class="text-red-500 hover:text-red-700 text-sm font-medium transition">
-                                    Hapus
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
-            <div class="text-xs text-gray-500 order-2 sm:order-1">
-                Halaman <span id="currentPage" class="font-bold text-gray-900">1</span>
-                dari <span id="totalPages" class="font-bold text-gray-900">1</span>
-            </div>
-
-            <div class="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
-                <button id="prevBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
-                    hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
-                    Prev
-                </button>
-
-                <button id="nextBtn" class="flex-1 sm:flex-none min-w-[100px] px-4 py-2.5 text-xs font-semibold border border-gray-300 rounded-lg bg-white text-gray-700 
-                    hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
-                    Next
-                </button>
-            </div>
-        </div>
-
-        <!-- Empty -->
-        <div id="emptyState" class="hidden p-8 text-center">
-            <div class="text-4xl mb-2">📦</div>
-            <p class="text-gray-600 text-sm">Tidak ada data ditemukan</p>
+    <div class="flex items-center justify-between py-6 border-b border-[#e6e0d6] text-[13px] font-medium text-[#6b6459]">
+        <div>Hal <span id="currentPage" class="text-[#1f1c19]">1</span>/<span id="totalPages" class="text-[#1f1c19]">1</span></div>
+        <div class="flex gap-5">
+            <button id="prevBtn" class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer">
+                &larr; Prev
+            </button>
+            <button id="nextBtn" class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer">
+                Next &rarr;
+            </button>
         </div>
     </div>
 </div>

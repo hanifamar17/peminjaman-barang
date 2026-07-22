@@ -2,131 +2,87 @@
 {% block title %}{{ 'Edit Inventory' if item else 'Tambah Inventory' }}{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
-    <a href="{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-              hover:text-blue-600 hover:bg-blue-50 active:scale-95 active:bg-gray-100 group">
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
-        </svg>
-        <span>Kembali</span>
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[var(--ink)]">
+    <a href="{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
     </a>
 
-    <div class="mb-6 mt-2">
-        <h2 class="text-xl font-bold text-gray-900">{{ 'Edit Inventory: ' + item.item_id if item else 'Tambah Inventory'
-            }}</h2>
-        <p class="text-gray-600 text-sm">{{ 'Perbarui detail informasi barang inventory' if item else 'Lengkapi formulir
-            untuk menambah barang baru' }}</p>
+
+    <div class="mt-8 mb-10">
+        <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">{{ 'Edit Inventory: ' +
+            item.item_id if item else 'Tambah Inventory' }}</h1>
+        <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">{{ 'Perbarui detail
+            informasi barang inventory' if item else 'Lengkapi formulir untuk menambah barang baru' }}</p>
     </div>
 
-    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg">
-        <form method="POST" class="space-y-6">
-            <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Nama
-                        Barang</label>
-                    <input type="text" name="name" required value="{{ item.name }}"
-                        placeholder="Masukkan nama barang..."
-                        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
-                </div>
-                <div>
-                    <label
-                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Stock</label>
-                    <input type="number" name="stock" required value="{{ item.stock if item else '' }}" placeholder="0"
-                        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
-                </div>
+    <form method="POST" class="space-y-5">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="group">
+            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Nama Barang</label>
+            <input type="text" name="name" required value="{{ item.name if item else '' }}"
+                placeholder="Contoh: Monitor LED 24 inch"
+                class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 transition-colors">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="group">
+                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Stock</label>
+                <input type="number" name="stock" required value="{{ item.stock if item else '' }}" placeholder="0"
+                    class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 transition-colors">
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">UOM
-                        (Satuan)</label>
-                    <div class="relative">
-                        <select name="uom" required
-                            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition appearance-none cursor-pointer">
-                            <option value="" disabled {{ 'selected' if not item }}>Pilih Satuan</option>
-                            <option value="Unit" {{ 'selected' if item and item.uom=='Unit' }}>Unit (PC, Monitor, dll)
-                            </option>
-                            <option value="Buah" {{ 'selected' if item and item.uom=='Buah' }}>Buah (Mouse, Keyboard, dll)
-                            </option>
-                            <option value="Set" {{ 'selected' if item and item.uom=='Set' }}>Set (Speaker, Toolkit, dll)
-                            </option>
-                            <option value="Pcs" {{ 'selected' if item and item.uom=='Pcs' }}>Pcs (Komponen)</option>
-                            <option value="Roll" {{ 'selected' if item and item.uom=='Roll' }}>Roll (Kabel)</option>
-                            <option value="Box" {{ 'selected' if item and item.uom=='Box' }}>Box (Connector)</option>
-                        </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <label
-                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Kondisi</label>
-                    <div class="relative">
-                        <select name="condition" required
-                            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition appearance-none cursor-pointer">
-                            <option value="Baik" {{ 'selected' if item and item.condition=='Baik' }}>Baik</option>
-                            <option value="Rusak Ringan" {{ 'selected' if item and item.condition=='Rusak Ringan' }}>
-                                Rusak Ringan</option>
-                            <option value="Rusak Berat" {{ 'selected' if item and item.condition=='Rusak Berat' }}>Rusak
-                                Berat</option>
-                        </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label
-                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Lokasi</label>
-                    <input type="text" name="location" value="{{ item.location if item else '' }}"
-                        placeholder="Contoh: Gudang Utama, Rak A1"
-                        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">
-                </div>
+            <div class="group">
+                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">UOM</label>
+                <select name="uom" required
+                    class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 cursor-pointer">
+                    <option value="" disabled {{ 'selected' if not item }}>Pilih Satuan</option>
+                    <option value="Unit" {{ 'selected' if item and item.uom=='Unit' }}>Unit</option>
+                    <option value="Buah" {{ 'selected' if item and item.uom=='Buah' }}>Buah</option>
+                    <option value="Set" {{ 'selected' if item and item.uom=='Set' }}>Set</option>
+                    <option value="Pcs" {{ 'selected' if item and item.uom=='Pcs' }}>Pcs</option>
+                    <option value="Roll" {{ 'selected' if item and item.uom=='Roll' }}>Roll</option>
+                    <option value="Box" {{ 'selected' if item and item.uom=='Box' }}>Box</option>
+                </select>
             </div>
+        </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Catatan</label>
-                <textarea name="note" rows="3" placeholder="Tambahkan keterangan tambahan jika ada..."
-                    class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition">{{ item.note if item else '' }}</textarea>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="group">
+                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Kondisi</label>
+                <select name="condition" required
+                    class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 cursor-pointer">
+                    <option value="Baik" {{ 'selected' if item and item.condition=='Baik' }}>Baik</option>
+                    <option value="Rusak Ringan" {{ 'selected' if item and item.condition=='Rusak Ringan' }}>Rusak
+                        Ringan</option>
+                    <option value="Rusak Berat" {{ 'selected' if item and item.condition=='Rusak Berat' }}>Rusak Berat
+                    </option>
+                </select>
             </div>
-
-            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 mt-2 border-t border-gray-100">
-                <a href="{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}"
-                    class="w-full sm:w-auto px-6 py-2.5 text-xs font-semibold text-center text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all">
-                    Batal
-                </a>
-                <button type="submit" id="submitBtn"
-                    class="w-full sm:w-auto min-w-[140px] px-6 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:scale-95 transition-all cursor-pointer shadow-sm flex items-center justify-center">
-                    <span id="submitText">{{ 'Perbarui Data' if item else 'Simpan Inventory' }}</span>
-
-                    <div id="submitLoader" class="hidden">
-                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                            </circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                    </div>
-                </button>
+            <div class="group">
+                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Lokasi</label>
+                <input type="text" name="location" value="{{ item.location if item else '' }}"
+                    placeholder="Contoh: Rak A1"
+                    class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 transition-colors">
             </div>
-        </form>
-    </div>
+        </div>
+
+        <div class="group">
+            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Catatan</label>
+            <textarea name="note" rows="2" placeholder="Keterangan tambahan..."
+                class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 resize-none">{{ item.note if item else '' }}</textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-6 pt-2">
+            <a href="{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}"
+                class="text-[12px] font-bold text-zinc-400 uppercase hover:text-zinc-900 transition-colors">Batal</a>
+            <button type="submit" id="submitBtn"
+                class="bg-zinc-900 text-white text-[12px] font-bold uppercase px-6 py-3 hover:bg-zinc-800 transition-all active:scale-[0.98]">
+                <span id="submitText">{{ 'Perbarui Data' if item else 'Simpan Inventory' }}</span>
+            </button>
+        </div>
+    </form>
 </div>
 
 

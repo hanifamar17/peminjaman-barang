@@ -1,334 +1,105 @@
 {% extends "base.html" %}
 {% block content %}
 <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
-<div class="max-w-2xl mx-auto px-4 py-6">
-    <a href="{{ url_for('peminjaman_invlabkomp.peminjaman_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
 
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
-        </svg>
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[#1f1c19]">
 
-        <span>Kembali</span>
+    <a href="{{ url_for('peminjaman_invlabkomp.peminjaman_landing') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
     </a>
 
-    <div class="mb-6 mt-2">
-        <h1 class="text-xl font-bold text-gray-900">Pengembalian Barang</h1>
-        <p class="text-gray-600 text-sm">Validasi pengembalian barang inventaris laboratorium.</p>
+    <div class="mt-8 mb-10">
+        <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Pengembalian Barang
+        </h1>
+        <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Masukkan kode
+            peminjaman/referensi pada form di bawah</p>
     </div>
-
-    <div class="bg-white rounded-lg border border-slate-200 p-6 mb-4">
-        <label for="loanCode" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kode
-            Peminjaman</label>
-        <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </span>
-            <input id="loanCode" type="text" placeholder="Masukkan kode ref..."
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-blue-500 font-mono transition-all uppercase" />
-
-            <div id="loanLoader" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center">
-                <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
+    
+    <div class="relative w-full mb-8">
+        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wide mb-1">Kode Peminjaman</label>
+        <input id="loanCode" type="text" placeholder="Masukkan kode ref..." class="block py-2.5 w-full text-[15px] font-semibold border-b border-zinc-200 focus:outline-none focus:border-zinc-900 uppercase font-mono">
+        <div id="loanLoader" class="hidden absolute right-0 top-7"><div class="w-4 h-4 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin"></div></div>
+    </div>
+    <div id="loanSummary" class="hidden space-y-6 mb-8 border-t border-zinc-200 pt-6">
+        <div class="grid grid-cols-2 gap-4">
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Kode Referensi</span><span id="sIdItem" class="text-sm font-mono font-semibold bg-zinc-100 px-2"></span></div>
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Status</span><span id="sStatus" class="inline-block mt-0.5 text-xs font-bold uppercase"></span></div>
+        </div>
+        <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Peminjam</span><p id="sBorrower" class="text-base font-semibold"></p></div>
+        <div class="grid grid-cols-2 gap-4">
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Tgl Pinjam</span><p id="sLoanDate" class="text-sm font-semibold"></p></div>
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Tgl Kembali</span><p id="sReturnDate" class="text-sm font-semibold"></p></div>
+        </div>
+        <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Catatan</span><p id="sNote" class="text-sm text-zinc-500 font-mono"></p></div>
+        <div>
+            <h3 class="text-[13px] font-bold uppercase tracking-widest">Daftar Barang</h3>
+            <table class="w-full text-left text-sm mt-4"><tbody id="sItems" class="divide-y divide-zinc-100"></tbody></table>
         </div>
     </div>
-
-    <div id="loanSummary" class="hidden space-y-4 animate-in fade-in slide-in-from-top-4 duration-300 mb-4">
-        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <div class="p-4 border-b border-slate-50 bg-slate-50/50">
-                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide">Ringkasan Peminjaman</h2>
-            </div>
-
-            <div class="bg-gray-50/50 p-4 md:p-6 border-b border-gray-100">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Kode Referensi</p>
-                        <p id="sIdItem" class="mt-1 text-sm font-mono font-medium text-gray-900 select-all"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Peminjam</p>
-                        <p id="sBorrower" class="mt-1 text-sm font-medium text-gray-900"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Status Saat Ini</p>
-                        <span id="sStatus" class="mt-1 text-sm font-medium text-gray-900"></span>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Tgl Pinjam</p>
-                        <p id="sLoanDate" class="mt-1 text-sm font-medium text-gray-900"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Tgl Kembali</p>
-                        <p id="sReturnDate" class="mt-1 text-sm font-medium text-gray-900"></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
-                <div>
-                    <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Catatan Tambahan</p>
-                    <p id="sNote" class="mt-1 text-sm text-amber-900 font-mono line-clamp-3"></p>
-                </div>
-            </div>
-
-            <div class="p-2 md:p-4 mt-2">
-                <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                        </path>
-                    </svg>
-                    Daftar Barang
-                </h3>
-                <div class="overflow-x-auto rounded-lg border border-gray-100">
-                    <table class="min-w-full divide-y divide-gray-100">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col"
-                                    class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Barang</th>
-                                <th scope="col"
-                                    class="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Jumlah (Qty)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sItems" class="bg-white divide-y divide-gray-100"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-lg border border-slate-200 p-5">
-        <!--
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Foto Bukti
-                Pengembalian</label>-->
-
-        <div class="relative group">
-            <input type="file" id="proof" accept="image/*"
-                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 hidden" />
-            <div
-                class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center group-hover:border-blue-400 group-hover:bg-blue-50 transition-all hidden">
-                <div
-                    class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-100">
-                    <svg class="w-6 h-6 text-slate-400 group-hover:text-blue-600" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
-                        </path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                </div>
-                <p class="text-xs text-slate-500 font-medium" id="fileName">Klik untuk ambil foto atau upload</p>
-            </div>
-        </div>
-
-        <button id="btnReturn"
-            class="mt-6 w-full bg-slate-900 text-white py-4 rounded-lg font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:scale-100 flex items-center justify-center gap-2 cursor-pointer">
-            Konfirmasi Pengembalian
-        </button>
+    <div class="space-y-4">
+        <input type="file" id="proof" accept="image/*" class="hidden">
+        <div id="fileName" class="text-xs"></div>
+        <button id="btnReturn" class="w-full bg-zinc-900 text-white text-[13px] font-semibold py-4 hover:bg-zinc-800 disabled:bg-zinc-200">Konfirmasi Pengembalian</button>
     </div>
 </div>
-</div>
-
-<!--Swal mixin-->
 <script>
-    // Mixin untuk toast notifikasi
-    const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 2500,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.addEventListener("mouseenter", Swal.stopTimer);
-            toast.addEventListener("mouseleave", Swal.resumeTimer);
-        }
-    });
-</script>
-<script>
+    const Toast = Swal.mixin({ toast: true, position: "top-end", showConfirmButton: false, timer: 2000, timerProgressBar: true });
     document.addEventListener("DOMContentLoaded", () => {
-        const loanCodeInput = document.getElementById("loanCode");
-        const summaryBox = document.getElementById("loanSummary");
-        const btnReturn = document.getElementById("btnReturn");
-        const proofInput = document.getElementById("proof");
-        const fileNameText = document.getElementById("fileName");
-        const loanLoader = document.getElementById("loanLoader");
-        const csrfToken = document.getElementById("csrf_token").value;
-
-        let currentLoan = null;
-        let debounceTimer = null;
-
-        loanCodeInput.addEventListener("input", function () {
-            this.value = this.value.toUpperCase();
-
-            clearTimeout(debounceTimer);
-            // Tampilkan loader segera saat user mengetik (opsional, memberikan feedback instan)
-            if (loanCodeInput.value.trim()) {
-                loanLoader.classList.remove("hidden");
-            }
-            debounceTimer = setTimeout(fetchLoan, 500);
+        const [loanCode, summary, btn, proof, loader, token] = [document.getElementById("loanCode"), document.getElementById("loanSummary"), document.getElementById("btnReturn"), document.getElementById("proof"), document.getElementById("loanLoader"), document.getElementById("csrf_token").value];
+        let currentLoan, debounce;
+        loanCode.addEventListener("input", (e) => {
+            e.target.value = e.target.value.toUpperCase();
+            clearTimeout(debounce);
+            if(e.target.value.trim()) loader.classList.remove("hidden");
+            debounce = setTimeout(fetchLoan, 500);
         });
-
-        // Feedback nama file setelah pilih foto
-        proofInput.addEventListener("change", (e) => {
-            if (e.target.files.length > 0) {
-                fileNameText.innerText = "📸 " + e.target.files[0].name;
-                fileNameText.classList.add("text-blue-600", "font-bold");
-            }
+        proof.addEventListener("change", (e) => {
+            if(e.target.files.length) document.getElementById("fileName").innerText = "📸 " + e.target.files[0].name;
         });
-
-        loanCodeInput.addEventListener("input", () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(fetchLoan, 500);
-        });
-
         function fetchLoan() {
-            const code = loanCodeInput.value.trim();
-            if (!code) {
-                summaryBox.classList.add("hidden");
-                loanLoader.classList.add("hidden");
-                return;
-            }
-
-            loanLoader.classList.remove("hidden");
-            summaryBox.classList.add("hidden");
-
-            fetch(`/peminjaman/api/loan/${code}`)
-                .then(res => res.json())
-                .then(res => {
-                    loanLoader.classList.add("hidden");
-                    if (!res.ok) {
-                        summaryBox.classList.add("hidden");
-                        return;
-                    }
-
-                    const loan = res.loan;
-                    currentLoan = loan;
-
-                    const formatDate = (dateStr) => {
-                        if (!dateStr) return "-";
-                        const [year, month, day] = dateStr.split('-');
-                        const shortYear = year.slice(-2); // Ambil 2 digit terakhir tahun
-                        return `${day}/${month}/${shortYear}`;
-                    };
-
-                    const formattedLoanDate = formatDate(loan.loan_date);
-                    const formattedReturnDate = formatDate(loan.return_date);
-
-                    document.getElementById("sIdItem").innerText = loan.code;
-                    document.getElementById("sBorrower").innerText = loan.borrower_name;
-                    document.getElementById("sLoanDate").innerText = formattedLoanDate;
-                    document.getElementById("sReturnDate").innerText = formattedReturnDate;
-                    document.getElementById("sNote").innerText = loan.note || "-";
-
-                    const statusEl = document.getElementById("sStatus");
-                    statusEl.innerText = loan.status;
-
-                    // Styling Status Badge
-                    if (loan.status.toLowerCase() === 'dikembalikan') {
-                        statusEl.className = "inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight bg-green-100 text-green-700 ring-1 ring-green-600/20";
-                        btnReturn.disabled = true;
-                        btnReturn.innerText = "Dikembalikan";
-                    } else {
-                        statusEl.className = "inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight bg-amber-100 text-amber-700 ring-1 ring-amber-600/20";
-                        btnReturn.disabled = false;
-                        btnReturn.innerText = "Konfirmasi Pengembalian";
-                    }
-
-                    const itemsBox = document.getElementById("sItems");
-                    itemsBox.innerHTML = "";
-                    loan.items.forEach(item => {
-                        const tr = document.createElement("tr");
-                        tr.className = "hover:bg-gray-50 transition-colors"; // Opsional: efek hover agar selaras dengan UI sebelumnya
-
-                        tr.innerHTML = `
-                            <td class="px-3 py-2 capitalize whitespace-nowrap text-sm">
-                                ${item.item_name}
-                            </td>
-                            <td class="px-3 py-2 capitalize whitespace-nowrap text-sm text-right font-mono">
-                                ${item.qty} unit
-                            </td>
-                        `;
-
-                        itemsBox.appendChild(tr);
-                    });
-
-                    summaryBox.classList.remove("hidden");
-                })
-                .catch(err => {
-                    // Pastikan loader hilang jika terjadi error network
-                    loanLoader.classList.add("hidden");
-                    console.error(err);
-                });
+            const code = loanCode.value.trim();
+            if(!code) { summary.classList.add("hidden"); loader.classList.add("hidden"); return; }
+            fetch(`/peminjaman/api/loan/${code}`).then(res => res.json()).then(res => {
+                loader.classList.add("hidden");
+                if(!res.ok) { summary.classList.add("hidden"); return; }
+                currentLoan = res.loan;
+                document.getElementById("sIdItem").innerText = currentLoan.code;
+                document.getElementById("sBorrower").innerText = currentLoan.borrower_name;
+                document.getElementById("sLoanDate").innerText = currentLoan.loan_date;
+                document.getElementById("sReturnDate").innerText = currentLoan.return_date;
+                document.getElementById("sNote").innerText = currentLoan.note || "-";
+                document.getElementById("sStatus").innerText = currentLoan.status;
+                const items = document.getElementById("sItems");
+                items.innerHTML = "";
+                currentLoan.items.forEach(i => items.innerHTML += `<tr class="border-b"><td class="py-0.5">${i.item_name}</td><td class="text-right">${i.qty} unit</td></tr>`);
+                if(currentLoan.status.toLowerCase() === 'dikembalikan') { btn.disabled = true; btn.innerText = "Dikembalikan"; }
+                else { btn.disabled = false; btn.innerText = "Konfirmasi Pengembalian"; }
+                summary.classList.remove("hidden");
+            });
         }
-
-        btnReturn.addEventListener("click", () => {
-            if (!currentLoan) return;
-
-            Swal.fire({
-                title: "Proses Pengembalian?",
-                text: "Pastikan fisik barang sudah diperiksa dan sesuai jumlahnya.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#0f172a", // slate-900
-                confirmButtonText: "Ya, Selesaikan",
-                cancelButtonText: "Batal"
-            }).then(result => {
-                if (!result.isConfirmed) return;
-
-                const formData = new FormData();
-                formData.append("code", currentLoan.code);
-                if (proofInput.files.length > 0) {
-                    formData.append("proof", proofInput.files[0]);
-                }
-
-                // Loading State
-                btnReturn.disabled = true;
-                btnReturn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
-
-                fetch('{{url_for("peminjaman_invlabkomp.return_submit")}}', {
-                    method: "POST",
-                    headers: {
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: formData
-                })
-                    .then(res => res.json())
-                    .then(res => {
-                        if (res.ok) {
-                            Toast.fire({
-                                icon: "success",
-                                title: "Berhasil dikembalikan"
-                            }).then(() => {
-                                location.reload(); // Reload setelah toast selesai (2 detik)
-                            });
-                        } else {
-                            Toast.fire({
-                                icon: "error",
-                                title: res.error || "Gagal memproses"
-                            });
-
-                            // Reset tombol jika gagal
-                            btnReturn.disabled = false;
-                            btnReturn.innerText = "Konfirmasi Pengembalian";
-                        }
-                    })
-                    .catch(() => {
-                        Toast.fire({
-                            icon: "error",
-                            title: "Server tidak merespons"
-                        });
-                        btnReturn.disabled = false;
-                        btnReturn.innerText = "Konfirmasi Pengembalian";
-                    });
+        btn.addEventListener("click", () => {
+            if(!currentLoan) return;
+            Swal.fire({ title: "Proses Pengembalian?", text: "Pastikan fisik sesuai.", icon: "warning", showCancelButton: true, confirmButtonText: "Ya, Selesaikan" }).then(r => {
+                if(!r.isConfirmed) return;
+                const fd = new FormData();
+                fd.append("code", currentLoan.code);
+                if(proof.files.length) fd.append("proof", proof.files[0]);
+                btn.disabled = true;
+                btn.innerHTML = `<svg class="animate-spin h-4 w-4 inline mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Memproses...`;
+                fetch('{{url_for("peminjaman_invlabkomp.return_submit")}}', { method: "POST", headers: { 'X-CSRFToken': token }, body: fd }).then(res => res.json()).then(res => {
+                    if(res.ok) {
+                        Toast.fire({ icon: "success", title: "Berhasil dikembalikan" }).then(() => location.reload());
+                    } else { 
+                        Toast.fire({ icon: "error", title: res.error || "Gagal" }); 
+                        btn.disabled = false; 
+                        btn.innerText = "Konfirmasi Pengembalian";
+                    }
+                }).catch(() => {
+                    Toast.fire({ icon: "error", title: "Server Error" });
+                    btn.disabled = false;
+                    btn.innerText = "Konfirmasi Pengembalian";
+                });
             });
         });
     });

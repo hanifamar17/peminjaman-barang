@@ -1,88 +1,69 @@
 {% extends 'base.html' %}
+
 {% block title %}Manajemen Inventaris{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto px-6 py-12 sm:py-20">
+<div class="max-w-[460px] mx-auto px-5 pt-14 pb-20 bg-[#faf8f5] text-[#1f1c19] font-['Inter',ui-sans-serif,system-ui,sans-serif] overflow-x-clip">
 
-  <!-- ========================================== -->
-  <!-- HEADER HALAMAN (Lebih Berstruktur)         -->
-  <!-- ========================================== -->
-  <div class="text-center mb-10">
-    <!-- Badge Kecil Penyelaras Objek -->
-    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-slate-100 text-slate-500 border border-slate-200/60 mb-3">
-        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Sistem Inventaris
-    </span>
-    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-      Inventaris Barang
-    </h1>
-    <p class="text-xs sm:text-sm text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed">
-      Kelola ketersediaan, kondisi, dan lokasi barang laboratorium secara terpusat.
-    </p>
+  <div class="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#a8501f] mb-3">
+    Lab Komputer
   </div>
 
-  <!-- ========================================== -->
-  <!-- DAFTAR MENU UTAMA                          -->
-  <!-- ========================================== -->
-  <div class="space-y-3.5">
+  <h1 class="text-[26px] leading-[1.15] font-semibold font-['Source_Serif_4',ui-serif,Georgia,serif] tracking-[-0.01em] mb-3 break-words min-w-0">
+    Inventaris Barang
+  </h1>
 
-    <!-- Tombol 1: Daftar Inventaris -->
-    <a href="{{ url_for('inventory_labkomp.inventory_list') }}" 
-       class="block p-4 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:border-indigo-200 active:scale-[0.98] active:bg-slate-50 transition-all duration-200 cursor-pointer group">
-      <div class="flex items-center gap-3.5">
-        <!-- Kotak Ikon yang Lembut & Clean -->
-        <div class="w-11 h-11 rounded-xl bg-slate-50 text-slate-500 border border-slate-100 flex items-center justify-center shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-        </div>
-        <!-- Konten Teks -->
-        <div class="flex-1 min-w-0">
-          <h3 class="font-bold text-slate-800 text-sm sm:text-base group-hover:text-slate-900">Daftar Inventaris</h3>
-          <p class="text-xs text-slate-400 mt-0.5 truncate">Lihat, cari, dan periksa semua data barang</p>
-        </div>
-        <!-- Panah Indikator -->
-        <svg class="w-4 h-4 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
+  <p class="text-[14px] leading-relaxed max-w-[36ch] mb-10 text-[#6b6459]">
+    Kelola ketersediaan, kondisi, dan lokasi barang laboratorium secara terpusat.
+  </p>
+
+  <nav class="border-t border-[#e6e0d6]">
+
+    <a href="{{ url_for('inventory_labkomp.inventory_list') }}"
+      class="group flex items-center gap-4 py-5 border-b border-[#e6e0d6] no-underline transition-all duration-150 ease-out touch-manipulation cursor-pointer select-none [-webkit-tap-highlight-color:transparent] hover:pl-[6px] hover:bg-[#1f1c19]/[0.02] active:bg-[#f3e6dc] active:scale-[0.99]">
+      <span class="font-['Source_Serif_4',ui-serif,Georgia,serif] tabular-nums text-[15px] w-6 shrink-0 text-[#a49b8c] transition-colors duration-150 group-hover:text-[#a8501f]">
+        01
+      </span>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-[15px] font-semibold m-0 text-[#1f1c19] transition-colors duration-150 group-hover:text-[#a8501f]">
+          Daftar Inventaris
+        </h3>
+        <p class="text-[13px] mt-0.5 m-0 text-[#a49b8c]">
+          Lihat, cari, dan periksa semua data barang
+        </p>
       </div>
+      <svg class="w-4 h-4 shrink-0 text-[#a49b8c] transition-all duration-150 group-hover:text-[#a8501f] group-hover:translate-x-[3px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3.333 8h9.334"/><path d="M8 3.333 12.667 8 8 12.667"/>
+      </svg>
     </a>
 
-    <!-- Tombol 2: Tambah Inventaris -->
-    <a href="{{ url_for('inventory_labkomp.inventory_add') }}" 
-       class="block p-4 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:border-indigo-200 active:scale-[0.98] active:bg-slate-50 transition-all duration-200 cursor-pointer group">
-      <div class="flex items-center gap-3.5">
-        <!-- Kotak Ikon -->
-        <div class="w-11 h-11 rounded-xl bg-slate-50 text-slate-500 border border-slate-100 flex items-center justify-center shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-        </div>
-        <!-- Konten Teks -->
-        <div class="flex-1 min-w-0">
-          <h3 class="font-bold text-slate-800 text-sm sm:text-base group-hover:text-slate-900">Tambah Inventaris</h3>
-          <p class="text-xs text-slate-400 mt-0.5 truncate">Input barang baru atau peralatan laboratorium</p>
-        </div>
-        <!-- Panah Indikator -->
-        <svg class="w-4 h-4 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
+    <a href="{{ url_for('inventory_labkomp.inventory_add') }}"
+      class="group flex items-center gap-4 py-5 border-b border-[#e6e0d6] relative no-underline transition-all duration-150 ease-out touch-manipulation cursor-pointer select-none [-webkit-tap-highlight-color:transparent] hover:pl-[6px] hover:bg-[#1f1c19]/[0.02] active:bg-[#f3e6dc] active:scale-[0.99]">
+      <span class="font-['Source_Serif_4',ui-serif,Georgia,serif] tabular-nums text-[15px] w-6 shrink-0 text-[#a8501f] transition-colors duration-150">
+        02
+      </span>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-[15px] font-semibold m-0 text-[#1f1c19] transition-colors duration-150 group-hover:text-[#a8501f]">
+          Tambah Inventaris
+        </h3>
+        <p class="text-[13px] mt-0.5 m-0 text-[#a49b8c]">
+          Input barang baru atau peralatan laboratorium
+        </p>
       </div>
+      <svg class="w-4 h-4 shrink-0 text-[#a8501f] transition-all duration-150 group-hover:translate-x-[3px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3.333 8h9.334"/><path d="M8 3.333 12.667 8 8 12.667"/>
+      </svg>
     </a>
 
-    <!-- ========================================== -->
-    <!-- TOMBOL KEMBALI (Gaya Garis Tepi Halus)      -->
-    <!-- ========================================== -->
-    <a href="/repository"
-       class="block p-3.5 text-center bg-slate-50 border border-slate-200/60 rounded-xl transition-all active:scale-[0.98] active:bg-slate-100 cursor-pointer mt-6 group">
-      <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 group-hover:text-slate-500 transition-colors">
-        <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        <span>Kembali ke Dashboard Utama</span>
-      </div>
-    </a>
+  </nav>
 
-  </div>
+  <a href="/repository"
+    class="inline-flex items-center gap-2 mt-8 text-[13px] font-medium text-[#6b6459] no-underline transition-all duration-150 touch-manipulation cursor-pointer select-none hover:text-[#1f1c19] hover:-translate-x-[2px] active:scale-[0.97]">
+    <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12.667 8H3.333"/><path d="M8 12.667 3.333 8 8 3.333"/>
+    </svg>
+    Kembali ke Dashboard Utama
+  </a>
 
 </div>
 {% endblock %}

@@ -11,140 +11,361 @@
     <!-- Tailwind CSS (dihasilkan oleh Tailwind CLI) -->
     <link href="{{ url_for('static', filename='/output.css') }}" rel="stylesheet">
 
-    <!-- Font dari Google Fonts -->
+    <!-- Font: satu keluarga, dipakai secara sengaja (bukan Inter default) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
 
-    <!-- SweetAlert2 untuk notifikasi -->
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Phosphor Icons (outline, satu keluarga ikon konsisten) -->
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
     <!-- Font Awesome untuk ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+
     <style>
+        :root {
+            --ink: #17171a;
+            --ink-soft: #5c5952;
+            --ink-faint: #a19c92;
+            --paper: #faf9f7;
+            --line: #e7e4de;
+            --accent: #2d5c4d;
+            /* hijau tua kalem, bukan indigo generik */
+            --accent-soft: #eef3f0;
+        }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Manrope', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            overflow-x: clip;
         }
 
-        .progress-bar {
-            height: 6px;
-            border-radius: 3px;
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .nav-link {
-            position: relative;
+        /* garis bawah nav-link, statement, bukan gradient */
+        .nav-mark {
+            box-shadow: inset 0 -2px 0 0 var(--accent);
         }
 
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
-            background-color: #4f46e5;
-            transition: width 0.3s ease;
+        .menu-panel {
+            transform-origin: top right;
+            transition: opacity .16s ease, transform .16s ease;
         }
 
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .section-fade {
+        .menu-panel[data-state="closed"] {
             opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
+            transform: scale(.97) translateY(-4px);
+            pointer-events: none;
         }
 
-        .section-fade.visible {
+        .menu-panel[data-state="open"] {
             opacity: 1;
-            transform: translateY(0);
+            transform: scale(1) translateY(0);
+        }
+
+        /* ===========================================================
+           GLOBAL PAGE PRIMITIVES
+           Dipakai lintas halaman (booking, jadwal, form, repository)
+           supaya child template tidak perlu <style> sendiri.
+           =========================================================== */
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--ink-faint);
+        }
+
+        .eyebrow.accent {
+            color: var(--accent);
+        }
+
+        .page-title {
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            color: var(--ink);
+        }
+
+        .page-sub {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--ink-soft);
+        }
+
+        /* numbered flat list — item baris */
+        .idx-list {
+            border-top: 1px solid var(--line);
+        }
+
+        .idx-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 2px;
+            border-bottom: 1px solid var(--line);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            transition: padding-left .15s ease-out, background-color .15s ease-out, transform .15s ease-out;
+        }
+
+        .idx-row:hover {
+            padding-left: 6px;
+            background: rgba(23, 23, 26, 0.025);
+        }
+
+        .idx-row:active {
+            background: var(--accent-soft);
+            transform: scale(0.99);
+        }
+
+        .idx-row.disabled {
+            opacity: .4;
+            filter: grayscale(1);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .idx-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink-faint);
+            width: 22px;
+            flex-shrink: 0;
+            transition: color .15s ease-out;
+        }
+
+        .idx-row:hover .idx-num {
+            color: var(--accent);
+        }
+
+        .idx-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .idx-body h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--ink);
+            transition: color .15s ease-out;
+        }
+
+        .idx-row:hover .idx-body h3 {
+            color: var(--accent);
+        }
+
+        .idx-body p {
+            font-size: 12.5px;
+            color: var(--ink-faint);
+            margin: 2px 0 0;
+        }
+
+        .idx-arrow {
+            font-size: 20px;
+            color: var(--ink-faint);
+            flex-shrink: 0;
+            transition: transform .15s ease-out, color .15s ease-out;
+        }
+
+        .idx-row:hover .idx-arrow {
+            transform: translateX(3px);
+            color: var(--accent);
+        }
+
+        /* back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink-soft);
+            text-decoration: none;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            transition: color .15s ease-out, transform .15s ease-out;
+        }
+
+        .back-link:hover {
+            color: var(--ink);
+            transform: translateX(-2px);
+        }
+
+        .back-link:active {
+            transform: scale(.97);
+        }
+
+        /* outline button (mis. buka PDF, hari ini, dsb) */
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 10px 16px;
+            border: 1px solid var(--line);
+            color: var(--ink);
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            transition: background-color .15s ease-out, border-color .15s ease-out, transform .15s ease-out, color .15s ease-out;
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-outline:active {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: #fff;
+            transform: scale(.98);
+        }
+
+        /* sidebar nav (repository) */
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 8px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            border-bottom: 1px solid var(--line);
+            border-left: 2px solid transparent;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            transition: color .15s ease-out, background-color .15s ease-out, padding-left .15s ease-out, border-color .15s ease-out;
+        }
+
+        .sidebar-btn:hover {
+            color: var(--ink);
+            background: rgba(23, 23, 26, 0.025);
+            padding-left: 14px;
+            border-left-color: var(--line);
+        }
+
+        .sidebar-btn.is-active {
+            color: var(--accent);
+            background: var(--accent-soft);
+            border-left-color: var(--accent);
+            padding-left: 14px;
+            font-weight: 700;
+        }
+
+        /* step row (alur administrasi) */
+        .step-row {
+            transition: border-color .15s ease, background-color .15s ease;
+        }
+
+        .step-row:active {
+            border-left-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .card-outline {
+            border: 1px solid var(--line);
         }
     </style>
     {% block head %}{% endblock %}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
-<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen flex flex-col">
-    <nav class="bg-white/70 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2 group">
-                <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
-                    <i class="fa-solid fa-graduation-cap text-xl"></i>
-                </div>
-                <span class="font-bold text-gray-800">e-manu</span>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <nav class="border-b border-[var(--line)] bg-[var(--paper)]">
+        <div class="max-w-5xl mx-auto px-5 md:px-6 h-16 flex items-center justify-between">
+
+            <a href="/" class="flex items-center gap-2.5 group select-none touch-manipulation">
+                <span
+                    class="font-bold tracking-tight text-[15px] text-[var(--ink)] transition-colors group-hover:text-[var(--accent)]">e-manu</span>
+                <span class="text-[var(--ink-faint)] hidden sm:inline">/</span>
+                <span class="mono text-[11px] uppercase tracking-widest text-[var(--ink-soft)] hidden sm:inline">Digital
+                    Repository</span>
             </a>
+
             {% if session.get('user') %}
-            <div class="relative inline-block text-left" id="userDropdownContainer">
+            <div class="relative" id="userDropdownContainer">
                 <button id="dropdownBtn" type="button"
-                    class="flex items-center gap-2 p-1 md:p-1.5 pr-2 md:pr-3 text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-full border border-gray-300 transition-all focus:outline-none cursor-pointer">
-                    <div id="avatarIcon"
-                        class="w-6 h-6 md:w-7 md:h-7 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center shrink-0 transition-colors">
-                        <i class="fa-solid fa-user-gear text-[10px] md:text-xs"></i>
+                    class="flex items-center gap-1.5 pl-2.5 pr-3 py-2 rounded-full border text-sm font-medium hover:bg-black/[.03] transition-colors focus:outline-none cursor-pointer"
+                    style="border-color:var(--line);">
+                    <div id="avatarIcon" class="flex items-center justify-center shrink-0">
+                        <i class="ph ph-user text-sm"></i>
                     </div>
-
-                    <span class="max-w-[70px] md:max-w-[100px] truncate select-none">
-                        {{ session.get('user') }}
-                    </span>
-
+                    <span class="max-w-[90px] md:max-w-[120px] truncate">{{ session.get('user') }}</span>
                     <i id="chevronIcon"
-                        class="fa-solid fa-chevron-down text-[8px] md:text-[10px] text-gray-400 transition-transform duration-200"></i>
+                        class="ph ph-caret-down text-xs opacity-50 transition-transform duration-150 ml-0.5"></i>
                 </button>
 
-                <div id="dropdownMenu"
-                    class="hidden absolute right-0 mt-2 w-48 md:w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-[100] overflow-hidden transform origin-top-right">
+                <div id="dropdownMenu" data-state="closed"
+                    class="menu-panel hidden absolute right-0 mt-2 w-56 rounded-xl border bg-white shadow-lg z-50 overflow-hidden"
+                    style="border-color:var(--line);">
 
-                    <div class="px-4 py-3 bg-gray-50/50 border-b border-gray-100">
-                        <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Akun Terhubung</p>
-                        <p class="text-sm font-semibold text-gray-800 truncate">{{ session.get('user') }}</p>
+                    <div class="px-4 py-3 border-b" style="border-color:var(--line);">
+                        <p class="mono text-[10px] uppercase tracking-wider opacity-50">Akun terhubung</p>
+                        <p class="text-sm font-semibold truncate mt-0.5">{{ session.get('user') }}</p>
                     </div>
 
                     <div class="py-1">
                         <a href="{{ base_url }}" target="_blank" rel="noopener noreferrer"
-                            class="flex items-center gap-3 px-4 py-3 md:py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
-                            <i class="fa-solid fa-cubes w-4 text-center"></i>
+                            class="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-black/[.03] transition-colors">
+                            <i class="ph ph-squares-four text-base opacity-60"></i>
                             <span>e-manu</span>
                         </a>
-
-                        <div class="px-2 my-1">
-                            <hr class="border-gray-100">
-                        </div>
-
                         <a href="{{ url_for('logout') }}"
-                            class="flex items-center gap-3 px-4 py-3 md:py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
-                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
+                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="ph ph-sign-out text-base"></i>
                             <span>Keluar</span>
                         </a>
                     </div>
                 </div>
             </div>
             {% endif %}
+
         </div>
     </nav>
 
-    <main>
+    <main class="flex-1">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-gradient-to-r from-gray-900 to-slate-800 text-white py-6 mt-auto">
-        <div class="max-w-5xl mx-auto px-6 text-center space-y-2">
-            <div class="flex items-center justify-center gap-3 text-xs font-medium tracking-wide">
-                <span class="opacity-90">e-manu portal</span>
-                <span class="text-gray-600">•</span>
+    <footer class="border-t mt-auto" style="border-color:var(--line); background:var(--ink);">
+        <div
+            class="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-white">
+            <span class="text-xs opacity-70 mono">made with 🫰</span>
+            <div class="flex items-center gap-4">
                 <a href="https://github.com/hanifamar17/peminjaman-barang" target="_blank"
-                    class="flex items-center gap-1.5 hover:text-blue-400 transition-colors">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                    </svg>
+                    class="flex items-center gap-1.5 text-xs opacity-80 hover:opacity-100 transition-opacity">
+                    <i class="ph ph-github-logo text-sm"></i>
                     GitHub
                 </a>
+                <span class="text-xs opacity-50 mono">&copy; <span id="current-year"></span></span>
             </div>
-
-            <p class="text-[10px] text-gray-500 tracking-widest">&copy; <span id="current-year"></span> —
-                Dibuat dengan 🫰</p>
         </div>
     </footer>
 
@@ -156,48 +377,28 @@
             const menu = document.getElementById('dropdownMenu');
             const container = document.getElementById('userDropdownContainer');
             const chevron = document.getElementById('chevronIcon');
-            const avatar = document.getElementById('avatarIcon');
 
             if (!btn || !menu) return;
 
-            // Fungsi Toggle
-            const toggleMenu = () => {
-                const isHidden = menu.classList.contains('hidden');
-                if (isHidden) {
-                    // Munculkan menu
-                    menu.classList.remove('hidden');
-                    chevron.classList.add('rotate-180');
-                    avatar.classList.add('bg-blue-600', 'text-white');
-                } else {
-                    // Sembunyikan menu
-                    menu.classList.add('hidden');
-                    chevron.classList.remove('rotate-180');
-                    avatar.classList.remove('bg-blue-600', 'text-white');
-                }
+            const setOpen = (open) => {
+                menu.classList.toggle('hidden', !open);
+                menu.dataset.state = open ? 'open' : 'closed';
+                chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
             };
 
-            // Event Klik pada Button
             btn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Mencegah event "bubble" ke document
-                toggleMenu();
-            });
-
-            // Klik di luar untuk menutup menu
-            document.addEventListener('click', (e) => {
-                // Jika menu sedang terbuka dan yang diklik bukan bagian dari dropdown
-                if (!menu.classList.contains('hidden') && !container.contains(e.target)) {
-                    menu.classList.add('hidden');
-                    chevron.classList.remove('rotate-180');
-                    avatar.classList.remove('bg-blue-600', 'text-white');
-                }
-            });
-
-            // Mencegah menu tertutup saat mengklik area di dalam menu itu sendiri
-            menu.addEventListener('click', (e) => {
                 e.stopPropagation();
+                setOpen(menu.classList.contains('hidden'));
             });
+
+            document.addEventListener('click', (e) => {
+                if (!menu.classList.contains('hidden') && !container.contains(e.target)) setOpen(false);
+            });
+
+            menu.addEventListener('click', (e) => e.stopPropagation());
         });
     </script>
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>
