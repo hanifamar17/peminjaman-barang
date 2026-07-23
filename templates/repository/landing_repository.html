@@ -4,57 +4,108 @@
 
 {% block content %}
 <style>
-  #manu-page{
-    --font-display: 'Source Serif 4', ui-serif, Georgia, serif;
-    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --color-paper: #faf8f5;
-    --color-ink: #1f1c19;
-    --color-ink-soft: #6b6459;
-    --color-ink-faint: #a49b8c;
-    --color-line: #e6e0d6;
-    --color-accent: #a8501f;
-    --color-accent-soft: #f3e6dc;
-  }
-  #manu-page{ background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); overflow-x: clip; }
-  #manu-page h1, #manu-page .idx{ font-family: var(--font-display); font-style: normal; }
-  #manu-page .idx{ font-variant-numeric: tabular-nums; }
-  #manu-page .eyebrow{ font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-ink-faint); }
-  #manu-page .item:hover{ padding-left: 6px; background: rgba(31,28,25,0.03); }
-  #manu-page .item:active{ background: var(--color-accent-soft); transform: scale(0.99); }
-  #manu-page .item:hover .idx, #manu-page .item:hover h3{ color: var(--color-accent); }
-  #manu-page .item:hover .arrow{ color: var(--color-accent); transform: translateX(3px); }
-  #manu-page .sidebar-btn.is-active{ color: var(--color-accent); background: var(--color-accent-soft); border-left-color: var(--color-accent); padding-left: 14px; font-weight: 600; }
-  #manu-page .sidebar-btn:not(.is-active):hover{ color: var(--color-ink); background: rgba(31,28,25,0.03); padding-left: 14px; border-left-color: var(--color-line); }
+    #manu-page {
+        --font-display: 'Source Serif 4', ui-serif, Georgia, serif;
+        --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        --color-paper: #faf8f5;
+        --color-ink: #1f1c19;
+        --color-ink-soft: #6b6459;
+        --color-ink-faint: #a49b8c;
+        --color-line: #e6e0d6;
+        --color-accent: #a8501f;
+        --color-accent-soft: #f3e6dc;
+    }
+
+    #manu-page {
+        background: var(--color-paper);
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        overflow-x: clip;
+    }
+
+    #manu-page h1,
+    #manu-page .idx {
+        font-family: var(--font-display);
+        font-style: normal;
+    }
+
+    #manu-page .idx {
+        font-variant-numeric: tabular-nums;
+    }
+
+    #manu-page .eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--color-ink-faint);
+    }
+
+    #manu-page .item:hover {
+        padding-left: 6px;
+        background: rgba(31, 28, 25, 0.03);
+    }
+
+    #manu-page .item:active {
+        background: var(--color-accent-soft);
+        transform: scale(0.99);
+    }
+
+    #manu-page .item:hover .idx,
+    #manu-page .item:hover h3 {
+        color: var(--color-accent);
+    }
+
+    #manu-page .item:hover .arrow {
+        color: var(--color-accent);
+        transform: translateX(3px);
+    }
+
+    #manu-page .sidebar-btn.is-active {
+        color: var(--color-accent);
+        background: var(--color-accent-soft);
+        border-left-color: var(--color-accent);
+        padding-left: 14px;
+        font-weight: 600;
+    }
+
+    #manu-page .sidebar-btn:not(.is-active):hover {
+        color: var(--color-ink);
+        background: rgba(31, 28, 25, 0.03);
+        padding-left: 14px;
+        border-left-color: var(--color-line);
+    }
 </style>
- 
-<div id="manu-page"
-    class="min-h-screen flex flex-col md:flex-row antialiased relative max-w-[1200px] mx-auto px-5">
- 
+
+<div id="manu-page" class="min-h-screen flex flex-col md:flex-row antialiased relative max-w-[1200px] mx-auto px-5">
+
     <!-- MOBILE HEADER -->
     <div class="md:hidden px-5 py-4 sticky top-0 z-30 flex items-center justify-between transition-all duration-150"
-         style="border-bottom:1px solid var(--color-line); background:var(--color-paper);">
+        style="border-bottom:1px solid var(--color-line); background:var(--color-paper);">
         <button id="mobile-sidebar-open"
             class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-widest active:scale-[0.97] touch-manipulation cursor-pointer"
             style="color:var(--color-ink);">
             <i class="fa-solid fa-bars text-base"></i>
             <span>Menu</span>
         </button>
-        <span id="mobile-active-badge" class="text-[11px] font-bold uppercase tracking-widest truncate" style="color:var(--color-ink-faint);">
+        <span id="mobile-active-badge" class="text-[11px] font-bold uppercase tracking-widest truncate"
+            style="color:var(--color-ink-faint);">
             {{ repository_data[0].category }}
         </span>
     </div>
- 
+
     <!-- BACKDROP -->
     <div id="sidebar-backdrop"
         class="fixed inset-0 bg-zinc-900/50 z-40 hidden opacity-0 transition-opacity duration-150 md:hidden"></div>
- 
+
     <!-- SIDEBAR -->
     <aside id="main-sidebar"
         class="fixed md:sticky top-0 left-0 z-50 md:z-0 w-72 h-full px-5 py-8 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-out shrink-0 overflow-y-auto"
         style="background:var(--color-paper); border-right:1px solid var(--color-line);">
- 
+
         <!-- Mobile Close -->
-        <div class="flex items-center justify-between md:hidden mb-8 pb-4" style="border-bottom:1px solid var(--color-line);">
+        <div class="flex items-center justify-between md:hidden mb-8 pb-4"
+            style="border-bottom:1px solid var(--color-line);">
             <p class="eyebrow">Pilih Layanan</p>
             <button id="mobile-sidebar-close"
                 class="transition-colors active:scale-[0.97] cursor-pointer touch-manipulation"
@@ -62,20 +113,21 @@
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
- 
+
         <!-- Desktop Header -->
         <div class="hidden md:block mb-8 pb-4" style="border-bottom:1px solid var(--color-line);">
             <p class="eyebrow">Kategori Layanan</p>
         </div>
- 
+
         <!-- Nav -->
         <nav class="space-y-0">
             {% for item in repository_data %}
             <button data-target="pane-{{ loop.index0 }}" data-category-name="{{ item.category }}"
                 class="sidebar-btn {{ 'is-active' if loop.first else '' }} w-full flex items-center gap-3 px-2 py-3.5 text-left transition-all duration-150 ease-out cursor-pointer touch-manipulation group text-[13px]"
                 style="border-bottom:1px solid var(--color-line); border-left:2px solid transparent; color:var(--color-ink-soft);">
- 
-                <div class="shrink-0 w-5 flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity">
+
+                <div
+                    class="shrink-0 w-5 flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity">
                     {{ item.icon | safe }}
                 </div>
                 <span class="uppercase tracking-wide truncate">{{ item.category }}</span>
@@ -83,66 +135,129 @@
             {% endfor %}
         </nav>
     </aside>
- 
+
     <!-- MAIN CONTENT -->
     <main class="flex-1 p-5 md:p-12 lg:px-16 overflow-y-auto">
         <div class="max-w-3xl mx-auto">
- 
-            <!-- BANNER -->
-            <div class="mb-12 pl-4 py-1" style="border-left:2px solid var(--color-accent);">
-                <h2 class="eyebrow" style="color:var(--color-ink);">MANU Digital Repository</h2>
-                <p class="text-sm mt-2 leading-relaxed max-w-[40ch]" style="color:var(--color-ink-soft);">
-                    Layanan pengarsipan resmi. Terbatas hanya untuk kalangan internal lingkungan madrasah.
-                </p>
-            </div>
- 
+
             {% for item in repository_data %}
             <div id="pane-{{ loop.index0 }}" class="content-pane {{ 'block' if loop.first else 'hidden' }}">
- 
+
+                {% if item.category == "Home" %}
+
+                <section class="mb-14">
+                    <span class="text-xs tracking-widest uppercase font-semibold"
+                        style="color:var(--color-accent);">Arsip Digital</span>
+                    <h1 class="mt-3 text-3xl md:text-4xl font-serif leading-tight" style="color:var(--color-ink);">
+                        Repositori Madrasah
+                    </h1>
+                    <p class="mt-4 text-sm md:text-base leading-relaxed max-w-md" style="color:var(--color-ink-soft);">
+                        Layanan pengarsipan internal meliputi dokumen, formulir, dan data institusi dalam satu tempat.
+                    </p>
+                </section>
+
+                <section class="md:hidden mb-14">
+                    <button type="button" onclick="document.getElementById('mobile-sidebar-open').click()"
+                        id="btn-masuk-repositori" class="inline-flex items-center gap-2 px-6 py-3 min-h-[44px]
+        text-[12px] font-bold uppercase tracking-widest
+        bg-[var(--color-ink)] text-[var(--color-paper)]
+        hover:bg-[var(--color-accent)]
+        active:scale-[0.96]
+        transition-all duration-150
+        touch-manipulation
+        focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40
+        cursor-pointer rounded-md">
+                        Masuk Repositori
+                        <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                    </button>
+                </section>
+
+                <section>
+                    <h2 class="text-xs uppercase tracking-widest font-semibold mb-1"
+                        style="color:var(--color-ink-faint);">
+                        Pengumuman
+                    </h2>
+
+                    <div style="border-top:1px solid var(--color-line);">
+                        {% for a in pengumuman %}
+                        <a href="{{ url_for('pengumuman.pengumuman_detail', pengumuman_id=a.id) }}"
+                            class="item group flex items-start gap-4 py-5 px-0.5 no-underline text-inherit transition-all duration-150 ease-out cursor-pointer touch-manipulation"
+                            style="border-bottom:1px solid var(--color-line);">
+                            <span
+                                class="idx text-[15px] w-6 shrink-0 pt-0.5 transition-colors duration-150 group-hover:text-[#a8501f]"
+                                style="color:var(--color-ink-faint);">{{ "%02d" | format(loop.index) }}</span>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-[15px] font-semibold m-0 leading-snug transition-colors duration-150 group-hover:text-[#a8501f]"
+                                    style="color:var(--color-ink);">{{ a.title }}</h3>
+                                <time class="block text-xs mt-0.5 mb-1 leading-none"
+                                    style="color:var(--color-ink-faint);">{{ a.updated_at }}</time>
+                                <div class="line-clamp-3">
+                                    <p class="text-xs mt-1 m-0 leading-relaxed" style="color:var(--color-ink-soft);">{{
+                                        a.desc|striptags|truncate(150) }}</p>
+                                </div>
+                            </div>
+                            <span
+                                class="arrow text-xl shrink-0 transition-all duration-150 group-hover:translate-x-1 group-hover:text-[#a8501f]"
+                                style="color:var(--color-ink-faint);">&rarr;</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                {% else %}
+
+                <!-- DAFTAR LINK — kategori selain Home -->
                 <h1 class="text-2xl font-semibold tracking-tight leading-snug mb-2.5">{{ item.category }}</h1>
-                <p class="text-sm leading-relaxed mb-9 max-w-[36ch]" style="color:var(--color-ink-soft);">Silakan pilih menu aplikasi atau
-                    formulir di bawah ini.</p>
- 
+                <p class="text-sm leading-relaxed mb-9 max-w-[36ch]" style="color:var(--color-ink-soft);">
+                    Silakan pilih menu aplikasi atau formulir di bawah ini.
+                </p>
+
                 <div style="border-top:1px solid var(--color-line);">
                     {% for link in item.links %}
- 
                     {% if link.disabled %}
                     <div class="flex items-center gap-4 py-5 px-0.5 select-none opacity-40 grayscale cursor-not-allowed"
                         style="border-bottom:1px solid var(--color-line);">
-                        <span class="idx text-[15px] w-6 shrink-0" style="color:var(--color-ink-faint);">{{ "%02d" | format(loop.index) }}</span>
+                        <span class="idx text-[15px] w-6 shrink-0" style="color:var(--color-ink-faint);">{{ "%02d" |
+                            format(loop.index) }}</span>
                         <div class="flex-1 min-w-0">
-                            <h3 class="text-[15px] font-semibold m-0" style="color:var(--color-ink);">{{ link.title }}</h3>
+                            <h3 class="text-[15px] font-semibold m-0" style="color:var(--color-ink);">{{ link.title }}
+                            </h3>
                             {% if link.subtext %}
-                            <p class="text-xs mt-0.5 m-0 truncate" style="color:var(--color-ink-soft);">{{ link.subtext }}</p>
+                            <p class="text-xs mt-0.5 m-0 truncate" style="color:var(--color-ink-soft);">{{ link.subtext
+                                }}</p>
                             {% endif %}
                         </div>
                         <i class="fa-solid fa-lock text-sm shrink-0" style="color:var(--color-ink-faint);"></i>
                     </div>
- 
                     {% else %}
                     <a href="{{ link.url }}"
                         class="item group flex items-center gap-4 py-5 px-0.5 no-underline text-inherit transition-all duration-150 ease-out cursor-pointer touch-manipulation"
                         style="border-bottom:1px solid var(--color-line);">
-                        <span class="idx text-[15px] w-6 shrink-0 transition-colors duration-150" style="color:var(--color-ink-faint);">{{ "%02d" | format(loop.index) }}</span>
+                        <span class="idx text-[15px] w-6 shrink-0 transition-colors duration-150"
+                            style="color:var(--color-ink-faint);">{{ "%02d" | format(loop.index) }}</span>
                         <div class="flex-1 min-w-0">
-                            <h3 class="text-[15px] font-semibold m-0 transition-colors duration-150" style="color:var(--color-ink);">{{ link.title }}</h3>
+                            <h3 class="text-[15px] font-semibold m-0 transition-colors duration-150"
+                                style="color:var(--color-ink);">{{ link.title }}</h3>
                             {% if link.subtext %}
-                            <p class="text-xs mt-0.5 m-0 truncate" style="color:var(--color-ink-soft);">{{ link.subtext }}</p>
+                            <p class="text-xs mt-0.5 m-0 truncate" style="color:var(--color-ink-soft);">{{ link.subtext
+                                }}</p>
                             {% endif %}
                         </div>
-                        <span class="arrow text-2xl shrink-0 transition-all duration-150" style="color:var(--color-ink-faint);">&rarr;</span>
+                        <span class="arrow text-2xl shrink-0 transition-all duration-150"
+                            style="color:var(--color-ink-faint);">&rarr;</span>
                     </a>
                     {% endif %}
- 
                     {% endfor %}
                 </div>
- 
+
+                {% endif %}
+
             </div>
             {% endfor %}
- 
+
         </div>
     </main>
- 
+
 </div>
 
 <!-- ========================================== -->
@@ -184,7 +299,7 @@
                 const isActive = btn.getAttribute('data-target') === targetId;
                 btn.classList.toggle('is-active', isActive);
             });
- 
+
             if (mobileActiveBadge && categoryName) {
                 mobileActiveBadge.textContent = categoryName;
             }

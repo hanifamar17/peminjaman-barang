@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-5 py-9 sm:py-14 text-[#1f1c19]">
+    <a href="{{ url_for('repository') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
+    </a>
+
+    <div class="mt-8 mb-8 border-b border-[#e6e0d6] pb-6">
+        <time datetime="{{ item.date }}"
+            class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-widest mb-2">
+            {{ item.date_obj.strftime('%d %b %Y') if item.date_obj else item.date }}
+        </time>
+        <h1 class="page-title text-2xl sm:text-[28px] font-bold tracking-tight leading-snug m-0 text-[#1f1c19]">
+            {{ item.title }}
+        </h1>
+    </div>
+
+    <div class="prose prose-sm md:prose-base max-w-none text-[#1f1c19] leading-relaxed">
+        {{ item.desc|safe }}
+    </div>
+</div>
+{% endblock %}

@@ -74,13 +74,35 @@
                 class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 resize-none">{{ item.note if item else '' }}</textarea>
         </div>
 
-        <div class="flex items-center justify-end gap-6 pt-2">
+
+
+        <div class="flex items-center justify-end gap-6 pt-4">
             <a href="{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}"
-                class="text-[12px] font-bold text-zinc-400 uppercase hover:text-zinc-900 transition-colors">Batal</a>
-            <button type="submit" id="submitBtn"
-                class="bg-zinc-900 text-white text-[12px] font-bold uppercase px-6 py-3 hover:bg-zinc-800 transition-all active:scale-[0.98]">
-                <span id="submitText">{{ 'Perbarui Data' if item else 'Simpan Inventory' }}</span>
-            </button>
+                class="text-[12px] font-bold text-[#a49b8c] uppercase hover:text-[#1f1c19]">Batal</a>
+            <button id="submitBtn" type="submit" class="w-full sm:w-auto
+    bg-[#1f1c19] text-white text-[12px] font-bold uppercase
+    px-6 py-3 min-h-[44px]
+    hover:bg-[#a8501f]
+    active:scale-[0.96]
+    transition-all duration-150
+    touch-manipulation
+    focus:outline-none focus:ring-2 focus:ring-[#a8501f]/40
+    cursor-pointer
+    flex items-center justify-center gap-2">
+
+                <span id="submitText">
+                    {{ 'Perbarui Data' if item else 'Simpan Data' }}
+                </span>
+
+                <span id="submitLoader" class="hidden flex items-center gap-2">
+                    <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    Menyimpan...
+                </span>
+
         </div>
     </form>
 </div>
@@ -109,7 +131,20 @@
         const submitBtn = document.getElementById('submitBtn');
         const submitText = document.getElementById('submitText');
         const submitLoader = document.getElementById('submitLoader');
-        const csrfInput = document.getElementById('csrf_token');
+        const form = document.querySelector('form');
+        const csrfInput = inventoryForm.querySelector('input[name="csrf_token"]');
+
+        form.addEventListener('submit', () => {
+            submitBtn.disabled = true;
+            submitBtn.classList.add(
+                'opacity-80',
+                'cursor-not-allowed',
+                'active:scale-100'
+            );
+
+            submitText.classList.add('hidden');
+            submitLoader.classList.remove('hidden');
+        });
 
         // Fungsi Reset Tombol
         const resetButton = () => {
@@ -148,7 +183,7 @@
                         body: formData,
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRFToken': csrfInput.value // Mengambil value token
+                            "X-CSRFToken": csrfInput.value
                         }
                     });
 

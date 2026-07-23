@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block title %}Daftar Pengumuman{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
+        <div>
+            <div class="mt-2">
+                <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Daftar
+                    Pengumuman</h1>
+                <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Kelola dan pantau
+                    informasi pengumuman. Total: <span id="totalCount" class="font-semibold text-[#1f1c19]">{{
+                        items|length }}</span>.</p>
+            </div>
+        </div>
+        <a href="{{ url_for('pengumuman.pengumuman_tambah') }}"
+            class="mt-6 sm:mt-0 text-[12px] font-bold text-[#a8501f] border border-[#a8501f] px-4 py-2 hover:bg-[#a8501f] hover:text-white transition-all uppercase tracking-wider">
+            + Tambah Pengumuman
+        </a>
+    </div>
+
+    <div class="relative z-0 w-full max-w-sm mb-8">
+        <input type="text" id="filter"
+            class="block py-2.5 px-0 w-full text-sm text-[#1f1c19] bg-transparent border-0 border-b border-[#e6e0d6] appearance-none focus:outline-none focus:ring-0 focus:border-[#a8501f] peer transition-colors duration-150 rounded-none placeholder-[#a49b8c]"
+            placeholder="Cari judul, deskripsi, tanggal...">
+        <div id="searchCount" class="text-xs text-[#a49b8c] mt-2 hidden"></div>
+    </div>
+
+    <div class="overflow-x-auto border-t border-[#e6e0d6]">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="border-b border-[#e6e0d6] text-[11px] font-semibold text-[#a49b8c] uppercase tracking-wider">
+                    <th class="py-2 pr-6 w-12">No</th>
+                    <th class="py-2 pr-6">Judul</th>
+                    <th class="py-2 pr-6 max-w-md whitespace-normal">Deskripsi</th>
+                    <th class="py-2 pr-6">Diperbarui</th>
+                    <th class="py-2 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for item in items %}
+                <tr class="group border-b border-[#e6e0d6] hover:bg-[#f3f0ea] transition-colors" data-row>
+                    <td class="py-3 pr-6 text-[13px] font-medium text-[#a49b8c] align-top">
+                        {{ "%02d" | format(loop.index) }}
+                    </td>
+                    <td class="py-3 pr-6 align-top">
+                        <div class="text-[14px] font-semibold text-[#1f1c19]">{{ item.title }}</div>
+                    </td>
+                    <td class="py-3 pr-6 max-w-md whitespace-normal align-top">
+                        <div class="line-clamp-2 text-[13px] text-[#6b6459]">
+                            {{ item.desc|striptags|truncate(150) }}
+                        </div>
+                    </td>
+                    <td class="py-3 pr-6 text-[13px] text-[#6b6459] align-top">
+                        {{ item.updated_at }} WIB
+                    </td>
+                    <td class="py-3 text-right align-top">
+                        <div class="flex items-center justify-end gap-4">
+                            <a href="{{ url_for('pengumuman.pengumuman_edit', pengumuman_id=item.id) }}"
+                                class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline">Edit</a>
+                            <a class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline cursor-pointer"
+                                href="{{ url_for('pengumuman.pengumuman_hapus', pengumuman_id=item.id) }}">Hapus</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="emptyState"
+        class="{% if items %}hidden{% endif %} py-10 text-center text-[13px] font-semibold text-[#a49b8c]">
+        Belum ada pengumuman.
+    </div>
+
+    <div
+        class="flex items-center justify-between py-6 border-b border-[#e6e0d6] text-[13px] font-medium text-[#6b6459]">
+        <div>Hal <span id="currentPage" class="text-[#1f1c19]">1</span>/<span id="totalPages"
+                class="text-[#1f1c19]">1</span></div>
+        <div class="flex gap-5">
+            <button id="prevBtn"
+                class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer">&larr;
+                Prev</button>
+            <button id="nextBtn"
+                class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer">Next
+                &rarr;</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterInput = document.getElementById('filter');
+        const tableBody = document.getElementById('tableBody');
+        const searchCount = document.getElementById('searchCount');
+        const emptyState = document.getElementById('emptyState');
+        const totalCountLabel = document.getElementById('totalCount');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentPageLabel = document.getElementById('currentPage');
+        const totalPagesLabel = document.getElementById('totalPages');
+
+        const allRows = Array.from(tableBody.querySelectorAll('[data-row]'));
+        let filteredRows = [...allRows];
+        let currentPage = 1;
+        const rowsPerPage = 15;
+        let debounceTimer;
+
+        function updateTable() {
+            const totalRows = filteredRows.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            allRows.forEach(row => row.style.display = 'none');
+            filteredRows.slice(start, end).forEach(row => row.style.display = '');
+
+            currentPageLabel.textContent = currentPage;
+            totalPagesLabel.textContent = totalPages;
+            totalCountLabel.textContent = totalRows;
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+
+            if (totalRows === 0) {
+                emptyState.classList.remove('hidden');
+                tableBody.closest('.overflow-x-auto').classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                tableBody.closest('.overflow-x-auto').classList.remove('hidden');
+            }
+        }
+
+        filterInput.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const query = e.target.value.toLowerCase().trim();
+                filteredRows = allRows.filter(row => row.textContent.toLowerCase().includes(query));
+                currentPage = 1;
+
+                if (query) {
+                    searchCount.textContent = `Ditemukan ${filteredRows.length} data`;
+                    searchCount.classList.remove('hidden');
+                } else {
+                    searchCount.classList.add('hidden');
+                }
+
+                updateTable();
+            }, 300);
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTable();
+            }
+        });
+
+        updateTable();
+    });
+</script>
+{% endblock %}

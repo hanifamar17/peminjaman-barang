@@ -1,102 +1,177 @@
 {% extends "base.html" %}
+{% block title %}Riwayat Peminjaman Aset{% endblock %}
+
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
+<div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
 
-  <!-- Back -->
-  <a href="{{ url_for('peminjaman_aset_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
-
-    <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-      viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-      </path>
-    </svg>
-    <span>Kembali</span>
-  </a>
-
-  <!-- Header Section -->
-  <div class="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <div>
-      <h1 class="text-xl font-bold text-gray-900">Riwayat Peminjaman Aset</h1>
-      <p class="text-sm text-gray-500">Daftar log aktivitas dan dokumen peminjaman</p>
+  <!-- Header -->
+  <div class="mb-10">
+    <a href="{{ url_for('peminjaman_aset_landing') }}"
+      class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+      <i class="ph ph-arrow-left"></i> Kembali
+    </a>
+    <div class="mt-8">
+      <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Riwayat Peminjaman Aset
+      </h1>
+      <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Daftar log aktivitas dan
+        dokumen peminjaman aset.</p>
     </div>
   </div>
 
-  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm">
-        <thead class="bg-gray-50/50 border-b border-gray-100 text-gray-500">
-          <tr>
-            <th class="px-6 py-4 font-semibold">Peminjam & Surat</th>
-            <th class="px-6 py-4 font-semibold hidden sm:table-cell">Periode Pinjam</th>
-            <th class="px-6 py-4 font-semibold">Status PDF</th>
-            <th class="px-6 py-4 font-semibold text-right">Dokumen</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          {% for r in data %}
-          <tr class="hover:bg-gray-50/50 transition-colors">
 
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="font-bold text-gray-900">{{ r.nama }}</div>
-              <div class="text-xs text-gray-500 mt-1">Ref: {{ r.nomor_surat }}</div>
-              <div class="text-xs text-indigo-600 sm:hidden mt-1">{{ r.tgl_pinjam }} s/d {{ r.tgl_kembali }}</div>
-            </td>
+  <!-- Filter -->
+  <div class="relative z-0 w-full max-w-sm mb-8">
+    <input type="text" id="filter"
+      class="block py-2.5 px-0 w-full text-sm text-[#1f1c19] bg-transparent border-0 border-b border-[#e6e0d6] focus:outline-none focus:ring-0 focus:border-[#a8501f] transition-colors placeholder-[#a49b8c]"
+      placeholder="Cari nama atau nomor surat...">
+    <div id="searchCount" class="text-xs text-zinc-500 mt-2 hidden"></div>
+  </div>
 
-            <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-              <div class="font-medium text-gray-700">{{ r.tgl_pinjam }}</div>
-              <div class="text-xs text-gray-500 mt-1">s/d {{ r.tgl_kembali }}</div>
-            </td>
-
-            <td class="px-6 py-4 whitespace-nowrap">
+  <!-- Table -->
+  <div class="overflow-x-auto border-t border-[#e6e0d6]">
+    <table class="w-full text-left text-sm whitespace-nowrap">
+      <thead>
+        <tr class="border-b border-[#e6e0d6] text-[11px] font-semibold text-[#a49b8c] uppercase tracking-wider">
+          <th class="py-2 pr-6">Peminjam & Surat</th>
+          <th class="py-2 pr-6 hidden sm:table-cell">Periode Pinjam</th>
+          <th class="py-2 pr-6">Status</th>
+          <th class="py-2 text-right">Dokumen</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% for r in data %}
+        <tr class="group border-b border-[#e6e0d6] hover:bg-[#f3f0ea] transition-colors data-row" data-row
+          data-search="{{ r.nama|lower }} {{ r.nomor_surat|lower }}">
+          <td class="py-2 pr-6">
+            <div class="text-[14px] font-semibold text-[#1f1c19]">{{ r.nama }}</div>
+            <div class="text-[12px] text-[#a49b8c] mt-0.5">Ref: {{ r.nomor_surat }}</div>
+            <div class="text-[12px] text-[#a8501f] sm:hidden mt-1">{{ r.tgl_pinjam }} s/d {{ r.tgl_kembali }}</div>
+          </td>
+          <td class="py-2 pr-6 text-[13px] text-[#6b6459] hidden sm:table-cell">
+            <div>{{ r.tgl_pinjam }}</div>
+            <div class="text-[12px] text-[#a49b8c]">s/d {{ r.tgl_kembali }}</div>
+          </td>
+          <td class="py-2 pr-6">
+            {% if r.sudah_generate %}
+            <span
+              class="inline-flex px-2 py-0.5 rounded-sm bg-[#e6e0d6] text-[#1f1c19] text-[10px] font-bold uppercase tracking-wider">Sudah</span>
+            {% else %}
+            <span
+              class="inline-flex px-2 py-0.5 rounded-sm bg-[#f3f0ea] text-[#a49b8c] text-[10px] font-bold uppercase tracking-wider border border-[#e6e0d6]">Belum</span>
+            {% endif %}
+          </td>
+          <td class="py-2 text-right">
+            <div class="flex items-center justify-end gap-4">
+              <a href="{{ r.ringkasan_url }}"
+                class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline">Ringkasan</a>
               {% if r.sudah_generate %}
-              <span
-                class="inline-flex px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] tracking-widest border border-emerald-100">Sudah
-                Generate</span>
+              <a href="{{ url_for('preview_pdf_peminjaman_aset', record_id=r.record_id) }}" target="_blank"
+                class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline">PDF</a>
               {% else %}
-              <span
-                class="inline-flex px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] tracking-widest border border-amber-100">Belum
-                Generate</span>
+              <span class="text-[11px] font-bold text-[#a49b8c] uppercase tracking-wide cursor-not-allowed">PDF</span>
               {% endif %}
-            </td>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-            <td class="px-6 py-4 whitespace-nowrap text-right">
-              <div class="flex items-center justify-end gap-3 sm:gap-4">
-                <a href="{{ r.ringkasan_url }}"
-                  class="text-indigo-600 hover:text-indigo-900 text-sm font-medium transition">Ringkasan</a>
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden py-10 text-center text-[13px] font-semibold text-[#a49b8c]">
+    Tidak ada data ditemukan
+  </div>
 
-                <span class="text-gray-300">|</span>
-
-                {% if r.sudah_generate %}
-                <a href="{{ url_for('preview_pdf_peminjaman_aset', record_id=r.record_id) }}" target="_blank"
-                  class="text-emerald-600 hover:text-emerald-900 text-sm font-medium transition flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                    </path>
-                  </svg>
-                  PDF
-                </a>
-                {% else %}
-                <span class="text-gray-300 text-sm font-medium cursor-not-allowed flex items-center gap-1"
-                  title="PDF belum digenerate">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                    </path>
-                  </svg>
-                  PDF
-                </span>
-                {% endif %}
-              </div>
-            </td>
-
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <!-- Pagination -->
+  <div id="paginationBar"
+    class="flex items-center justify-between py-6 border-b border-[#e6e0d6] text-[13px] font-medium text-[#6b6459]">
+    <div>Hal <span id="currentPage" class="text-[#1f1c19]">1</span>/<span id="totalPages"
+        class="text-[#1f1c19]">1</span>
+    </div>
+    <div class="flex gap-5">
+      <button id="prevBtn"
+        class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none cursor-pointer">&larr;
+        Prev</button>
+      <button id="nextBtn"
+        class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none cursor-pointer">Next
+        &rarr;</button>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterInput = document.getElementById('filter');
+    const tableBody = document.getElementById('tableBody');
+    const tableWrapper = tableBody.closest('.overflow-x-auto');
+    const emptyState = document.getElementById('emptyState');
+    const paginationBar = document.getElementById('paginationBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentPageLabel = document.getElementById('currentPage');
+    const totalPagesLabel = document.getElementById('totalPages');
+    const searchCount = document.getElementById('searchCount');
+
+    const allRows = Array.from(tableBody.querySelectorAll('[data-row]'));
+    let filteredRows = [...allRows];
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let debounceTimer;
+
+    filterInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const q = e.target.value.toLowerCase().trim();
+        filteredRows = allRows.filter(row => row.dataset.search.includes(q));
+        currentPage = 1;
+
+        if (q) {
+          searchCount.textContent = `Ditemukan ${filteredRows.length} data`;
+          searchCount.classList.remove('hidden');
+        } else {
+          searchCount.classList.add('hidden');
+        }
+
+        updateTable();
+      }, 300);
+    });
+
+    function updateTable() {
+      const totalRows = filteredRows.length;
+      const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+      const hasData = totalRows > 0;
+
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+
+      allRows.forEach(row => row.style.display = 'none');
+      filteredRows.slice(start, end).forEach(row => row.style.display = '');
+
+      currentPageLabel.textContent = currentPage;
+      totalPagesLabel.textContent = totalPages;
+
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+
+      // Empty state: sembunyikan tabel & pagination, tampilkan pesan
+      tableWrapper.classList.toggle('hidden', !hasData);
+      emptyState.classList.toggle('hidden', hasData);
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) { currentPage--; updateTable(); }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredRows.length / rowsPerPage) || 1;
+      if (currentPage < totalPages) { currentPage++; updateTable(); }
+    });
+
+    updateTable();
+  });
+</script>
 {% endblock %}

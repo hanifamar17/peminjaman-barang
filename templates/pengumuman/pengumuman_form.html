@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit Pengumuman' if item else 'Tambah Pengumuman' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[var(--ink)]">
+  <a href="{{ url_for('pengumuman.pengumuman_list') }}"
+    class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+    <i class="ph ph-arrow-left"></i> Kembali
+  </a>
+
+  <div class="mt-8 mb-10">
+    <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">
+      {{ 'Edit Pengumuman' if item else 'Tambah Pengumuman' }}
+    </h1>
+    <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">
+      {{ 'Perbarui detail pengumuman' if item else 'Lengkapi formulir untuk menambah pengumuman baru' }}
+    </p>
+  </div>
+
+  <form id="pengumumanForm" method="POST" class="space-y-5">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="group">
+      <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1" for="title">Judul</label>
+      <input type="text" id="title" name="title" value="{{ item.title if item else '' }}" required
+        placeholder="Judul Pengumuman"
+        class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 transition-colors">
+    </div>
+
+    <div class="group">
+      <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Deskripsi</label>
+      <div class="border-b border-zinc-200 pb-1">
+        <div id="editor" class="min-h-[150px] text-[14px] text-zinc-900">
+          {{ item.desc|safe if item else '' }}
+        </div>
+      </div>
+      <input type="hidden" id="desc" name="desc">
+    </div>
+
+    <div class="flex items-center justify-end gap-6 pt-4">
+      <a href="{{ url_for('pengumuman.pengumuman_list') }}"
+        class="text-[12px] font-bold text-[#a49b8c] uppercase hover:text-[#1f1c19]">Batal</a>
+
+      <button id="submitBtn" type="submit"
+        class="w-full sm:w-auto bg-[#1f1c19] text-white text-[12px] font-bold uppercase px-6 py-3 min-h-[44px] hover:bg-[#a8501f] active:scale-[0.96] transition-all duration-150 touch-manipulation focus:outline-none focus:ring-2 focus:ring-[#a8501f]/40 cursor-pointer flex items-center justify-center gap-2">
+        <span id="submitText">{{ 'Simpan Perubahan' if item else 'Tambah Pengumuman' }}</span>
+        <span id="submitLoader" class="hidden flex items-center gap-2">
+          <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          Menyimpan...
+        </span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 2500,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.addEventListener("mouseenter", Swal.stopTimer);
+      toast.addEventListener("mouseleave", Swal.resumeTimer);
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const quill = new Quill("#editor", {
+      theme: "snow",
+      modules: {
+        toolbar: {
+          container: [
+            [{ header: [1, 2, 3, false] }],
+            ["bold", "italic", "underline"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            [{ align: [] }],
+            ["link"],
+            ["clean"]
+          ],
+          handlers: {
+            link: function (value) {
+              if (value) {
+                let url = prompt("Masukkan URL:");
+                if (url) {
+                  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+                  this.quill.format("link", url);
+                }
+              } else {
+                this.quill.format("link", false);
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const form = document.getElementById('pengumumanForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitLoader = document.getElementById('submitLoader');
+    const csrfInput = form.querySelector('input[name="csrf_token"]');
+    const descInput = document.getElementById('desc');
+
+    const resetButton = () => {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+      }
+      if (submitText) submitText.classList.remove('hidden');
+      if (submitLoader) submitLoader.classList.add('hidden');
+    };
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        descInput.value = quill.root.innerHTML;
+
+        if (!csrfInput) {
+          console.error("Elemen csrf_token tidak ditemukan!");
+          return;
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+        }
+        if (submitText) submitText.classList.add('hidden');
+        if (submitLoader) submitLoader.classList.remove('hidden');
+
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              "X-CSRFToken": csrfInput.value
+            }
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            Toast.fire({
+              icon: 'success',
+              title: data.message || "{{ 'Berhasil diperbarui' if item else 'Berhasil disimpan' }}"
+            });
+
+            setTimeout(() => {
+              window.location.href = data.redirect || "{{ url_for('pengumuman.pengumuman_list') }}";
+            }, 1500);
+
+          } else {
+            throw new Error(data.message || data.error || 'Terjadi kesalahan');
+          }
+
+        } catch (error) {
+          console.error('Error:', error);
+          Toast.fire({
+            icon: 'error',
+            title: error.message || 'Terjadi kesalahan sistem'
+          });
+          resetButton();
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

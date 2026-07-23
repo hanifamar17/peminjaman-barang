@@ -1,132 +1,176 @@
 {% extends "base.html" %}
+{% block title %}Database Aset{% endblock %}
+
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
+<div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
 
-  <!-- Back -->
-    <a href="{{ url_for('peminjaman_aset_landing') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
-
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
-        </svg>
-        <span>Kembali</span>
-    </a>
-  
-  <!-- Header Section -->
-  <div class="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Database Inventaris</h1>
-      <p class="text-sm text-gray-500 mt-1">Kelola master data seluruh sub bidang dan ketersediaan stok barang</p>
+      <a href="{{ url_for('peminjaman_aset_landing') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
+      </a>
+      <div class="mt-8">
+        <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Database Aset
+        </h1>
+        <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Kelola master data seluruh
+          sub bidang dan
+          ketersediaan stok barang.</p>
+      </div>
     </div>
     <a href="{{ url_for('inventaris.tambah_inventaris') }}"
-       class="inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 transition-all active:scale-95 w-full sm:w-auto">
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-      Tambah Barang
+      class="mt-6 sm:mt-0 text-[12px] font-bold text-[#a8501f] border border-[#a8501f] px-4 py-2 hover:bg-[#a8501f] hover:text-white transition-all uppercase tracking-wider">
+      + Tambah Barang
     </a>
   </div>
 
-  <!-- Search Bar -->
-  <div class="relative mb-6">
-    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-    </div>
-    <input type="text" id="filter-input" placeholder="Cari nama barang, merk, atau lokasi..."
-           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm">
+  <!-- Filter -->
+  <div class="relative z-0 w-full max-w-sm mb-8">
+    <input type="text" id="filter"
+      class="block py-2.5 px-0 w-full text-sm text-[#1f1c19] bg-transparent border-0 border-b border-[#e6e0d6] focus:outline-none focus:ring-0 focus:border-[#a8501f] transition-colors placeholder-[#a49b8c]"
+      placeholder="Cari nama, merk, atau lokasi...">
+    <div id="searchCount" class="text-xs text-zinc-500 mt-2 hidden"></div>
   </div>
 
-  <!-- Table Card -->
-  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm" id="inv-table">
-        <thead class="bg-gray-50/50 border-b border-gray-100 text-gray-500">
-          <tr>
-            <th class="px-6 py-4 font-semibold">Barang & Info</th>
-            <th class="px-6 py-4 font-semibold hidden sm:table-cell">Penempatan</th>
-            <th class="px-6 py-4 font-semibold">Stok & Status</th>
-            <th class="px-6 py-4 font-semibold text-right">Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          {% for r in data %}
-          <tr class="inv-row hover:bg-gray-50/50 transition-colors">
-            
-            <!-- Kolom 1: Informasi Barang -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="font-bold text-gray-900">{{ r.nama_barang }}</div>
-              <div class="text-xs text-gray-500 mt-1">{{ r.merk }} <span class="mx-1">•</span> ID: {{ r.id }}</div>
-              <!-- Muncul di Mobile Saja (menggantikan kolom penempatan) -->
-              <div class="text-xs text-indigo-600 sm:hidden mt-1">{{ r.lokasi }} ({{ r.sub_bidang }})</div>
-            </td>
+  <!-- Table -->
+  <div class="overflow-x-auto border-t border-[#e6e0d6]">
+    <table class="w-full text-left text-sm whitespace-nowrap">
+      <thead>
+        <tr class="border-b border-[#e6e0d6] text-[11px] font-semibold text-[#a49b8c] uppercase tracking-wider">
+          <th class="py-2 pr-6 w-12">No</th>
+          <th class="py-2 pr-6">Barang & Info</th>
+          <th class="py-2 pr-6 hidden sm:table-cell">Penempatan</th>
+          <th class="py-2 pr-6">Stok</th>
+          <th class="py-2 text-right">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% for r in data %}
+        <tr class="group border-b border-[#e6e0d6] hover:bg-[#f3f0ea] transition-colors" data-row
+          data-search="{{ r.nama_barang }} {{ r.merk }} {{ r.lokasi }}">
+          <td class="py-2 pr-6 text-[13px] font-medium text-[#a49b8c]">{{ "%02d" | format(loop.index) }}</td>
+          <td class="py-2 pr-6">
+            <div class="text-[14px] font-semibold text-[#1f1c19]">{{ r.nama_barang }}</div>
+            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.merk }} &middot; ID: {{ r.id }}</div>
+            <div class="text-[12px] text-[#6b6459] sm:hidden mt-1">{{ r.lokasi }} ({{ r.sub_bidang }})</div>
+          </td>
+          <td class="py-2 pr-6 text-[13px] text-[#6b6459] hidden sm:table-cell">
+            <div>{{ r.lokasi }}</div>
+            <div class="text-[#a49b8c]">{{ r.sub_bidang }}</div>
+          </td>
+          <td class="py-2 pr-6">
+            <div class="text-[13px] font-semibold text-[#1f1c19]">{{ r.jumlah_tersedia }} / {{ r.jumlah_total }}</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-[#a8501f]">{{ r.status }}</div>
+          </td>
+          <td class="py-2 text-right">
+            <div class="flex items-center justify-end gap-4">
+              <a href="{{ url_for('inventaris.edit_inventaris', item_id=r.id) }}"
+                class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline">Edit</a>
+              <a href="{{ url_for('inventaris.hapus_inventaris', item_id=r.id) }}"
+                class="text-[11px] font-bold text-[#a8501f] uppercase tracking-wide hover:underline">Hapus</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-            <!-- Kolom 2: Penempatan (Disembunyikan di Mobile) -->
-            <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-              <div class="font-medium text-gray-700">{{ r.lokasi }}</div>
-              <div class="text-xs text-gray-500 mt-1">{{ r.sub_bidang }}</div>
-            </td>
+  <div id="emptyState" class="hidden py-10 text-center text-[13px] font-semibold text-[#a49b8c]">Tidak ada data
+    ditemukan</div>
 
-            <!-- Kolom 3: Stok & Status -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center gap-1.5 mb-1.5">
-                <span class="font-bold text-gray-900">{{ r.jumlah_tersedia }}</span>
-                <span class="text-xs text-gray-500">dari {{ r.jumlah_total }}</span>
-              </div>
-              {% if r.status == "Tersedia" %}
-                <span class="inline-flex px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest border border-emerald-100">Tersedia</span>
-              {% else %}
-                <span class="inline-flex px-2 py-0.5 rounded-md bg-red-50 text-red-700 text-[10px] font-bold uppercase tracking-widest border border-red-100">Habis</span>
-              {% endif %}
-            </td>
-
-            <!-- Kolom 4: Aksi -->
-            <td class="px-6 py-4 whitespace-nowrap text-right">
-              <div class="flex items-center justify-end gap-4">
-                <a href="{{ url_for('inventaris.edit_inventaris', item_id=r.id) }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium transition">Edit</a>
-                <a href="{{ url_for('inventaris.hapus_inventaris', item_id=r.id) }}" class="text-red-500 hover:text-red-700 text-sm font-medium transition">Hapus</a>
-              </div>
-            </td>
-
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <!-- Pagination -->
+  <div id="pagination"
+    class="flex items-center justify-between py-6 border-b border-[#e6e0d6] text-[13px] font-medium text-[#6b6459]">
+    <div>Hal <span id="currentPage" class="text-[#1f1c19]">1</span>/<span id="totalPages"
+        class="text-[#1f1c19]">1</span></div>
+    <div class="flex gap-5">
+      <button id="prevBtn"
+        class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none cursor-pointer">&larr;
+        Prev</button>
+      <button id="nextBtn"
+        class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none cursor-pointer">Next
+        &rarr;</button>
     </div>
   </div>
 </div>
 
-<!-- SweetAlert2 & Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.all.min.js"></script>
 <script>
-  // Konfigurasi Toast SweetAlert
-  const Toast = Swal.mixin({
-    toast: true,
-    position: "top-end",
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.onmouseenter = Swal.stopTimer;
-      toast.onmouseleave = Swal.resumeTimer;
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterInput = document.getElementById('filter');
+    const tableBody = document.getElementById('tableBody');
+    const tableWrapper = tableBody.closest('.overflow-x-auto');
+    const emptyState = document.getElementById('emptyState');
+    const paginationBar = document.getElementById('pagination');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentPageLabel = document.getElementById('currentPage');
+    const totalPagesLabel = document.getElementById('totalPages');
+    const searchCount = document.getElementById('searchCount');
+
+    const allRows = Array.from(tableBody.querySelectorAll('[data-row]'));
+    let filteredRows = [...allRows];
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let debounceTimer;
+
+    function updateTable() {
+      const totalRows = filteredRows.length;
+      const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+      const hasData = totalRows > 0;
+
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+
+      allRows.forEach(row => row.style.display = 'none');
+      filteredRows.slice(start, end).forEach(row => row.style.display = '');
+
+      currentPageLabel.textContent = currentPage;
+      totalPagesLabel.textContent = totalPages;
+
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+
+      tableWrapper.classList.toggle('hidden', !hasData);
+      emptyState.classList.toggle('hidden', hasData);
     }
-  });
 
-  // Render Flash Messages
-  const flashMessages = JSON.parse('{{ get_flashed_messages() | tojson | safe }}');
-  if (Array.isArray(flashMessages) && flashMessages.length > 0) {
-    flashMessages.forEach(msg => {
-      Toast.fire({ icon: "success", title: msg });
-    });
-  }
+    filterInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const q = e.target.value.toLowerCase().trim();
+        filteredRows = allRows.filter(row => row.dataset.search.toLowerCase().includes(q));
+        currentPage = 1;
 
-  // Live Search Filter (Berfungsi sempurna meski kolom digabung karena membaca textContent per baris)
-  const filterInput = document.getElementById("filter-input");
-  filterInput.addEventListener("input", () => {
-    const q = filterInput.value.toLowerCase();
-    document.querySelectorAll(".inv-row").forEach(row => {
-      row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+        if (q) {
+          searchCount.textContent = `Ditemukan ${filteredRows.length} data`;
+          searchCount.classList.remove('hidden');
+        } else {
+          searchCount.classList.add('hidden');
+        }
+
+        updateTable();
+      }, 300);
     });
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) { currentPage--; updateTable(); }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredRows.length / rowsPerPage) || 1;
+      if (currentPage < totalPages) { currentPage++; updateTable(); }
+    });
+
+    // Flash
+    const flashMessages = JSON.parse('{{ get_flashed_messages() | tojson | safe }}');
+    if (flashMessages.length) flashMessages.forEach(m => Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: m, showConfirmButton: false, timer: 3000 }));
+
+    updateTable();
   });
 </script>
 {% endblock %}

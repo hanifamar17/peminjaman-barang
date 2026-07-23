@@ -4,13 +4,25 @@
 {% block content %}
 <div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
 
-    <a href="{{ url_for('inventory_labkomp.inventory_landing') }}" class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
-        <i class="ph ph-arrow-left"></i> Kembali
-    </a>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
+        <div>
+            <a href="{{ url_for('inventory_labkomp.inventory_landing') }}"
+                class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+                <i class="ph ph-arrow-left"></i> Kembali
+            </a>
 
-    <div class="mt-8 mb-10">
-        <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Inventory Barang</h1>
-        <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Kelola dan pantau data barang inventaris. Total: <span id="totalCount" class="font-semibold text-[#1f1c19]">{{ items|length }}</span>.</p>
+            <div class="mt-8">
+                <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Inventory
+                    Barang</h1>
+                <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Kelola dan pantau
+                    data barang inventaris. Total: <span id="totalCount" class="font-semibold text-[#1f1c19]">{{
+                        items|length }}</span>.</p>
+            </div>
+        </div>
+        <a href="{{ url_for('inventory_labkomp.inventory_add') }}"
+            class="mt-6 sm:mt-0 text-[12px] font-bold text-[#a8501f] border border-[#a8501f] px-4 py-2 hover:bg-[#a8501f] hover:text-white transition-all uppercase tracking-wider">
+            + Tambah Barang
+        </a>
     </div>
 
     <div class="relative z-0 w-full max-w-sm mb-8">
@@ -70,13 +82,17 @@
         Tidak ada data ditemukan
     </div>
 
-    <div class="flex items-center justify-between py-6 border-b border-[#e6e0d6] text-[13px] font-medium text-[#6b6459]">
-        <div>Hal <span id="currentPage" class="text-[#1f1c19]">1</span>/<span id="totalPages" class="text-[#1f1c19]">1</span></div>
+    <div
+        class="flex items-center justify-between py-6 border-b border-[#e6e0d6] text-[13px] font-medium text-[#6b6459]">
+        <div>Hal <span id="currentPage" class="text-[#1f1c19]">1</span>/<span id="totalPages"
+                class="text-[#1f1c19]">1</span></div>
         <div class="flex gap-5">
-            <button id="prevBtn" class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer">
+            <button id="prevBtn"
+                class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer">
                 &larr; Prev
             </button>
-            <button id="nextBtn" class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer">
+            <button id="nextBtn"
+                class="uppercase hover:text-[#1f1c19] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer">
                 Next &rarr;
             </button>
         </div>
