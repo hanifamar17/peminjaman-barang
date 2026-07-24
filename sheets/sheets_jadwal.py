@@ -96,7 +96,7 @@ def _parse_tanggal(t):
     t = t.strip()
     for fmt in ("%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d"):
         try:
-            return datetime.datetime.strptime(t, fmt).date()
+            return datetime.strptime(t, fmt).date()
         except ValueError:
             continue
     return None
@@ -106,7 +106,7 @@ def get_jadwal(force_refresh=False):
     Ambil data jadwal dari 'Form Responses 1', hasil sudah diparse.
     Menggunakan cache in-memory (TTL) agar hemat kuota Sheets API.
     """
-    now = datetime.datetime.now()
+    now = datetime.now()
     if (
         not force_refresh
         and _cache["data"] is not None
@@ -192,7 +192,7 @@ def get_kalender_akademik(force_refresh=False):
     Ambil data kalender akademik (libur/agenda madrasah).
     Cache in-memory terpisah dari jadwal lab.
     """
-    now = datetime.datetime.now()
+    now = datetime.now()
     if (
         not force_refresh
         and _kalender_cache["data"] is not None
