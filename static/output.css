@@ -1128,6 +1128,9 @@
   .h-8 {
     height: calc(var(--spacing) * 8);
   }
+  .h-12 {
+    height: calc(var(--spacing) * 12);
+  }
   .h-16 {
     height: calc(var(--spacing) * 16);
   }
@@ -1232,12 +1235,6 @@
   }
   .max-w-\[52ch\] {
     max-width: 52ch;
-  }
-  .max-w-\[72ch\] {
-    max-width: 72ch;
-  }
-  .max-w-\[82ch\] {
-    max-width: 82ch;
   }
   .max-w-\[90px\] {
     max-width: 90px;
@@ -1583,8 +1580,14 @@
   .border-\[\#a8501f\] {
     border-color: #a8501f;
   }
+  .border-\[\#d6d0d6\] {
+    border-color: #d6d0d6;
+  }
   .border-\[\#e6e0d6\] {
     border-color: #e6e0d6;
+  }
+  .border-\[color\:var\(--color-ink-faint\)\] {
+    border-color: var(--color-ink-faint);
   }
   .border-\[var\(--accent\)\] {
     border-color: var(--accent);
@@ -2006,8 +2009,20 @@
   .text-\[16px\] {
     font-size: 16px;
   }
+  .text-\[20px\] {
+    font-size: 20px;
+  }
+  .text-\[22px\] {
+    font-size: 22px;
+  }
+  .text-\[25px\] {
+    font-size: 25px;
+  }
   .text-\[26px\] {
     font-size: 26px;
+  }
+  .text-\[30px\] {
+    font-size: 30px;
   }
   .leading-\[1\.15\] {
     --tw-leading: 1.15;
@@ -2503,6 +2518,9 @@
       --tw-translate-y: calc(var(--spacing) * -2);
       translate: var(--tw-translate-x) var(--tw-translate-y);
     }
+    .hover\:border-\[color\:var\(--color-accent\)\]:hover {
+      border-color: var(--color-accent);
+    }
     .hover\:border-\[var\(--color-ink\)\]:hover {
       border-color: var(--color-ink);
     }
@@ -2692,6 +2710,12 @@
     --tw-outline-style: none;
     outline-style: none;
   }
+  .active\:scale-90:active {
+    --tw-scale-x: 90%;
+    --tw-scale-y: 90%;
+    --tw-scale-z: 90%;
+    scale: var(--tw-scale-x) var(--tw-scale-y);
+  }
   .active\:scale-95:active {
     --tw-scale-x: 95%;
     --tw-scale-y: 95%;
@@ -2719,14 +2743,23 @@
   .active\:bg-gray-100:active {
     background-color: var(--color-gray-100);
   }
+  .active\:opacity-100:active {
+    opacity: 100%;
+  }
   .disabled\:pointer-events-none:disabled {
     pointer-events: none;
+  }
+  .disabled\:cursor-not-allowed:disabled {
+    cursor: not-allowed;
   }
   .disabled\:bg-zinc-200:disabled {
     background-color: var(--color-zinc-200);
   }
   .disabled\:opacity-30:disabled {
     opacity: 30%;
+  }
+  .disabled\:opacity-70:disabled {
+    opacity: 70%;
   }
   @media (width >= 40rem) {
     .sm\:col-span-1 {
@@ -3030,6 +3063,12 @@
     .md\:hidden {
       display: none;
     }
+    .md\:h-8 {
+      height: calc(var(--spacing) * 8);
+    }
+    .md\:w-8 {
+      width: calc(var(--spacing) * 8);
+    }
     .md\:max-w-\[120px\] {
       max-width: 120px;
     }
@@ -3046,11 +3085,18 @@
     .md\:flex-row {
       flex-direction: row;
     }
+    .md\:border-t-0 {
+      border-top-style: var(--tw-border-style);
+      border-top-width: 0px;
+    }
     .md\:p-12 {
       padding: calc(var(--spacing) * 12);
     }
     .md\:px-6 {
       padding-inline: calc(var(--spacing) * 6);
+    }
+    .md\:pt-3\.5 {
+      padding-top: calc(var(--spacing) * 3.5);
     }
     .md\:text-4xl {
       font-size: var(--text-4xl);
@@ -3060,19 +3106,46 @@
       font-size: var(--text-base);
       line-height: var(--tw-leading, var(--text-base--line-height));
     }
+    .md\:text-\[15px\] {
+      font-size: 15px;
+    }
   }
   @media (width >= 64rem) {
+    .lg\:sticky {
+      position: sticky;
+    }
+    .lg\:top-10 {
+      top: calc(var(--spacing) * 10);
+    }
     .lg\:col-span-5 {
       grid-column: span 5 / span 5;
     }
     .lg\:col-span-7 {
       grid-column: span 7 / span 7;
     }
+    .lg\:mb-0 {
+      margin-bottom: 0px;
+    }
+    .lg\:grid {
+      display: grid;
+    }
     .lg\:grid-cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
     .lg\:grid-cols-12 {
       grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    .lg\:grid-cols-\[1fr_360px\] {
+      grid-template-columns: 1fr 360px;
+    }
+    .lg\:grid-cols-\[360px_1fr\] {
+      grid-template-columns: 360px 1fr;
+    }
+    .lg\:items-start {
+      align-items: flex-start;
+    }
+    .lg\:gap-10 {
+      gap: calc(var(--spacing) * 10);
     }
     .lg\:border-t-0 {
       border-top-style: var(--tw-border-style);

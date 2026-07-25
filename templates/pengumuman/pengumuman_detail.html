@@ -9,9 +9,9 @@
     </a>
 
     <div class="mt-8 mb-8 border-b border-[#e6e0d6] pb-6">
-        <time datetime="{{ item.date }}"
+        <time datetime="{{ item.updated_at }}"
             class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-widest mb-2">
-            {{ item.date_obj.strftime('%d %b %Y') if item.date_obj else item.date }}
+            {{ item.updated_at }} WIB
         </time>
         <h1 class="page-title text-2xl sm:text-[28px] font-bold tracking-tight leading-snug m-0 text-[#1f1c19]">
             {{ item.title }}
@@ -20,6 +20,12 @@
 
     <div class="prose prose-sm md:prose-base max-w-none text-[#1f1c19] leading-relaxed">
         {{ item.desc|safe }}
+    </div>
+    <div class="mt-8 border-t border-[#e6e0d6]">
+        <a href="{{ url_for('repository') }}"
+            class="mt-4 back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+            <i class="ph ph-arrow-left"></i> Kembali
+        </a>
     </div>
 </div>
 {% endblock %}

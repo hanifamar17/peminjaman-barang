@@ -26,6 +26,8 @@ from flask import request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
 from functools import wraps
 from flask_wtf import CSRFProtect
+from urllib.parse import urlparse, urljoin
+
 from routes.routes_inventory_aset import inventaris_bp
 from routes.routes_booking_ruangan import booking_ruangan_bp
 from routes.routes_inventory_komp import inventory_labkomp_bp
@@ -88,12 +90,24 @@ mail.init_app(app)
 # scheduler hanya di lokal
 if app.config["ENABLE_SCHEDULER"]:
     init_app(app)
-
-
+    
 
 # LOGIN
+def is_safe_url(target):
+    """Cegah open redirect: hanya izinkan redirect ke path relatif di domain sendiri."""
+    if not target:
+        return False
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return (
+        test_url.scheme in ("http", "https")
+        and ref_url.netloc == test_url.netloc
+        )
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    next_url = request.values.get("next", "") 
+
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
@@ -105,20 +119,24 @@ def login():
 
         headers = rows[0]
         users = [dict(zip(headers, r)) for r in rows[1:]]
-
         user = next((u for u in users if u["username"] == username), None)
 
-        # Proteksi timing attack (delay kecil)
         time.sleep(0.5)
 
         if user and check_password_hash(user["password_hash"], password):
             session["user"] = username
+            session.regenerate = True
+
+            target = request.form.get("next") or next_url
+            if is_safe_url(target):
+                return redirect(target)
             return redirect(url_for("repository"))
 
         flash("Username atau password salah.")
-        return redirect(url_for("login"))
+        
+        return redirect(url_for("login", next=next_url))
 
-    return render_template("login.html")
+    return render_template("login.html", next=next_url)
 
 def login_required(f):
     @wraps(f)

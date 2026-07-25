@@ -10,11 +10,13 @@ pengumuman_bp = Blueprint("pengumuman", __name__, url_prefix="/pengumuman")
 
 # PENGUMUMAN
 @pengumuman_bp.route("/")
+@login_required
 def pengumuman_list():
     items = get_all_pengumuman()
     return render_template("pengumuman/daftar_pengumuman.html", items=items)
 
 @pengumuman_bp.route("/tambah", methods=["GET", "POST"])
+@login_required
 def pengumuman_tambah():
     if request.method == "POST":
         title = request.form.get("title")
@@ -36,6 +38,7 @@ def pengumuman_tambah():
     return render_template("pengumuman/pengumuman_form.html", item=None)
 
 @pengumuman_bp.route("/<pengumuman_id>/edit", methods=["GET", "POST"])
+@login_required
 def pengumuman_edit(pengumuman_id):
     item = get_pengumuman_by_id(pengumuman_id)
     if not item:
@@ -66,6 +69,7 @@ def pengumuman_edit(pengumuman_id):
     return render_template("pengumuman/pengumuman_form.html", item=item)
 
 @pengumuman_bp.route("/<pengumuman_id>/hapus", methods=["GET", "POST"])
+@login_required
 def pengumuman_hapus(pengumuman_id):
 
     item = get_pengumuman_by_id(pengumuman_id)

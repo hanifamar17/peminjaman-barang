@@ -2,22 +2,24 @@
 {% block title %}Jadwal Penggunaan Lab{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 py-6 sm:py-10 text-[var(--ink)]">
+<div class="max-w-5xl mx-auto px-4 py-6 sm:py-10 text-[var(--ink)]">
 
     {% set back_url = url_for('booking_ruangan.booking_landing') %}
     {% if request.referrer %}
-        {% if 'repository' in request.referrer %}
-            {% set back_url = url_for('repository') %}
-        {% elif 'booking-lab' in request.referrer %}
-            {% set back_url = url_for('booking_ruangan.booking_landing') %}
-        {% else %}
-            {% set back_url = request.referrer %}
-        {% endif %}
+    {% if 'repository' in request.referrer %}
+    {% set back_url = url_for('repository') %}
+    {% elif 'booking-lab' in request.referrer %}
+    {% set back_url = url_for('booking_ruangan.booking_landing') %}
+    {% else %}
+    {% set back_url = request.referrer %}
+    {% endif %}
     {% endif %}
 
-    <a href="{{ back_url }}" class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+    <a href="{{ back_url }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
         </svg>
         Kembali
     </a>
@@ -27,51 +29,63 @@
             <h1 class="page-title text-xl sm:text-2xl font-bold tracking-tight m-0">Kalender Akademik</h1>
             <p class="page-sub text-sm text-[var(--ink-soft)] mt-1 m-0">Dan jadwal penggunaan lab komputer</p>
         </div>
-        <div class="mono text-[11px] font-bold text-[var(--ink-soft)] border border-[var(--line)] px-3 py-1.5 uppercase tracking-widest whitespace-nowrap">
+        <div
+            class="mono text-[11px] font-bold text-[var(--ink-soft)] border border-[var(--line)] px-3 py-1.5 uppercase tracking-widest whitespace-nowrap">
             {{ jadwal | length }} Jadwal
         </div>
     </div>
 
-    <div class="border-t border-[var(--line)] pt-6 mb-8">
-        <div class="flex items-center justify-between mb-4">
-            <h2 id="calendarLabel" class="text-[15px] font-bold m-0"></h2>
-            <div class="flex items-center gap-1">
-                <button id="todayBtn" class="btn-outline px-3 py-1.5 text-xs font-bold border border-[var(--line)] text-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--paper)] transition-colors touch-manipulation uppercase mono tracking-widest">
-                    Hari ini
-                </button>
-                <button id="prevMonth" class="btn-outline p-1.5 border border-[var(--line)] text-[var(--ink-soft)] hover:text-[var(--ink)] hover:bg-[var(--line)] transition-colors touch-manipulation">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </button>
-                <button id="nextMonth" class="btn-outline p-1.5 border border-[var(--line)] text-[var(--ink-soft)] hover:text-[var(--ink)] hover:bg-[var(--line)] transition-colors touch-manipulation">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
+    <div class="lg:grid lg:grid-cols-[360px_1fr] lg:gap-10 lg:items-start">
+
+        <div class="border-t border-[var(--line)] pt-6 mb-8 lg:mb-0">
+            <div class="flex items-center justify-between mb-4">
+                <h2 id="calendarLabel" class="text-[15px] font-bold m-0"></h2>
+                <div class="flex items-center gap-1">
+                    <button id="todayBtn"
+                        class="btn-outline px-3 py-1.5 text-xs font-bold border border-[var(--line)] text-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--paper)] transition-colors touch-manipulation uppercase mono tracking-widest">
+                        Hari ini
+                    </button>
+                    <button id="prevMonth"
+                        class="btn-outline p-1.5 border border-[var(--line)] text-[var(--ink-soft)] hover:text-[var(--ink)] hover:bg-[var(--line)] transition-colors touch-manipulation">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
+                    </button>
+                    <button id="nextMonth"
+                        class="btn-outline p-1.5 border border-[var(--line)] text-[var(--ink-soft)] hover:text-[var(--ink)] hover:bg-[var(--line)] transition-colors touch-manipulation">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
             </div>
+
+            <div
+                class="grid grid-cols-7 gap-1 text-center mono text-[10px] font-bold uppercase tracking-widest text-[var(--ink-faint)] mb-2 select-none border-b border-[var(--line)] pb-2">
+                <div>Min</div>
+                <div>Sen</div>
+                <div>Sel</div>
+                <div>Rab</div>
+                <div>Kam</div>
+                <div>Jum</div>
+                <div>Sab</div>
+            </div>
+
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
         </div>
 
-        <div class="grid grid-cols-7 gap-1 text-center mono text-[10px] font-bold uppercase tracking-widest text-[var(--ink-faint)] mb-2 select-none border-b border-[var(--line)] pb-2">
-            <div>Min</div>
-            <div>Sen</div>
-            <div>Sel</div>
-            <div>Rab</div>
-            <div>Kam</div>
-            <div>Jum</div>
-            <div>Sab</div>
+        <div class="border-t border-[var(--line)] pt-6 lg:border-t-0 lg:pt-0 lg:sticky lg:top-10">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="selectedDateLabel" class="text-sm font-bold m-0"></h3>
+                <span id="selectedDateCount"
+                    class="mono text-[10px] font-bold uppercase tracking-widest border border-[var(--line)] px-2 py-1 text-[var(--ink-soft)]"></span>
+            </div>
+
+            <div id="dayListBody" class="flex flex-col gap-2"></div>
         </div>
 
-        <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
-    </div>
-
-    <div class="border-t border-[var(--line)] pt-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 id="selectedDateLabel" class="text-sm font-bold m-0"></h3>
-            <span id="selectedDateCount" class="mono text-[10px] font-bold uppercase tracking-widest border border-[var(--line)] px-2 py-1 text-[var(--ink-soft)]"></span>
-        </div>
-
-        <div id="dayListBody" class="flex flex-col gap-2"></div>
     </div>
 
 </div>
@@ -139,25 +153,25 @@
     }
 
     const EVENT_COLORS = {
-        jadwal:   { text: "text-[var(--accent)]", border: "border-[var(--accent)]", label: "Jadwal Lab" },
-        libur:    { text: "text-[#C87979]",       border: "border-[#C87979]",       label: "Libur" },    // Muted Rose/Brick
-        agenda:   { text: "text-[#D4A373]",       border: "border-[#D4A373]",       label: "Agenda" },   // Muted Ochre/Tan
-        akademik: { text: "text-[#6B8395]",       border: "border-[#6B8395]",       label: "Akademik" }, // Muted Slate Blue
-        default:  { text: "text-[var(--ink-soft)]", border: "border-[var(--line)]",   label: "Lainnya" },
+        jadwal: { text: "text-[var(--accent)]", border: "border-[var(--accent)]", label: "Jadwal Lab" },
+        libur: { text: "text-[#C87979]", border: "border-[#C87979]", label: "Libur" },    // Muted Rose/Brick
+        agenda: { text: "text-[#D4A373]", border: "border-[#D4A373]", label: "Agenda" },   // Muted Ochre/Tan
+        akademik: { text: "text-[#6B8395]", border: "border-[#6B8395]", label: "Akademik" }, // Muted Slate Blue
+        default: { text: "text-[var(--ink-soft)]", border: "border-[var(--line)]", label: "Lainnya" },
     };
 
     function getEventDot(type, isSelected) {
         const base = "w-2 h-2 shrink-0 inline-block rounded-full";
-        
+
         if (isSelected) {
             return `<span class="${base} bg-[var(--paper)] border border-[var(--ink)]"></span>`;
         }
         switch (type) {
-            case "jadwal":   return `<span class="${base} bg-[var(--accent)]" title="Jadwal Lab"></span>`;
+            case "jadwal": return `<span class="${base} bg-[var(--accent)]" title="Jadwal Lab"></span>`;
             case "akademik": return `<span class="${base} bg-[#6B8395]" title="Akademik"></span>`;
-            case "libur":    return `<span class="${base} bg-[#C87979]" title="Libur"></span>`;
-            case "agenda":   return `<span class="${base} bg-[#D4A373]" title="Agenda"></span>`;
-            default:         return `<span class="${base} bg-[var(--ink-faint)]"></span>`;
+            case "libur": return `<span class="${base} bg-[#C87979]" title="Libur"></span>`;
+            case "agenda": return `<span class="${base} bg-[#D4A373]" title="Agenda"></span>`;
+            default: return `<span class="${base} bg-[var(--ink-faint)]"></span>`;
         }
     }
 

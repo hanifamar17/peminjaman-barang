@@ -3,6 +3,11 @@
 
 {% block content %}
 <div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
+    <a href="{{ url_for('repository') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
+    </a>
+    
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
         <div>
             <div class="mt-2">

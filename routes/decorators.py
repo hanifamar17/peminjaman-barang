@@ -1,11 +1,11 @@
 from functools import wraps
-from flask import session, redirect, url_for
+from flask import session, redirect, url_for, request
 
 def login_required(f):
     @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Flask akan otomatis tahu session user yang sedang mengakses
+    def decorated(*args, **kwargs):
         if "user" not in session:
-            return redirect(url_for("login")) 
+            # sertakan URL tujuan sebagai next
+            return redirect(url_for("login", next=request.full_path))
         return f(*args, **kwargs)
-    return decorated_function
+    return decorated
