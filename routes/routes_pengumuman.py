@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from routes.decorators import login_required
-from sheets.sheets_jadwal import get_all_pengumuman, get_pengumuman_by_id, add_pengumuman, update_pengumuman, delete_pengumuman
+from sheets.sheets_pengumuman import get_all_pengumuman, get_pengumuman_by_id, add_pengumuman, update_pengumuman, delete_pengumuman
 from datetime import datetime
 from zoneinfo import ZoneInfo
 

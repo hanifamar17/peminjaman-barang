@@ -10,29 +10,33 @@ from flask import (
     url_for,
     flash,
     send_from_directory,
+    request, redirect, url_for, session, flash
 )
-from dotenv import load_dotenv
-from sheets.sheets import read_sheet
-from sheets.sheets_jadwal import get_all_pengumuman
 from mailer import (
     mail,
     init_app,
 )
-from peminjaman_aset.document_generator import generate_pdf, generate_nomor_surat
-from peminjaman_aset.drive_uploader import upload_file
-from sheets.sheets_peminjaman_aset import append_peminjaman, get_last_sequence_this_month, get_all_peminjaman, find_row_by_id, update_row, get_sheet_headers, deduct_inventaris_stock, search_inventaris
+from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
-from flask import request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
 from functools import wraps
 from flask_wtf import CSRFProtect
 from urllib.parse import urlparse, urljoin
+
+from sheets.sheets import read_sheet
+from sheets.sheets_pengumuman import get_all_pengumuman
+from sheets.sheets_peminjaman_aset import append_peminjaman, get_last_sequence_this_month, get_all_peminjaman, find_row_by_id, update_row, get_sheet_headers, deduct_inventaris_stock, search_inventaris
+
+from peminjaman_aset.document_generator import generate_pdf, generate_nomor_surat
+from peminjaman_aset.drive_uploader import upload_file
+from routes.routes_jadwal_pelajaran import split_mixed_script
 
 from routes.routes_inventory_aset import inventaris_bp
 from routes.routes_booking_ruangan import booking_ruangan_bp
 from routes.routes_inventory_komp import inventory_labkomp_bp
 from routes.routes_peminjaman import peminjaman_invlabkomp_bp
 from routes.routes_pengumuman import pengumuman_bp
+from routes.routes_jadwal_pelajaran import jadwal_pelajaran_bp
 
 
 
@@ -46,6 +50,8 @@ app.register_blueprint(booking_ruangan_bp)
 app.register_blueprint(inventory_labkomp_bp)
 app.register_blueprint(peminjaman_invlabkomp_bp)
 app.register_blueprint(pengumuman_bp)
+app.register_blueprint(jadwal_pelajaran_bp)
+app.jinja_env.globals['split_mixed_script'] = split_mixed_script
 
 # =========================
 # DETEKSI ENVIRONMENT
@@ -174,7 +180,7 @@ def repository():
             "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>',
             "links": [
                 {"title": "Kalender akademik", "url": url_for('booking_ruangan.jadwal_penggunaan'), "subtext": "Dokumen kalender akademik"},
-                {"title": "Jadwal KBM", "url": "https://drive.google.com/file/d/1x56KSv5q4ihgWq5YGKeRqJauzJGoqL39/view?usp=sharing", "subtext": "Jadwal kegiatan belajar mengajar (KBM)"},
+                {"title": "Jadwal KBM", "url": url_for('jadwal_pelajaran.jadwal_pelajaran_landing'), "subtext": "Jadwal kegiatan belajar mengajar (KBM)"},
                 {"title": "Rapor Digital Madrasah", "url": "#", "subtext": "Coming Soon", "disabled": True}
             ]
         },

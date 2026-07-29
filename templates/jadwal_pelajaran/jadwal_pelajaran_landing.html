@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}Jadwal Pelajaran{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-5 pt-12 bg-[#faf8f5] text-[#1f1c19]">
+
+  <a href="{{ url_for('repository') }}"
+    class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+    <i class="ph ph-arrow-left"></i> Kembali
+  </a>
+
+  <div class="my-8">
+    <h1 class="page-title text-2xl sm:text-[26px] leading-snug m-0">Jadwal Pelajaran (KBM)</h1>
+    <p class="page-sub mt-2 max-w-[46ch]">Pantau jadwal jam, mapel, dan guru pengajar per hari.</p>
+  </div>
+
+  <div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+    <div class="flex items-center gap-3">
+      <button id="prevDay" class="btn-outline w-9 h-9 !px-0">
+        <i class="ph ph-caret-left text-base"></i>
+      </button>
+      <div id="hariLabel" class="mono text-sm font-bold tracking-wide" style="color:var(--ink)"></div>
+      <button id="nextDay" class="btn-outline w-9 h-9 !px-0">
+        <i class="ph ph-caret-right text-base"></i>
+      </button>
+    </div>
+    <button id="todayBtn" class="btn-outline">
+      <i class="ph ph-calendar-check text-base"></i>
+      Hari Ini
+    </button>
+  </div>
+
+  <div class="relative z-0 w-full max-w-sm mb-8">
+    <input type="text" id="filter"
+      class="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b appearance-none focus:outline-none focus:ring-0 peer transition-colors duration-150 rounded-none"
+      style="color:var(--ink); border-color:var(--line)" onfocus="this.style.borderColor='var(--accent)'"
+      onblur="this.style.borderColor='var(--line)'" placeholder="Cari kelas, mapel, guru...">
+    <div id="searchCount" class="text-xs mt-2 hidden" style="color:var(--ink-faint)"></div>
+  </div>
+
+  {% set hari_list = ['SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'] %}
+
+  {% for hari in hari_list %}
+  <div class="hari-panel space-y-10" data-hari="{{ hari }}" style="display:none">
+    {% set kelas_groups = jadwal_per_hari.get(hari, []) %}
+    {% if kelas_groups | length == 0 %}
+    <div class="page-sub">Tidak ada jadwal.</div>
+    {% else %}
+    {% for kelas, rows_kelas in kelas_groups %}
+    <div class="kelas-block" data-kelas="{{ kelas }}">
+      <div class="mono text-xs font-bold uppercase tracking-widest mb-3 pb-2 block w-full"
+        style="color:var(--ink-soft); border-bottom:1px solid var(--line)">
+        Kelas {{ kelas }}
+      </div>
+
+      <!-- TABLE: md ke atas -->
+      <div class="hidden md:block idx-list">
+        <table class="w-full text-sm">
+          <thead>
+            <tr>
+              <th class="text-left pr-6 py-2 eyebrow whitespace-nowrap w-px">Sesi</th>
+              <th class="text-left pr-6 py-2 eyebrow whitespace-nowrap w-px">Pukul</th>
+              <th class="text-left pr-6 py-2 eyebrow">Mapel</th>
+              <th class="text-left py-2 eyebrow w-1/2">Guru</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows_kelas %}
+            <tr data-row style="border-top:1px solid var(--line)">
+              <td class="mono text-xs pr-6 py-3 whitespace-nowrap" style="color:var(--ink-faint)">{{ r.sesi or '-' }}
+              </td>
+              <td class="mono text-xs pr-6 py-3 font-semibold whitespace-nowrap" style="color:var(--ink)">{{ r.waktu }}
+              </td>
+              <td class="pr-6 py-3 break-words" style="color:var(--ink)">{% for segment, is_arabic in
+                split_mixed_script(r.nama_mapel) %}
+                {% if is_arabic %}<span dir="rtl" style="font-family: var(--font-arabic)">{{ segment }}</span>{% else
+                %}{{ segment }}{% endif %}
+                {% endfor %}</td>
+              <td class="py-3 break-words" style="color:var(--ink-soft)">{{ r.nama_guru or '-' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TABLE: mobile, 2 kolom gabungan -->
+      <div class="md:hidden idx-list">
+        <table class="w-full text-sm table-fixed">
+          <colgroup>
+            <col style="width:34%">
+            <col>
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="text-left pr-4 py-2 eyebrow">Sesi / Pukul</th>
+              <th class="text-left py-2 eyebrow">Mapel / Guru</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows_kelas %}
+            <tr data-row style="border-top:1px solid var(--line)">
+              <td class="pr-4 py-3 align-top">
+                <div class="mono text-xs font-semibold" style="color:var(--ink)">{{ r.waktu }}</div>
+                <div class="mono text-[10px]" style="color:var(--ink-faint)">Sesi {{ r.sesi or '-' }}</div>
+              </td>
+              <td class="py-3 align-top break-words">
+                <div class="text-sm font-medium" style="color:var(--ink)">{% for segment, is_arabic in
+                  split_mixed_script(r.nama_mapel) %}
+                  {% if is_arabic %}<span dir="rtl" style="font-family: var(--font-arabic)">{{ segment }}</span>{% else
+                  %}{{ segment }}{% endif %}
+                  {% endfor %}</div>
+                <div class="text-xs" style="color:var(--ink-soft)">{{ r.nama_guru or '-' }}</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="empty-state hidden py-10 text-center text-[13px] font-semibold" style="color:var(--ink-faint)">
+      Tidak ditemukan jadwal yang cocok.
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  const HARI_LIST = ['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+  const panels = document.querySelectorAll('.hari-panel');
+  const hariLabel = document.getElementById('hariLabel');
+  const filterInput = document.getElementById('filter');
+  const searchCount = document.getElementById('searchCount');
+
+  function jsDayToHariIndex(jsDay) {
+    return jsDay === 0 ? 0 : jsDay - 1;
+  }
+
+  let currentIndex = jsDayToHariIndex(new Date().getDay());
+  let debounceTimer;
+
+  function showHari(index) {
+    const hari = HARI_LIST[index];
+    panels.forEach(p => p.style.display = (p.dataset.hari === hari) ? '' : 'none');
+    hariLabel.textContent = hari;
+    applyFilter(); // re-apply filter tiap ganti hari
+  }
+
+  function applyFilter() {
+    const query = filterInput.value.toLowerCase().trim();
+    const activePanel = document.querySelector('.hari-panel[data-hari="' + HARI_LIST[currentIndex] + '"]');
+    if (!activePanel) return;
+
+    const cards = activePanel.querySelectorAll('.kelas-block');
+    const emptyState = activePanel.querySelector('.empty-state');
+    let visibleRowsTotal = 0;
+
+    cards.forEach(card => {
+      const rows = card.querySelectorAll('[data-row]');
+      let visibleInCard = 0;
+      rows.forEach(row => {
+        const match = !query || row.textContent.toLowerCase().includes(query);
+        row.style.display = match ? '' : 'none';
+        if (match) visibleInCard++;
+      });
+      card.style.display = visibleInCard > 0 ? '' : 'none';
+      visibleRowsTotal += visibleInCard;
+    });
+
+    if (query) {
+      searchCount.textContent = `Ditemukan ${visibleRowsTotal} data`;
+      searchCount.classList.remove('hidden');
+    } else {
+      searchCount.classList.add('hidden');
+    }
+
+    emptyState.classList.toggle('hidden', visibleRowsTotal > 0 || cards.length === 0);
+  }
+
+  filterInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(applyFilter, 300);
+  });
+
+  document.getElementById('prevDay').addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + HARI_LIST.length) % HARI_LIST.length;
+    showHari(currentIndex);
+  });
+  document.getElementById('nextDay').addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % HARI_LIST.length;
+    showHari(currentIndex);
+  });
+  document.getElementById('todayBtn').addEventListener('click', () => {
+    currentIndex = jsDayToHariIndex(new Date().getDay());
+    showHari(currentIndex);
+  });
+
+  showHari(currentIndex);
+</script>
+{% endblock %}
