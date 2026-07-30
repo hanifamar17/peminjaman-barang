@@ -5,7 +5,7 @@
 <div class="max-w-2xl mx-auto px-4 py-6">
   <h1 class="text-lg font-medium mb-4">Edit peminjaman aset</h1>
 
-  <form method="POST" action="{{ url_for('admin_edit_peminjaman_aset_submit', record_id=record_id) }}" class="space-y-4">
+  <form method="POST" action="{{ url_for('inventaris.admin_edit_peminjaman_aset_submit', record_id=record_id) }}" class="space-y-4">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="grid grid-cols-2 gap-3">

@@ -194,7 +194,21 @@ def get_all_peminjaman():
     if len(rows) < 2:
         return []
     headers = rows[0]
-    return [dict(zip(headers, row)) for row in rows[1:]]
+    data = [dict(zip(headers, row)) for row in rows[1:]]
+
+    for r in data:
+        try:
+            items = json.loads(r.get("barang_json") or "[]")
+        except json.JSONDecodeError:
+            items = []
+        if items and all(i.get("dikembalikan") for i in items):
+            r["status_pengembalian"] = "kembali"
+        else:
+            r["status_pengembalian"] = "dipinjam"
+
+    data.sort(key=lambda r: r.get("timestamp", ""), reverse=True)
+
+    return data
 
 
 def get_last_sequence_this_month() -> int:
@@ -217,7 +231,141 @@ def update_row(row_index, updated_row):
         body={"values": [updated_row]},
     ).execute()
 
-# Inventaris aset (barang) -- sheet terpisah dari peminjaman, tapi masih di spreadsheet yang sama
+
+# Pengembalian barang
+def find_row_by_nomor_surat(nomor_surat):
+    service = _get_service()
+    result = service.spreadsheets().values().get(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{ASET_SHEET_NAME}!A:Z",
+    ).execute()
+    rows = result.get("values", [])
+    if not rows:
+        return None, None
+    headers = rows[0]
+    surat_col = headers.index("nomor_surat")
+    for i, row in enumerate(rows[1:], start=2):
+        if len(row) > surat_col and row[surat_col] == nomor_surat:
+            return i, row
+    return None, None
+
+def get_loan_by_code(nomor_surat):
+    row_num, row = find_row_by_nomor_surat(nomor_surat)
+    if not row:
+        return None
+    headers = get_sheet_headers()
+    data = dict(zip(headers, row))
+    data["_row_index"] = row_num
+    try:
+        data["items"] = json.loads(data.get("barang_json") or "[]")
+    except json.JSONDecodeError:
+        data["items"] = []
+    return data
+
+
+def update_items_return(nomor_surat, item_ids_to_return, catatan=""):
+    row_num, row = find_row_by_nomor_surat(nomor_surat)
+    if not row:
+        return False, None
+    headers = get_sheet_headers()
+    barang_col = headers.index("barang_json")
+
+    while len(row) <= barang_col:
+        row.append("")
+    items = json.loads(row[barang_col] or "[]")
+
+    now = datetime.datetime.utcnow().isoformat()
+    deltas = {}
+    for item in items:
+        if item.get("id") in item_ids_to_return and not item.get("dikembalikan"):
+            item["dikembalikan"] = True
+            item["tgl_dikembalikan"] = now
+            item["catatan_kembali"] = catatan
+            deltas[item["id"]] = deltas.get(item["id"], 0) + int(item.get("jumlah") or 0)
+
+    row[barang_col] = json.dumps(items, ensure_ascii=False)
+
+    service = _get_service()
+    col_letter = chr(ord("A") + barang_col)
+    service.spreadsheets().values().update(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{ASET_SHEET_NAME}!{col_letter}{row_num}",
+        valueInputOption="RAW",
+        body={"values": [[row[barang_col]]]},
+    ).execute()
+    return True, deltas
+
+
+def _get_inventaris_raw():
+    now = time.time()
+    if _inventaris_cache["data"] and now - _inventaris_cache["ts"] < CACHE_TTL:
+        return _inventaris_cache["data"]
+    service = _get_service()
+    result = service.spreadsheets().values().get(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{INV_SHEET_NAME}!A:Z",
+    ).execute()
+    rows = result.get("values", [])
+    _inventaris_cache["data"] = rows
+    _inventaris_cache["ts"] = now
+    return rows
+
+
+def get_stock_map(item_ids):
+    rows = _get_inventaris_raw()
+    if not rows:
+        return {}
+    headers = rows[0]
+    id_col = headers.index("id")
+    total_col = headers.index("jumlah_total")
+    dipinjam_col = headers.index("jumlah_dipinjam")
+    result = {}
+    for row in rows[1:]:
+        if len(row) <= id_col:
+            continue
+        iid = row[id_col]
+        if iid in item_ids:
+            total = int(row[total_col]) if len(row) > total_col and row[total_col] else 0
+            dipinjam = int(row[dipinjam_col]) if len(row) > dipinjam_col and row[dipinjam_col] else 0
+            result[iid] = {"total": total, "dipinjam": dipinjam, "tersedia": total - dipinjam}
+    return result
+
+
+def update_stock_return_batch(item_deltas: dict):
+    service = _get_service()
+    result = service.spreadsheets().values().get(
+        spreadsheetId=ASET_SPREADSHEET_ID,
+        range=f"{INV_SHEET_NAME}!A:Z",
+    ).execute()
+    rows = result.get("values", [])
+    headers = rows[0]
+    id_col = headers.index("id")
+    dipinjam_col = headers.index("jumlah_dipinjam")
+    updated_col = headers.index("last_updated")
+    now = datetime.datetime.utcnow().isoformat()
+
+    data_updates = []
+    for idx, row in enumerate(rows[1:], start=2):
+        if len(row) <= id_col:
+            continue
+        item_id = row[id_col]
+        if item_id in item_deltas:
+            current = int(row[dipinjam_col]) if len(row) > dipinjam_col and row[dipinjam_col] else 0
+            new_val = max(0, current - item_deltas[item_id])
+            dcol_letter = chr(ord("A") + dipinjam_col)
+            ucol_letter = chr(ord("A") + updated_col)
+            data_updates.append({"range": f"{INV_SHEET_NAME}!{dcol_letter}{idx}", "values": [[new_val]]})
+            data_updates.append({"range": f"{INV_SHEET_NAME}!{ucol_letter}{idx}", "values": [[now]]})
+
+    if data_updates:
+        service.spreadsheets().values().batchUpdate(
+            spreadsheetId=ASET_SPREADSHEET_ID,
+            body={"valueInputOption": "RAW", "data": data_updates},
+        ).execute()
+    _inventaris_cache["data"] = None
+
+
+# Inventaris aset (barang) -- sheet terpisah dari peminjaman
 def _next_id():
     rows = get_all_inventaris()
     nums = []

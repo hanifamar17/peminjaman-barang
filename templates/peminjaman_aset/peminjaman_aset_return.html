@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
+
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[#1f1c19]">
+
+    <a href="{{ url_for('inventaris.peminjaman_aset_landing') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
+    </a>
+
+    <div class="mt-8 mb-10">
+        <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Pengembalian Barang
+        </h1>
+        <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Masukkan no. surat peminjaman pada form di bawah</p>
+    </div>
+
+    <div class="relative w-full mb-8">
+        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wide mb-1">No. Surat Peminjaman</label>
+        <input id="loanCode" type="text" placeholder="Masukkan no. surat..." class="block py-2.5 w-full text-[15px] font-semibold border-b border-zinc-200 focus:outline-none focus:border-zinc-900 uppercase font-mono">
+        <div id="loanLoader" class="hidden absolute right-0 top-7"><div class="w-4 h-4 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin"></div></div>
+    </div>
+
+    <div id="loanSummary" class="hidden space-y-6 mb-8 border-t border-zinc-200 pt-6">
+        <div class="grid grid-cols-2 gap-4">
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">No. Surat</span><span id="sIdItem" class="text-sm font-mono font-semibold"></span></div>
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Status</span><span id="sStatus" class="inline-block mt-0.5 text-xs font-bold uppercase"></span></div>
+        </div>
+        <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Peminjam</span><p id="sBorrower" class="text-base font-semibold"></p></div>
+        <div class="grid grid-cols-2 gap-4">
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Tgl Pinjam</span><p id="sLoanDate" class="text-sm font-semibold"></p></div>
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Tgl Kembali</span><p id="sReturnDate" class="text-sm font-semibold"></p></div>
+        </div>
+        <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Catatan Peminjaman</span><p id="sNote" class="text-sm text-zinc-500 font-mono"></p></div>
+        <div>
+            <h3 class="text-[13px] font-bold uppercase tracking-widest">Daftar Barang</h3>
+            <table class="w-full text-left text-sm mt-4"><tbody id="sItems" class="divide-y divide-zinc-100"></tbody></table>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        <div class="space-y-2">
+            <span class="block text-[11px] font-bold text-zinc-400 uppercase">Catatan Pengembalian</span>
+            <textarea id="catatan" placeholder="Catatan kondisi barang (opsional)..." class="w-full text-sm border-b border-zinc-200 focus:outline-none focus:border-zinc-900 py-2 resize-none" rows="2"></textarea>
+        </div>
+        <button id="btnReturn" class="w-full bg-zinc-900 text-white text-[13px] font-semibold py-4 hover:bg-zinc-800 disabled:bg-zinc-200 cursor-pointer">Konfirmasi Pengembalian</button>
+    </div>
+</div>
+<script>
+    const Toast = Swal.mixin({ toast: true, position: "top-end", showConfirmButton: false, timer: 2000, timerProgressBar: true });
+    document.addEventListener("DOMContentLoaded", () => {
+        const [loanCode, summary, btn, loader, token] = [document.getElementById("loanCode"), document.getElementById("loanSummary"), document.getElementById("btnReturn"), document.getElementById("loanLoader"), document.getElementById("csrf_token").value];
+        let currentLoan, debounce;
+
+        loanCode.addEventListener("input", (e) => {
+            e.target.value = e.target.value.toUpperCase();
+            clearTimeout(debounce);
+            if(e.target.value.trim()) loader.classList.remove("hidden");
+            debounce = setTimeout(fetchLoan, 500);
+        });
+
+        function fetchLoan() {
+            const code = loanCode.value.trim();
+            if(!code) { summary.classList.add("hidden"); loader.classList.add("hidden"); return; }
+            fetch(`/peminjaman-aset/api/loan/${encodeURIComponent(code)}`).then(res => res.json()).then(res => {
+                loader.classList.add("hidden");
+                if(!res.ok) { summary.classList.add("hidden"); return; }
+                currentLoan = res.loan;
+                document.getElementById("sIdItem").innerText = currentLoan.code;
+                document.getElementById("sBorrower").innerText = currentLoan.borrower_name;
+                document.getElementById("sLoanDate").innerText = currentLoan.loan_date;
+                document.getElementById("sReturnDate").innerText = currentLoan.return_date;
+                document.getElementById("sNote").innerText = currentLoan.note || "-";
+                document.getElementById("sStatus").innerText = currentLoan.status;
+                const items = document.getElementById("sItems");
+                items.innerHTML = "";
+                currentLoan.items.forEach(i => {
+                    const badge = i.dikembalikan
+                        ? `<span class="text-[10px] font-bold text-emerald-600 uppercase">Kembali</span>`
+                        : `<span class="text-[10px] font-bold text-amber-600 uppercase">Dipinjam</span>`;
+                    items.innerHTML += `<tr class="border-b"><td class="py-1.5">${i.item_name}</td><td class="py-1.5">${i.merk}</td><td class="text-right">${i.qty} unit</td><td class="text-right">${badge}</td></tr>`;
+                });
+                if(currentLoan.status.toLowerCase() === 'dikembalikan') { btn.disabled = true; btn.innerText = "Dikembalikan"; }
+                else { btn.disabled = false; btn.innerText = "Konfirmasi Pengembalian"; }
+                summary.classList.remove("hidden");
+            });
+        }
+
+        btn.addEventListener("click", () => {
+            if(!currentLoan) return;
+            Swal.fire({ title: "Proses Pengembalian?", text: "Pastikan fisik sesuai.", icon: "warning", showCancelButton: true, confirmButtonText: "Ya, Selesaikan" }).then(r => {
+                if(!r.isConfirmed) return;
+                const fd = new FormData();
+                fd.append("code", currentLoan.code);
+                fd.append("catatan", document.getElementById("catatan").value);
+                btn.disabled = true;
+                btn.innerHTML = `<svg class="animate-spin h-4 w-4 inline mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Memproses...`;
+                fetch('{{url_for("inventaris.return_submit")}}', { method: "POST", headers: { 'X-CSRFToken': token }, body: fd }).then(res => res.json()).then(res => {
+                    if(res.ok) {
+                        Toast.fire({ icon: "success", title: "Berhasil dikembalikan" }).then(() => location.reload());
+                    } else {
+                        Toast.fire({ icon: "error", title: res.error || "Gagal" });
+                        btn.disabled = false;
+                        btn.innerText = "Konfirmasi Pengembalian";
+                    }
+                }).catch(() => {
+                    Toast.fire({ icon: "error", title: "Server Error" });
+                    btn.disabled = false;
+                    btn.innerText = "Konfirmasi Pengembalian";
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

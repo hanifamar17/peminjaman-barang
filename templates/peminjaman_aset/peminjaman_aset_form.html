@@ -87,7 +87,7 @@
 
 <div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[var(--color-paper)] text-[var(--color-ink)]">
 
-  <a href="{{ url_for('peminjaman_aset_landing') }}"
+  <a href="{{ url_for('inventaris.peminjaman_aset_landing') }}"
     class="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-ink-faint)] hover:text-[var(--color-ink)] transition-colors">
     <i class="ph ph-arrow-left"></i> Kembali
   </a>
@@ -353,7 +353,7 @@
       }
       loader.style.display = "block";
       try {
-        const res = await fetch("{{ url_for('search_barang_inventaris') }}?q=" + encodeURIComponent(q));
+        const res = await fetch("{{ url_for('inventaris.search_barang_inventaris') }}?q=" + encodeURIComponent(q));
         const data = await res.json();
         searchResult.innerHTML = "";
 
@@ -588,7 +588,7 @@
       });
 
       try {
-        const response = await fetch("{{ url_for('submit_peminjaman_aset') }}", {
+        const response = await fetch("{{ url_for('inventaris.submit_peminjaman_aset') }}", {
           method: "POST",
           headers: { "X-CSRFToken": csrfToken },
           body: formData

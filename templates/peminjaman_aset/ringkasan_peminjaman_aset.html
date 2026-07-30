@@ -1,156 +1,104 @@
 {% extends "base.html" %}
+{% block title %}Ringkasan Peminjaman Aset{% endblock %}
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[#1f1c19]">
 
-    <!-- Back -->
-    <a href="{{ url_for('daftar_peminjaman_aset') }}" class="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 text-sm font-medium text-gray-500 rounded-lg transition-all duration-200 
-          hover:text-blue-600 hover:bg-blue-50 
-          active:scale-95 active:bg-gray-100 group">
-
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
-        </svg>
-        <span>Kembali</span>
+    <!-- Back Navigation -->
+    {% if session.get('user') %}
+    <a href="{{ url_for('inventaris.daftar_peminjaman_aset') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
     </a>
+    {% endif %}
 
     <!-- Header Section -->
-    <div class="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-bold text-gray-900">Ringkasan Peminjaman Aset</h1>
-            <p class="text-sm text-gray-500">
-                No. Surat: <span class="font-mono font-bold bg-gray-100 text-gray-800 px-2 py-0.5 rounded text-xs">{{
-                    data.nomor_surat }}</span>
-            </p>
+    <div class="mb-10 mt-8">
+        <h1 class="text-2xl sm:text-[26px] font-bold tracking-tight mb-2">Ringkasan Peminjaman</h1>
+        <p class="text-sm text-[#6b6459]">No. Surat: <span class="font-mono font-bold bg-[#e6e0d6]/50 px-1.5 py-0.5">{{ data.nomor_surat }}</span></p>
+    </div>
+
+    <!-- Data Grid -->
+    <div class="space-y-8">
+        <div class="grid grid-cols-2 gap-x-6 gap-y-6">
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Nama Peminjam</span>
+                <p class="text-[14px] font-semibold">{{ data.nama }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Pekerjaan</span>
+                <p class="text-[14px] text-[#1f1c19]">{{ data.pekerjaan }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">No. Telepon</span>
+                <p class="text-[14px] font-mono">{{ data.telepon }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">No. Identitas</span>
+                <p class="text-[14px] font-mono">{{ data.no_identitas }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Jaminan</span>
+                <p class="text-[14px]">{{ data.jenis_identitas_jaminan }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Periode</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19]">{{ data.tgl_pinjam }} s/d {{ data.tgl_kembali }}</p>
+            </div>
+        </div>
+
+        <div class="border-t border-[#e6e0d6] pt-6 grid grid-cols-1 gap-6">
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Lokasi Penggunaan</span>
+                <p class="text-[14px]">{{ data.lokasi_penggunaan }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Alamat Lengkap</span>
+                <p class="text-[14px] leading-relaxed">{{ data.alamat }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Tujuan</span>
+                <p class="text-[14px] italic leading-relaxed text-[#6b6459]">"{{ data.tujuan }}"</p>
+            </div>
+        </div>
+
+        <!-- Daftar Barang -->
+        <div class="pt-6 border-t border-[#e6e0d6]">
+            <h3 class="text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-4">Daftar Barang</h3>
+            <table class="w-full text-left text-[14px]">
+                <tbody id="barang-tbody" class="divide-y divide-[#e6e0d6]">
+                    <!-- JS Injected -->
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 sm:p-8 mb-6">
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nama
-                    Peminjam</label>
-                <p class="text-sm font-semibold text-gray-900">{{ data.nama }}</p>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pekerjaan</label>
-                <p class="text-sm text-gray-700">{{ data.pekerjaan }}</p>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">No. Telepon /
-                    HP</label>
-                <p class="text-sm text-gray-700 font-mono">{{ data.telepon }}</p>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">No.
-                    Identitas</label>
-                <p class="text-sm text-gray-700 font-mono">{{ data.no_identitas }}</p>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Jaminan
-                    Identitas</label>
-                <p class="text-sm text-gray-700">{{ data.jenis_identitas_jaminan }}</p>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Periode
-                    Pinjam</label>
-                <p class="text-sm font-medium text-indigo-600">{{ data.tgl_pinjam }} s/d {{ data.tgl_kembali }}</p>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Lokasi
-                    Penggunaan</label>
-                <p class="text-sm text-gray-700">{{ data.lokasi_penggunaan }}</p>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Petugas
-                    Administrasi</label>
-                <p class="text-sm text-gray-700">{{ data.nama_petugas }}</p>
-            </div>
-
-            <div class="sm:col-span-2 md:col-span-3">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Alamat
-                    Lengkap</label>
-                <p class="text-sm text-gray-700 leading-relaxed">{{ data.alamat }}</p>
-            </div>
-
-            <div class="sm:col-span-2 md:col-span-3">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Tujuan
-                    Peminjaman</label>
-                <p class="text-sm text-gray-700 leading-relaxed">{{ data.tujuan }}</p>
-            </div>
+    <!-- Actions -->
+    <div class="mt-12 pt-8 border-t border-[#e6e0d6]">
+        {% if data.sudah_generate %}
+        <div class="bg-[#f3f0ea] p-5 border border-[#e6e0d6]">
+            <p class="text-sm font-medium text-[#1f1c19] mb-4">Dokumen berita acara sudah tersedia.</p>
+            <a href="{{ url_for('inventaris.preview_pdf_peminjaman_aset', record_id=record_id) }}" target="_blank"
+               class="block w-full text-center bg-[#1f1c19] text-white text-[13px] font-semibold py-3.5 hover:bg-[#333] transition-all">
+                Lihat PDF
+            </a>
         </div>
-
-        <div class="pt-6 border-t border-gray-100">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Daftar Barang Yang Dipinjam</h3>
-
-            <div class="overflow-x-auto border border-gray-100 rounded-xl">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-gray-50 text-gray-500 border-b border-gray-100">
-                        <tr>
-                            <th class="px-4 py-3 font-semibold w-12 text-center">No</th>
-                            <th class="px-4 py-3 font-semibold">Nama Aset</th>
-                            <th class="px-4 py-3 font-semibold">Merk</th>
-                            <th class="px-4 py-3 font-semibold w-24">Jumlah</th>
-                            <th class="px-4 py-3 font-semibold w-32">Kondisi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="barang-tbody" class="divide-y divide-gray-100">
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+        {% else %}
+        <form id="generate-form" class="space-y-4">
+            <label class="flex items-start gap-3 cursor-pointer group">
+                <input type="checkbox" id="setuju" name="setuju" class="mt-1 accent-[#1f1c19]">
+                <span class="text-sm text-[#6b6459]">Saya memastikan seluruh data di atas valid dan benar.</span>
+            </label>
+            <button type="submit" id="btn-generate" disabled
+                class="w-full px-5 py-3.5 bg-[#e6e0d6] text-[#a49b8c] text-[13px] font-semibold transition-all cursor-not-allowed">
+                Generate Dokumen PDF
+            </button>
+        </form>
+        <p id="generate-status" class="text-sm mt-3"></p>
+        {% endif %}
     </div>
-
-    <script id="barang-data" type="application/json">{{ data.barang | tojson | safe }}</script>
-
-    {% if data.sudah_generate %}
-    <div
-        class="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-            <div class="p-2 bg-white rounded-lg text-emerald-600 shadow-sm">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <span class="text-sm font-medium text-emerald-800">Dokumen berita acara peminjaman PDF telah berhasil
-                diterbitkan.</span>
-        </div>
-        <a href="{{ url_for('preview_pdf_peminjaman_aset', record_id=record_id) }}" target="_blank"
-            class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95 transition-all text-center cursor-pointer">
-            Preview Surat PDF
-        </a>
-    </div>
-    {% else %}
-    <form id="generate-form" class="space-y-4 bg-gray-50 border border-gray-100 rounded-2xl p-5 sm:p-6">
-        <label class="flex items-start gap-3 cursor-pointer group">
-            <input type="checkbox" id="setuju" name="setuju"
-                class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-            <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors select-none">
-                Saya menyatakan dan memastikan seluruh data informasi ringkasan peminjaman di atas sudah valid dan
-                benar.
-            </span>
-        </label>
-
-        <button type="submit" id="btn-generate" disabled
-            class="w-full px-5 py-3 rounded-xl font-medium text-sm bg-gray-300 text-gray-500 cursor-not-allowed transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer">
-            Generate Dokumen PDF
-        </button>
-    </form>
-
-    <p id="generate-status" class="text-sm font-medium mt-3 px-2"></p>
-    {% endif %}
 </div>
+
+<script id="barang-data" type="application/json">{{ data.barang | tojson | safe }}</script>
 
 <script>
     // Parsing & Render data barang

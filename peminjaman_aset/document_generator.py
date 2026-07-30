@@ -97,7 +97,7 @@ def _barang_table(barang):
         data.append([
             Paragraph(str(b["no"]), ParagraphStyle("c", parent=cell_style, alignment=TA_CENTER)),
             Paragraph(str(b["nama"]), cell_style),
-            Paragraph(str(b["spek"]), cell_style),
+            Paragraph(str(b["merk"]), cell_style),
             Paragraph(str(b["jumlah"]), ParagraphStyle("c", parent=cell_style, alignment=TA_CENTER)),
             Paragraph(str(b["kondisi"]), ParagraphStyle("c", parent=cell_style, alignment=TA_CENTER)),
         ])

@@ -1,8 +1,7 @@
-import os, uuid, time
+import os, time
 from flask import (
     Flask,
     abort,
-    json,
     render_template,
     request,
     jsonify,
@@ -25,10 +24,7 @@ from urllib.parse import urlparse, urljoin
 
 from sheets.sheets import read_sheet
 from sheets.sheets_pengumuman import get_all_pengumuman
-from sheets.sheets_peminjaman_aset import append_peminjaman, get_last_sequence_this_month, get_all_peminjaman, find_row_by_id, update_row, get_sheet_headers, deduct_inventaris_stock, search_inventaris
 
-from peminjaman_aset.document_generator import generate_pdf, generate_nomor_surat
-from peminjaman_aset.drive_uploader import upload_file
 from routes.routes_jadwal_pelajaran import split_mixed_script
 
 from routes.routes_inventory_aset import inventaris_bp
@@ -222,7 +218,8 @@ def repository():
             "color": "rose",
             "icon": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>',
             "links": [
-                {"title": "Manajemen sarpras", "url": url_for('peminjaman_aset_landing'), "subtext": "Coming Soon", "disabled": True}
+                {"title": "Manajemen sarpras", "url": url_for('inventaris.peminjaman_aset_landing'), "subtext": "Coming Soon", "disabled": True},
+                {"title": "Database sarpras", "url": url_for('inventaris.list_inventaris'), "subtext": "Coming Soon", "disabled": False}
             ]
         },
         {
@@ -241,248 +238,11 @@ def repository():
     return render_template('repository/landing_repository.html', repository_data=repository_data, pengumuman=pengumuman)
 
 
-
 # landing page
 @app.route("/e-labkomp")
 def labkomp_landing():
     return render_template("landing.html")
 
-
-# =======================
-# PEMINJAMAN ASET SECTION (SARPRAS)
-# =======================
-
-# landing page peminjaman aset
-@app.route("/peminjaman-aset")
-def peminjaman_aset_landing():
-    return render_template("peminjaman_aset/peminjaman_aset.html")
-
-# Form peminjaman aset
-@app.route("/peminjaman-aset/form")
-def peminjaman_aset_form():
-    return render_template("peminjaman_aset/peminjaman_aset_form.html")
- 
-# ==== Endpoint search barang (inventory) ====
-@app.route("/peminjaman-aset/search-barang")
-def search_barang_inventaris():
-    q = request.args.get("q", "")
-    if len(q.strip()) < 2:
-        return jsonify({"items": []})
-
-    rows = search_inventaris(q, limit=20)
-    items = [{
-        "id": r.get("id"),
-        "nama_barang": r.get("nama_barang", ""),
-        "merk": r.get("merk", ""),
-        "kondisi": r.get("kondisi", ""),
-        "lokasi": r.get("lokasi", ""),
-        "sub_bidang": r.get("sub_bidang", ""),
-        "jumlah_tersedia": r.get("jumlah_tersedia", 0)
-    } for r in rows]
-
-    items.sort(key=lambda x: x["jumlah_tersedia"] <= 0)
-    return jsonify({"items": items})
-
-
-# ==== Submit peminjaman aset (revisi) ====
-@app.route("/peminjaman-aset/submit", methods=["POST"])
-def submit_peminjaman_aset():
-    form = request.form
-
-    id_list = form.getlist("barang_id[]")
-    nama_list = form.getlist("barang_nama[]")
-    merk_list = form.getlist("barang_merk[]")
-    jumlah_list = form.getlist("barang_jumlah[]")
-    kondisi_list = form.getlist("barang_kondisi[]")
-
-    barang = []
-    for i in range(len(nama_list)):
-        if not nama_list[i].strip():
-            continue
-        item_id = id_list[i].strip() if i < len(id_list) else ""
-        if not item_id:
-            return jsonify({
-                "success": False,
-                "message": f"Barang '{nama_list[i]}' belum dipilih dari daftar pencarian"
-            }), 400
-        try:
-            jumlah = int(jumlah_list[i])
-        except (ValueError, IndexError):
-            return jsonify({"success": False, "message": f"Jumlah barang '{nama_list[i]}' tidak valid"}), 400
-        if jumlah < 1:
-            return jsonify({"success": False, "message": f"Jumlah barang '{nama_list[i]}' harus minimal 1"}), 400
-
-        barang.append({
-            "no": len(barang) + 1,
-            "id": item_id,
-            "nama": nama_list[i],
-            "merk": merk_list[i] if i < len(merk_list) else "",
-            "jumlah": jumlah,
-            "kondisi": kondisi_list[i] if i < len(kondisi_list) else "",
-        })
-
-    nomor_surat = generate_nomor_surat(get_last_sequence_this_month)
-
-    data = {
-        "nomor_surat": nomor_surat,
-        "nama": form.get("nama", "").strip(),
-        "jenis_kelamin": form.get("jenis_kelamin", ""),
-        "pekerjaan": form.get("pekerjaan", "").strip(),
-        "alamat": form.get("alamat", "").strip(),
-        "telepon": form.get("telepon", "").strip(),
-        "no_identitas": form.get("no_identitas", "").strip(),
-        "tujuan": form.get("tujuan", "").strip(),
-        "lokasi_penggunaan": form.get("lokasi_penggunaan", "").strip(),
-        "tgl_pinjam": form.get("tgl_pinjam", ""),
-        "tgl_kembali": form.get("tgl_kembali", ""),
-        "kota": form.get("kota", "Yogyakarta"),
-        "tgl_surat": form.get("tgl_surat", ""),
-        "nama_petugas": form.get("nama_petugas", "").strip(),
-        "jaminan_identitas": form.get("jaminan_identitas") == "on",
-        "jenis_identitas_jaminan": form.get("jenis_identitas_jaminan", "KTP/SIM/Paspor"),
-        "jaminan_surat": form.get("jaminan_surat") == "on",
-        "barang": barang,
-    }
-
-    required = ["nama", "pekerjaan", "alamat", "telepon", "no_identitas",
-                "tujuan", "lokasi_penggunaan", "tgl_pinjam", "tgl_kembali", "nama_petugas"]
-    missing = [f for f in required if not data[f]]
-    if missing:
-        return jsonify({"success": False, "message": f"Field belum lengkap: {', '.join(missing)}"}), 400
-    if not barang:
-        return jsonify({"success": False, "message": "Minimal isi 1 barang yang dipinjam"}), 400
-
-    # ==== Validasi + kurangi stok SEBELUM simpan record peminjaman ====
-    deductions = [{"id": b["id"], "jumlah": b["jumlah"]} for b in barang]
-    ok, err_msg = deduct_inventaris_stock(deductions)
-    if not ok:
-        return jsonify({"success": False, "message": err_msg}), 400
-
-    try:
-        record_id = uuid.uuid4().hex
-        pdf_placeholder = {"id": "", "webViewLink": ""}
-        append_peminjaman(record_id, data, pdf_placeholder)
-
-        ringkasan_url = url_for(
-            "ringkasan_peminjaman_aset", record_id=record_id, _external=True
-        )
-        return jsonify({
-            "success": True,
-            "message": "Peminjaman berhasil diajukan. Silakan buka link ringkasan untuk konfirmasi.",
-            "record_id": record_id,
-            "ringkasan_url": ringkasan_url,
-        })
-    except Exception as e:
-        app.logger.error(f"Gagal proses peminjaman aset: {e}")
-        # stok sudah terlanjur dikurangi tapi record gagal disimpan -> perlu rollback manual
-        return jsonify({
-            "success": False,
-            "message": "Terjadi kesalahan saat menyimpan data peminjaman. Stok mungkin sudah dikurangi, hubungi admin untuk pengecekan."
-        }), 500
-     
-
-# Riwayat peminjaman aset
-@app.route("/peminjaman-aset/riwayat")
-# @login_required   # aktifkan sesuai setup auth yang sudah ada
-def daftar_peminjaman_aset():
-    rows = get_all_peminjaman()
-    for r in rows:
-        r["sudah_generate"] = bool(r.get("pdf_link"))
-        r["ringkasan_url"] = url_for(
-            "ringkasan_peminjaman_aset", record_id=r["record_id"]
-        )
-    return render_template("peminjaman_aset/daftar_peminjaman_aset.html", data=rows)
-
-# Ringkasan peminjaman aset
-@app.route("/peminjaman-aset/ringkasan/<record_id>")
-def ringkasan_peminjaman_aset(record_id):
-    row_index, row = find_row_by_id(record_id)
-    if row is None:
-        abort(404)
-
-    headers = get_sheet_headers()
-    data = dict(zip(headers, row))
-    data["sudah_generate"] = bool(data.get("pdf_link"))
-
-    try:
-        data["barang"] = json.loads(data.get("barang_json", "[]"))
-    except (json.JSONDecodeError, TypeError):
-        data["barang"] = []
-
-    return render_template(
-        "peminjaman_aset/ringkasan_peminjaman_aset.html",
-        record_id=record_id,
-        data=data,
-    )
-
-# generate PDF peminjaman aset
-@app.route("/peminjaman-aset/ringkasan/<record_id>/generate", methods=["GET", "POST"])
-def generate_pdf_peminjaman_aset(record_id):
-    # Validasi persetujuan WAJIB dicek di server, jangan percaya JS saja
-    setuju = request.form.get("setuju") == "on" or request.json and request.json.get("setuju")
-    if not setuju:
-        return jsonify({"success": False, "message": "Anda harus menyetujui ringkasan terlebih dahulu"}), 400
- 
-    row_index, row = find_row_by_id(record_id)
-    if row is None:
-        abort(404)
- 
-    headers = get_sheet_headers()
-    data = dict(zip(headers, row))
- 
-    if data.get("pdf_link"):
-        # sudah pernah digenerate sebelumnya, jangan generate ulang / dobel nomor surat
-        return jsonify({
-            "success": True,
-            "message": "PDF sudah pernah dibuat sebelumnya",
-            "pdf_link": data["pdf_link"],
-        })
- 
-    try:
-        # rekonstruksi struktur data yang dibutuhkan generate_pdf()
-        # (barang disimpan sebagai JSON string di kolom sheet, lihat catatan penyimpanan)
-        import json
-        data["barang"] = json.loads(data.get("barang_json", "[]"))
-        data["jaminan_identitas"] = str(data.get("jaminan_identitas")).lower() in ("true", "1", "on")
-        data["jaminan_surat"] = str(data.get("jaminan_surat")).lower() in ("true", "1", "on")
- 
-        pdf_path = generate_pdf(data)
-        base_name = f"Peminjaman_Aset_{data['nama'].replace(' ', '_')}"
-        pdf_file = upload_file(pdf_path, "application/pdf", f"{base_name}.pdf")
-        os.remove(pdf_path)
- 
-        # update kolom pdf_id & pdf_link di baris yang sama (index kolom sesuaikan urutan header)
-        updated_row = list(row)
-        idx_pdf_id = headers.index("pdf_id")
-        idx_pdf_link = headers.index("pdf_link")
-        # pastikan panjang row cukup
-        while len(updated_row) <= max(idx_pdf_id, idx_pdf_link):
-            updated_row.append("")
-        updated_row[idx_pdf_id] = pdf_file["id"]
-        updated_row[idx_pdf_link] = pdf_file["webViewLink"]
-        update_row(row_index, updated_row)
- 
-        return jsonify({
-            "success": True,
-            "message": "PDF berhasil dibuat",
-            "pdf_link": pdf_file["webViewLink"],
-        })
-    except Exception as e:
-        app.logger.error(f"Gagal generate PDF peminjaman aset ({record_id}): {e}")
-        return jsonify({"success": False, "message": "Gagal membuat PDF, coba lagi"}), 500
-
-# Preview PDF peminjaman aset
-@app.route("/peminjaman-aset/ringkasan/<record_id>/preview")
-def preview_pdf_peminjaman_aset(record_id):
-    row_index, row = find_row_by_id(record_id)
-    if row is None:
-        abort(404)
-    headers = get_sheet_headers()
-    data = dict(zip(headers, row))
-    if not data.get("pdf_link"):
-        flash("PDF belum dibuat. Silakan generate terlebih dahulu.")
-        return redirect(url_for("ringkasan_peminjaman_aset", record_id=record_id))
-    return redirect(data["pdf_link"])
 
 
 
