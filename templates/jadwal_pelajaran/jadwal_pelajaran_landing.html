@@ -2,6 +2,20 @@
 {% block title %}Jadwal Pelajaran{% endblock %}
 
 {% block content %}
+<style>
+  @media (min-width: 640px) {
+    .kelas-block-header {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .kelas-block-header .kelas-block-wali {
+      margin-left: auto;
+      padding-left: 1rem;
+      border-left: 1px solid var(--line);
+    }
+  }
+</style>
 <div class="max-w-5xl mx-auto px-5 pt-12 bg-[#faf8f5] text-[#1f1c19]">
 
   <a href="{{ url_for('repository') }}"
@@ -41,16 +55,33 @@
   {% set hari_list = ['SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'] %}
 
   {% for hari in hari_list %}
-  <div class="hari-panel space-y-10" data-hari="{{ hari }}" style="display:none">
+  <div class="hari-panel space-y-6 sm:space-y-10" data-hari="{{ hari }}" style="display:none">
+    {% set piket_list = piket_per_hari.get(hari, []) %}
+    {% if piket_list %}
+    <div class="mb-5 sm:mb-6 pb-3" style="border-bottom:2.5px dashed var(--line)">
+      <div class="eyebrow mb-2 mono text-xs font-bold uppercase" style="color:var(--ink-soft)">Guru Piket</div>
+      <div class="flex flex-wrap gap-1.5 text-sm mb-2">
+        {% for nama in piket_list %}
+        <span class="mono text-xs px-2 py-1" style="background:var(--accent-soft); color:var(--ink);">{{ nama }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     {% set kelas_groups = jadwal_per_hari.get(hari, []) %}
     {% if kelas_groups | length == 0 %}
     <div class="page-sub">Tidak ada jadwal.</div>
     {% else %}
     {% for kelas, rows_kelas in kelas_groups %}
     <div class="kelas-block" data-kelas="{{ kelas }}">
-      <div class="mono text-xs font-bold uppercase tracking-widest mb-3 pb-2 block w-full"
-        style="color:var(--ink-soft); border-bottom:1px solid var(--line)">
-        Kelas {{ kelas }}
+      <div class="mono text-xs font-bold tracking-widest mb-3 pb-2 w-full kelas-block-header"
+        style="color:var(--ink-soft); border-bottom:1px solid var(--line); display:flex; flex-direction:column; align-items:flex-start; gap:.25rem; text-transform:uppercase;">
+        <span>Kelas {{ kelas }}</span>
+        {% set wali = wali_kelas_map.get(kelas) %}
+        {% if wali %}
+        <span class="kelas-block-wali"
+          style="color:var(--ink); text-transform:none; font-weight:500; letter-spacing:normal;">Wali: {{ wali }}</span>
+        {% endif %}
       </div>
 
       <!-- TABLE: md ke atas -->
@@ -87,23 +118,23 @@
       <div class="md:hidden idx-list">
         <table class="w-full text-sm table-fixed">
           <colgroup>
-            <col style="width:34%">
+            <col style="width:30%">
             <col>
           </colgroup>
           <thead>
             <tr>
-              <th class="text-left pr-4 py-2 eyebrow">Sesi / Pukul</th>
+              <th class="text-left pr-3 py-2 eyebrow">Sesi / Pukul</th>
               <th class="text-left py-2 eyebrow">Mapel / Guru</th>
             </tr>
           </thead>
           <tbody>
             {% for r in rows_kelas %}
             <tr data-row style="border-top:1px solid var(--line)">
-              <td class="pr-4 py-3 align-top">
+              <td class="pr-3 py-2.5 align-top">
                 <div class="mono text-xs font-semibold" style="color:var(--ink)">{{ r.waktu }}</div>
                 <div class="mono text-[10px]" style="color:var(--ink-faint)">Sesi {{ r.sesi or '-' }}</div>
               </td>
-              <td class="py-3 align-top break-words">
+              <td class="py-2.5 align-top break-words">
                 <div class="text-sm font-medium" style="color:var(--ink)">{% for segment, is_arabic in
                   split_mixed_script(r.nama_mapel) %}
                   {% if is_arabic %}<span dir="rtl" style="font-family: var(--font-arabic)">{{ segment }}</span>{% else
@@ -126,6 +157,10 @@
     </div>
   </div>
   {% endfor %}
+
+  <div class="mt-6 py-4 text-center text-[11px] mono" style="border-top:1px solid var(--line); color:var(--ink-faint)">
+    Semua waktu ditampilkan dalam WIB
+  </div>
 </div>
 
 <script>

@@ -73,6 +73,8 @@ def jadwal_pelajaran_landing():
         "jadwal_pelajaran/jadwal_pelajaran_landing.html",
         kelas_list=data["kelas"],
         jadwal_per_hari=jadwal_per_hari,
+        piket_per_hari=data["piket_per_hari"],
+        wali_kelas_map=data["wali_kelas_map"],
     )
 
 @jadwal_pelajaran_bp.route("/api/data")

@@ -81,7 +81,8 @@
 
     {% if item %}
     <p class="text-[11px] font-medium text-[#a8501f] bg-[#f3f0ea] px-3 py-2 rounded">
-      Sedang dipinjam: {{ item.jumlah_dipinjam | default(0)}}
+      Sedang dipinjam: <strong>{{ item.jumlah_dipinjam | default(0, true) }} dari {{ item.jumlah_total | default(0, true) }}</strong> total
+      barang. Jika jumlah total dikurangi, pastikan jumlah yang dipinjam tidak melebihi jumlah total baru. Jika melebihi, sistem akan menolak perubahan.
     </p>
     {% endif %}
 

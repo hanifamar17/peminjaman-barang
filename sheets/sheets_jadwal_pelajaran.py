@@ -14,6 +14,7 @@ SHEET_GURU_MAPEL = os.getenv("JADWAL_SHEET_GURU_MAPEL", "Guru_Mapel")
 SHEET_JADWAL = os.getenv("JADWAL_SHEET_JADWAL", "Jadwal")
 SHEET_EKSKUL = os.getenv("JADWAL_SHEET_EKSKUL", "Ekstrakurikuler")
 SHEET_JUMAT_BERKAH = os.getenv("JADWAL_SHEET_JUMAT_BERKAH", "Jumat_Berkah")
+SHEET_GURU_PIKET = os.getenv("JADWAL_SHEET_GURU_PIKET", "Guru_Piket")
 
 _cache = {"data": None, "fetched_at": None}
 CACHE_TTL_SECONDS = int(os.getenv("JADWAL_PELAJARAN_CACHE_TTL", "120"))
@@ -60,6 +61,7 @@ def _fetch_all_sheets():
         _sheet_range(SHEET_GURU_MAPEL),
         _sheet_range(SHEET_JADWAL),
         _sheet_range(SHEET_JUMAT_BERKAH),
+        _sheet_range(SHEET_GURU_PIKET),
     ]
 
     resp = sheet.batchGet(
@@ -73,6 +75,7 @@ def _fetch_all_sheets():
         "guru_mapel": _rows_to_dicts(vr[1].get("values", [])),
         "jadwal": _rows_to_dicts(vr[2].get("values", [])),
         "jumat_berkah": _rows_to_dicts(vr[3].get("values", [])),
+        "guru_piket": _rows_to_dicts(vr[4].get("values", [])),
     }
     return data
 
@@ -88,6 +91,8 @@ def get_jadwal_pelajaran_data(force_refresh=False):
         return _cache["data"]
 
     data = _fetch_all_sheets()
+    data["piket_per_hari"] = _build_piket_per_hari(data["guru_piket"])
+    data["wali_kelas_map"] = _build_wali_kelas_map(data["kelas"])
     _cache["data"] = data
     _cache["fetched_at"] = now
     return data
@@ -102,6 +107,23 @@ def get_jadwal_by_hari(hari):
 def get_jadwal_by_kelas(nama_kelas):
     data = get_jadwal_pelajaran_data()
     return [row for row in data["jadwal"] if row.get("nama_kelas") == nama_kelas]
+
+def _build_piket_per_hari(guru_piket_rows):
+    out = {}
+    for r in guru_piket_rows:
+        hari = (r.get("Hari") or "").strip().upper()
+        nama = r.get("Nama")
+        if not hari or not nama:
+            continue
+        out.setdefault(hari, []).append(nama)
+    return out
+
+def _build_wali_kelas_map(kelas_rows):
+    return {
+        (r.get("nama_kelas") or "").strip(): r.get("wali_kelas")
+        for r in kelas_rows
+        if r.get("nama_kelas")
+    }
 
 
 
