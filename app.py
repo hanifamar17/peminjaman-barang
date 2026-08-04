@@ -92,7 +92,18 @@ mail.init_app(app)
 # scheduler hanya di lokal
 if app.config["ENABLE_SCHEDULER"]:
     init_app(app)
-    
+
+# Maintenance Mode    
+@app.before_request
+def maintenance_mode():
+    maintenance = os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
+    ALLOWED = ("/maintenance", "/static")
+    if maintenance and not request.path.startswith(ALLOWED):
+        return render_template("maintenance.html"), 503
+
+@app.route("/maintenance")
+def maintenance():
+    return render_template("maintenance.html"), 503
 
 # LOGIN
 def is_safe_url(target):

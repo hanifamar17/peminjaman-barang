@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Maintenance{% endblock %}
+
+{% block content %}
+<!-- Hallmark · macrostructure: System Log Panel (not centered-card) · theme: existing tokens (--ink/--paper/--line/--accent/--accent-soft) · fonts: Manrope + JetBrains Mono · pre-emit critique: P5 H4 E5 S5 R5 V5 -->
+
+<div class="min-h-[70vh] px-6 py-16 sm:py-24">
+  <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-x-10 gap-y-8">
+
+    <div class="sm:pt-1">
+      <div class="text-[11px] tracking-widest uppercase" style="font-family:'JetBrains Mono',monospace; color:var(--accent);">
+        503
+      </div>
+      <div class="mt-1 flex items-center gap-2">
+        <span class="inline-block w-1.5 h-1.5" style="background:var(--accent);"></span>
+        <span class="text-[11px] tracking-widest uppercase" style="font-family:'JetBrains Mono',monospace; color:var(--ink); opacity:.6;">
+          maintenance
+        </span>
+      </div>
+    </div>
+
+    <div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold leading-[1.05] max-w-lg" style="color:var(--ink); font-family:'Manrope',sans-serif; overflow-wrap:anywhere;">
+        Sedang ada pembaruan sistem.
+      </h1>
+
+      <p class="mt-5 max-w-md text-base leading-relaxed" style="color:var(--ink); opacity:.68;">
+        Layanan ini sementara tidak dapat diakses. Silakan coba lagi beberapa saat lagi.
+      </p>
+
+      <div class="mt-10 border-t pt-5" style="border-color:var(--line);">
+        <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[13px]" style="font-family:'JetBrains Mono',monospace;">
+          <dt style="color:var(--ink); opacity:.5;">status</dt>
+          <dd style="color:var(--accent);">maintenance_mode = true</dd>
+
+          <dt style="color:var(--ink); opacity:.5;">unit</dt>
+          <dd style="color:var(--ink);">MA Nurul Ummah Kotagede</dd>
+        </dl>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
