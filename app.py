@@ -188,6 +188,7 @@ def repository():
             "links": [
                 {"title": "Kalender akademik", "url": url_for('booking_ruangan.jadwal_penggunaan'), "subtext": "Dokumen kalender akademik"},
                 {"title": "Jadwal KBM", "url": url_for('jadwal_pelajaran.jadwal_pelajaran_landing'), "subtext": "Jadwal kegiatan belajar mengajar (KBM)"},
+                {"title": "Poin Disiplin", "url": "https://script.google.com/macros/s/AKfycbzQtB0i7iIKvb6tEuvHzTVUqt1K5JXRRIRphtKZOAGLHRjmI5Cr9kMTN2ylM5PVmOWZ/exec", "subtext": "Formulir pencatatan poin disiplin", "disabled": False},
                 {"title": "Rapor Digital Madrasah", "url": "#", "subtext": "Coming Soon", "disabled": True}
             ]
         },
