@@ -28,7 +28,16 @@ inventaris_bp = Blueprint("inventaris", __name__, url_prefix="/peminjaman-aset")
 
 KONDISI_OPTIONS = ["Baik", "Rusak Ringan", "Rusak Berat"]
 SUMBER_DANA_OPTIONS = ["BOS", "BOSDA", "Hibah", "Lainnya"]
-SUB_BIDANG_OPTIONS = ["Perpustakaan", "Lab IPA", "Lab Komputer", "Asrama", "Madrasah"]
+SUB_BIDANG_OPTIONS = ["Perpustakaan", "Lab IPA", "Lab Komputer", "Asrama", "Waka & Guru", "Madrasah"]
+BIDANG_LIST = ["perpus", "lab_komp", "lab_ipa", "asrama", "waka_guru", "madrasah"]
+BIDANG_LABELS = {
+    "perpus": "Perpus",
+    "lab_komp": "Lab Komp",
+    "lab_ipa": "Lab IPA",
+    "asrama": "Asrama",
+    "waka_guru": "Waka & Guru",
+    "madrasah": "Madrasah",
+}
 
 
 # landing page peminjaman aset
@@ -40,14 +49,19 @@ def peminjaman_aset_landing():
 # LIST + CREATE
 # ---------------------------------------------------------------------------
 @inventaris_bp.route("/inventaris")
+@inventaris_bp.route("/inventaris/<bidang>")
 @login_required
-def list_inventaris():
-    data = get_all_inventaris()
+def list_inventaris(bidang=None):
+    if bidang and bidang not in BIDANG_LIST:
+        abort(404)
+    data = get_all_inventaris(bidang)
     return render_template(
         "peminjaman_aset/inventory/daftar_inventaris_sarpras.html",
         data=data,
+        bidang=bidang,
+        bidang_list=BIDANG_LIST,
+        bidang_labels=BIDANG_LABELS,
     )
-
 
 @inventaris_bp.route("/inventaris/tambah", methods=["GET", "POST"])
 @login_required

@@ -97,7 +97,7 @@
           </thead>
           <tbody>
             {% for r in rows_kelas %}
-            <tr data-row style="border-top:1px solid var(--line)">
+            <tr data-row data-count-row="true" style="border-top:1px solid var(--line)">
               <td class="mono text-xs pr-6 py-3 whitespace-nowrap" style="color:var(--ink-faint)">{{ r.sesi or '-' }}
               </td>
               <td class="mono text-xs pr-6 py-3 font-semibold whitespace-nowrap" style="color:var(--ink)">{{ r.waktu }}
@@ -129,7 +129,7 @@
           </thead>
           <tbody>
             {% for r in rows_kelas %}
-            <tr data-row style="border-top:1px solid var(--line)">
+            <tr data-row data-count-row="false" style="border-top:1px solid var(--line)">
               <td class="pr-3 py-2.5 align-top">
                 <div class="mono text-xs font-semibold" style="color:var(--ink)">{{ r.waktu }}</div>
                 <div class="mono text-[10px]" style="color:var(--ink-faint)">Sesi {{ r.sesi or '-' }}</div>
@@ -186,22 +186,37 @@
 
   function applyFilter() {
     const query = filterInput.value.toLowerCase().trim();
-    const activePanel = document.querySelector('.hari-panel[data-hari="' + HARI_LIST[currentIndex] + '"]');
+
+    const activePanel = document.querySelector(
+      '.hari-panel[data-hari="' + HARI_LIST[currentIndex] + '"]'
+    );
+
     if (!activePanel) return;
 
     const cards = activePanel.querySelectorAll('.kelas-block');
     const emptyState = activePanel.querySelector('.empty-state');
+
     let visibleRowsTotal = 0;
 
     cards.forEach(card => {
       const rows = card.querySelectorAll('[data-row]');
       let visibleInCard = 0;
+
       rows.forEach(row => {
-        const match = !query || row.textContent.toLowerCase().includes(query);
+        const match = !query ||
+          row.textContent.toLowerCase().includes(query);
+
         row.style.display = match ? '' : 'none';
-        if (match) visibleInCard++;
+
+        // Hanya hitung row desktop.
+        // Row mobile adalah duplikat visual dari data yang sama.
+        if (match && row.dataset.countRow === 'true') {
+          visibleInCard++;
+        }
       });
+
       card.style.display = visibleInCard > 0 ? '' : 'none';
+
       visibleRowsTotal += visibleInCard;
     });
 
@@ -212,7 +227,10 @@
       searchCount.classList.add('hidden');
     }
 
-    emptyState.classList.toggle('hidden', visibleRowsTotal > 0 || cards.length === 0);
+    emptyState.classList.toggle(
+      'hidden',
+      visibleRowsTotal > 0 || cards.length === 0
+    );
   }
 
   filterInput.addEventListener('input', () => {

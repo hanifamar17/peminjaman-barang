@@ -1,7 +1,7 @@
 import datetime
 from flask import Blueprint, abort, abort, render_template, request, jsonify, url_for, current_app
 from routes.decorators import login_required
-from sheets.sheets import (
+from sheets.sheets_inventory_labkomp import (
     generate_item_id,
     add_inventory,
     delete_inventory,
@@ -177,7 +177,7 @@ def return_submit():
 @peminjaman_invlabkomp_bp.route("/history")
 @login_required
 def history():
-    from sheets.sheets import read_sheet
+    from sheets.sheets_inventory_labkomp import read_sheet
 
     rows = read_sheet("loans")
     if not rows:
@@ -220,7 +220,7 @@ def history():
 @peminjaman_invlabkomp_bp.route("/loan/<code>")
 @login_required
 def loan_detail(code):
-    from sheets.sheets import read_sheet
+    from sheets.sheets_inventory_labkomp import read_sheet
 
     rows = read_sheet("loans")
     headers = rows[0]

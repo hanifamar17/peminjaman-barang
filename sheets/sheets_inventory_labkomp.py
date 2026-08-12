@@ -4,7 +4,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
+INVENTORY_LABKOMP_SPREADSHEET_ID = os.getenv("INVENTORY_LABKOMP_SPREADSHEET_ID")
 
 
 def get_service():
@@ -38,7 +38,7 @@ def read_sheet(sheet_name, range_header=None):
     service = get_service()
     range_name = f"{sheet_name}!A:Z" if not range_header else f"{sheet_name}!{range_header}"
     result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID,
+        spreadsheetId=INVENTORY_LABKOMP_SPREADSHEET_ID,
         range=range_name
     ).execute()
 
@@ -49,7 +49,7 @@ def write_row(sheet_name, row):
     service = get_service()
     body = {'values': [row]}
     service.spreadsheets().values().append(
-        spreadsheetId=SPREADSHEET_ID,
+        spreadsheetId=INVENTORY_LABKOMP_SPREADSHEET_ID,
         range=f"{sheet_name}!A:Z",
         valueInputOption='RAW',
         body=body
@@ -59,7 +59,7 @@ def update_cell_range(sheet_name, range_name, value):
     service = get_service()
     body = {'values': [[value]]}
     service.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID,
+        spreadsheetId=INVENTORY_LABKOMP_SPREADSHEET_ID,
         range=f"{sheet_name}!{range_name}",
         valueInputOption='RAW',
         body=body
@@ -236,7 +236,7 @@ def update_inventory(item_id, updated_data):
 
             service = get_service()
             service.spreadsheets().values().update(
-                spreadsheetId=SPREADSHEET_ID,
+                spreadsheetId=INVENTORY_LABKOMP_SPREADSHEET_ID,
                 range=f"inventory!A{i}:G{i}",
                 valueInputOption='RAW',
                 body={'values': [updated_row]}
@@ -254,7 +254,7 @@ def delete_inventory(item_id):
 
     # Ambil metadata spreadsheet untuk mendapatkan sheetId
     spreadsheet = service.spreadsheets().get(
-        spreadsheetId=SPREADSHEET_ID
+        spreadsheetId=INVENTORY_LABKOMP_SPREADSHEET_ID
     ).execute()
 
     sheet_id = None
@@ -270,7 +270,7 @@ def delete_inventory(item_id):
     for i, row in enumerate(rows[1:], start=1):
         if row and row[0] == item_id:
             service.spreadsheets().batchUpdate(
-                spreadsheetId=SPREADSHEET_ID,
+                spreadsheetId=INVENTORY_LABKOMP_SPREADSHEET_ID,
                 body={
                     "requests": [
                         {

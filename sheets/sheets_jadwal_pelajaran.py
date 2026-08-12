@@ -21,9 +21,9 @@ CACHE_TTL_SECONDS = int(os.getenv("JADWAL_PELAJARAN_CACHE_TTL", "120"))
 
 
 def _get_jadwal_pelajaran_service():
-    creds_env = os.getenv("JADWAL_GOOGLE_CREDENTIALS_JSON")
+    creds_env = os.getenv("GOOGLE_CREDENTIALS_JSON")
     if not creds_env:
-        raise RuntimeError("JADWAL_GOOGLE_CREDENTIALS_JSON tidak diset")
+        raise RuntimeError("GOOGLE_CREDENTIALS_JSON tidak diset")
 
     if creds_env.strip().endswith(".json"):
         creds = service_account.Credentials.from_service_account_file(

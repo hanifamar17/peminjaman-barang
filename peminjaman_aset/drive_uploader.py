@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Upload dokumen aset peminjaman ke Google Drive
 DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive"]
 DRIVE_FOLDER_ID = os.getenv("PEMINJAMAN_ASET_DRIVE_FOLDER_ID")  # folder tujuan di Drive
 TOKEN_FILE = os.getenv("TOKEN_FILE")

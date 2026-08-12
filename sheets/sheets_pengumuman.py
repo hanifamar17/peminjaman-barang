@@ -6,16 +6,14 @@ from zoneinfo import ZoneInfo
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-# =========================
-# KONFIGURASI TERPISAH UNTUK JADWAL BOOKING RUANGAN
-# Spreadsheet & service account BEDA dari sheets.py (inventory/peminjaman)
-# =========================
-JADWAL_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-PENGUMUMAN_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-JADWAL_SPREADSHEET_ID = os.getenv("JADWAL_SPREADSHEET_ID")
-PENGUMUMAN_SPREADSHEET_ID = os.getenv("JADWAL_SPREADSHEET_ID")
-PENGUMUMAN_SHEET_NAME = os.getenv("PENGUMUMAN_SHEET_NAME", "pengumuman")
 
+JADWAL_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+JADWAL_SPREADSHEET_ID = os.getenv("JADWAL_SPREADSHEET_ID")
+
+# Pengumuman (pengumuman madrasah)
+PENGUMUMAN_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+PENGUMUMAN_SPREADSHEET_ID = os.getenv("PENGUMUMAN_SPREADSHEET_ID")
+SHEET_PENGUMUMAN = os.getenv("SHEET_PENGUMUMAN", "pengumuman")
 
 _pengumuman_cache = {"data": None, "fetched_at": None}
 PENGUMUMAN_CACHE_TTL_SECONDS = int(os.getenv("PENGUMUMAN_CACHE_TTL", "120"))
@@ -32,9 +30,9 @@ bulan = {
 
 # PENGUMUMAN
 def _get_pengumuman_service():
-    creds_env = os.getenv("JADWAL_GOOGLE_CREDENTIALS_JSON")
+    creds_env = os.getenv("GOOGLE_CREDENTIALS_JSON")
     if not creds_env:
-        raise RuntimeError("JADWAL_GOOGLE_CREDENTIALS_JSON tidak diset")
+        raise RuntimeError("GOOGLE_CREDENTIALS_JSON tidak diset")
 
     if creds_env.strip().endswith(".json"):
         creds = service_account.Credentials.from_service_account_file(
@@ -56,7 +54,7 @@ def get_all_pengumuman(force_refresh=False):
         return _pengumuman_cache["data"]
 
     service = _get_pengumuman_service()
-    range_name = f"{PENGUMUMAN_SHEET_NAME}!A:E"
+    range_name = f"{SHEET_PENGUMUMAN}!A:E"
     result = service.spreadsheets().values().get(
         spreadsheetId=PENGUMUMAN_SPREADSHEET_ID,
         range=range_name
@@ -112,7 +110,7 @@ def add_pengumuman(title, desc):
     values = [[new_id, title, desc or "", timestamp, timestamp]]
     service.spreadsheets().values().append(
         spreadsheetId=PENGUMUMAN_SPREADSHEET_ID,
-        range=f"{PENGUMUMAN_SHEET_NAME}!A:E",
+        range=f"{SHEET_PENGUMUMAN}!A:E",
         valueInputOption="USER_ENTERED",
         insertDataOption="INSERT_ROWS",
         body={"values": values}
@@ -135,8 +133,8 @@ def update_pengumuman(pengumuman_id, title, desc):
         body={
             "valueInputOption": "USER_ENTERED",
             "data": [
-                {"range": f"{PENGUMUMAN_SHEET_NAME}!B{row}:C{row}", "values": [[title, desc]]},
-                {"range": f"{PENGUMUMAN_SHEET_NAME}!E{row}", "values": [[updated_at]]},
+                {"range": f"{SHEET_PENGUMUMAN}!B{row}:C{row}", "values": [[title, desc]]},
+                {"range": f"{SHEET_PENGUMUMAN}!E{row}", "values": [[updated_at]]},
             ]
         }
     ).execute()
@@ -153,11 +151,11 @@ def delete_pengumuman(pengumuman_id):
     sheet_meta = service.spreadsheets().get(spreadsheetId=PENGUMUMAN_SPREADSHEET_ID).execute()
     sheet_id = None
     for s in sheet_meta["sheets"]:
-        if s["properties"]["title"] == PENGUMUMAN_SHEET_NAME:
+        if s["properties"]["title"] == SHEET_PENGUMUMAN:
             sheet_id = s["properties"]["sheetId"]
             break
     if sheet_id is None:
-        raise RuntimeError(f"Sheet {PENGUMUMAN_SHEET_NAME} tidak ditemukan")
+        raise RuntimeError(f"Sheet {SHEET_PENGUMUMAN} tidak ditemukan")
 
     service.spreadsheets().batchUpdate(
         spreadsheetId=PENGUMUMAN_SPREADSHEET_ID,

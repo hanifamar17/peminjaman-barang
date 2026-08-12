@@ -6,17 +6,21 @@ from zoneinfo import ZoneInfo
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-# =========================
-# KONFIGURASI TERPISAH UNTUK JADWAL BOOKING RUANGAN
-# Spreadsheet & service account BEDA dari sheets.py (inventory/peminjaman)
-# =========================
-JADWAL_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-PENGUMUMAN_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+
+
+# jadwal penggunaan lab komputer
+JADWAL_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 JADWAL_SPREADSHEET_ID = os.getenv("JADWAL_SPREADSHEET_ID")
-JADWAL_SHEET_NAME = os.getenv("JADWAL_SHEET_NAME", "Form Responses 1")
-KALENDER_SHEET_NAME = os.getenv("KALENDER_SHEET_NAME", "kalender_akademik")
-PENGUMUMAN_SPREADSHEET_ID = os.getenv("JADWAL_SPREADSHEET_ID")
-PENGUMUMAN_SHEET_NAME = os.getenv("PENGUMUMAN_SHEET_NAME", "pengumuman")
+SHEET_JADWAL_LABKOMP = os.getenv("SHEET_JADWAL_LABKOMP", "booking_lab")
+
+# kalender akademik (libur/agenda madrasah)
+KALENDER_SPREADSHEET_ID = os.getenv("KALENDER_SPREADSHEET_ID")
+SHEET_KALENDER = os.getenv("SHEET_KALENDER", "kalender_akademik")
+
+# pengumuman (pengumuman madrasah)
+PENGUMUMAN_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+PENGUMUMAN_SPREADSHEET_ID = os.getenv("PENGUMUMAN_SPREADSHEET_ID")
+SHEET_PENGUMUMAN = os.getenv("SHEET_PENGUMUMAN", "pengumuman")
 
 # Cache sederhana in-memory supaya tidak fetch ke Sheets API setiap request
 _cache = {"data": None, "fetched_at": None}
@@ -40,9 +44,9 @@ bulan = {
 }
 
 def _get_jadwal_service():
-    creds_env = os.getenv("JADWAL_GOOGLE_CREDENTIALS_JSON")
+    creds_env = os.getenv("GOOGLE_CREDENTIALS_JSON")
     if not creds_env:
-        raise RuntimeError("JADWAL_GOOGLE_CREDENTIALS_JSON tidak diset")
+        raise RuntimeError("GOOGLE_CREDENTIALS_JSON tidak diset")
 
     # === PATH FILE (lokal) ===
     if creds_env.strip().endswith(".json"):
@@ -62,7 +66,7 @@ def _get_jadwal_service():
 # JADWAL LAB
 def _read_jadwal_raw():
     service = _get_jadwal_service()
-    range_name = f"{JADWAL_SHEET_NAME}!A:Z"
+    range_name = f"{SHEET_JADWAL_LABKOMP}!A:J"
     result = (
         service.spreadsheets()
         .values()
@@ -72,29 +76,30 @@ def _read_jadwal_raw():
     return result.get("values", [])
 
 def _parse_time(t):
-    """Terima format 'H:MM', 'H:MM:SS', atau 'HH.MM' dari isian form/sheet, kembalikan datetime.time"""
-    if not t:
-        return None
-    t = t.strip().replace(".", ":")
-    parts = t.split(":")
-    try:
-        if len(parts) == 2:
-            h, m = parts
-            return datetime.time(int(h), int(m))
-        elif len(parts) == 3:
-            h, m, s = parts
-            return datetime.time(int(h), int(m), int(s))
-        return None
-    except Exception:
-        return None
-
-def _parse_tanggal(t):
-    """Sheet menyimpan tanggal sebagai string 'DD/MM/YYYY'. Kembalikan objek date agar
-    bisa dibandingkan/diformat konsisten, dan simpan juga versi ISO (YYYY-MM-DD)."""
     if not t:
         return None
     t = t.strip()
-    for fmt in ("%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d"):
+    for fmt in ("%I:%M:%S %p", "%I:%M %p", "%H:%M:%S", "%H:%M"):
+        try:
+            return datetime.strptime(t, fmt).time()
+        except ValueError:
+            continue
+    t2 = t.replace(".", ":")
+    parts = t2.split(":")
+    try:
+        if len(parts) == 2:
+            return datetime.time(int(parts[0]), int(parts[1]))
+        elif len(parts) == 3:
+            return datetime.time(int(parts[0]), int(parts[1]), int(parts[2]))
+    except Exception:
+        pass
+    return None
+
+def _parse_tanggal(t):
+    if not t:
+        return None
+    t = t.strip()
+    for fmt in ("%m/%d/%Y", "%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d"):
         try:
             return datetime.strptime(t, fmt).date()
         except ValueError:
@@ -103,7 +108,7 @@ def _parse_tanggal(t):
 
 def get_jadwal(force_refresh=False):
     """
-    Ambil data jadwal dari 'Form Responses 1', hasil sudah diparse.
+    Ambil data jadwal dari 'booking_lab', hasil sudah diparse.
     Menggunakan cache in-memory (TTL) agar hemat kuota Sheets API.
     """
     now = datetime.now()
@@ -149,8 +154,8 @@ def get_jadwal(force_refresh=False):
             return r[i].strip() if i is not None and i < len(r) else ""
 
         status = get("status_sheet")
-        if status != "✅ Disetujui":
-            continue  # skip semua yang belum/tidak disetujui
+        if status not in ("✅ Disetujui",):
+            continue
 
         tanggal_raw = get("tanggal")
         tanggal_obj = _parse_tanggal(tanggal_raw)
@@ -178,11 +183,11 @@ def get_jadwal_by_date(tanggal_iso_str):
 # KALENDER
 def _read_kalender_raw():
     service = _get_jadwal_service()  # scope readonly sama, bisa reuse
-    range_name = f"{KALENDER_SHEET_NAME}!A:Z"
+    range_name = f"{SHEET_KALENDER}!A:Z"
     result = (
         service.spreadsheets()
         .values()
-        .get(spreadsheetId=JADWAL_SPREADSHEET_ID, range=range_name)
+        .get(spreadsheetId=KALENDER_SPREADSHEET_ID, range=range_name)
         .execute()
     )
     return result.get("values", [])

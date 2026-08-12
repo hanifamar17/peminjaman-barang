@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from routes.decorators import login_required
-from sheets.sheets import (
+from sheets.sheets_inventory_labkomp import (
     generate_item_id,
     add_inventory,
     delete_inventory,

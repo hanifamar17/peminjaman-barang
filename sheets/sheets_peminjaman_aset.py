@@ -9,19 +9,39 @@ from peminjaman_aset.drive_uploader import _get_drive_service
 
 logger = logging.getLogger(__name__)
 
+# peminjaman aset sarpras
 ASET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]  # perlu write access
 ASET_SPREADSHEET_ID = os.getenv("ASET_SPREADSHEET_ID")
-ASET_SHEET_NAME = os.getenv("ASET_SHEET_NAME")
-INV_SHEET_NAME = os.getenv("INV_SHEET_NAME", "inventory")
+SHEET_ASET = os.getenv("SHEET_ASET", "peminjaman_aset")
+SHEET_INV = os.getenv("SHEET_INV", "inventory")
+BIDANG_LIST = ["perpus", "lab_komp", "lab_ipa", "asrama", "waka_guru", "madrasah"]
+
+BIDANG_DISPLAY = {
+    "perpus": "Perpus",
+    "lab_komp": "Lab Komp",
+    "lab_ipa": "Lab IPA",
+    "asrama": "Asrama",
+    "waka_guru": "Waka & Guru",
+    "madrasah": "Madrasah",
+}
+
+BIDANG_SHEET_VALUE = {
+    "perpus": "Perpustakaan",
+    "lab_komp": "Lab Komputer",
+    "lab_ipa": "Lab IPA",
+    "asrama": "Asrama",
+    "waka_guru": "Waka & Guru",
+    "madrasah": "Madrasah",
+}
 
 _inventaris_cache = {"data": None, "ts": 0}
 CACHE_TTL = 30  # detik
 
 
 def _get_service():
-    creds_env = os.getenv("ASET_GOOGLE_CREDENTIALS_JSON")
+    creds_env = os.getenv("GOOGLE_CREDENTIALS_JSON")
     if not creds_env:
-        raise RuntimeError("ASET_GOOGLE_CREDENTIALS_JSON tidak diset")
+        raise RuntimeError("GOOGLE_CREDENTIALS_JSON tidak diset")
     if creds_env.strip().endswith(".json"):
         creds = service_account.Credentials.from_service_account_file(
             creds_env, scopes=ASET_SCOPES
@@ -38,7 +58,7 @@ def get_sheet_headers():
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{ASET_SHEET_NAME}!A1:Z1",
+        range=f"{SHEET_ASET}!A1:Z1",
     ).execute()
     return result.get("values", [[]])[0]
 
@@ -67,7 +87,7 @@ def deduct_inventaris_stock(item_deductions):
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{INV_SHEET_NAME}!A:Z",
+        range=f"{SHEET_INV}!A:Z",
     ).execute()
     rows = result.get("values", [])
     if len(rows) < 2:
@@ -110,7 +130,7 @@ def deduct_inventaris_stock(item_deductions):
         new_dipinjam = dipinjam + jumlah_pinjam
         col_letter = _col_letter(idx_dipinjam)  # aman untuk kolom >26
         updates.append({
-            "range": f"{INV_SHEET_NAME}!{col_letter}{row_index}",
+            "range": f"{SHEET_INV}!{col_letter}{row_index}",
             "values": [[str(new_dipinjam)]],
         })
 
@@ -165,7 +185,7 @@ def append_peminjaman(record_id, data, pdf_file):
     ]
     service.spreadsheets().values().append(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{ASET_SHEET_NAME}!A:Z",
+        range=f"{SHEET_ASET}!A:Z",
         valueInputOption="RAW",
         body={"values": [row]},
     ).execute()
@@ -175,7 +195,7 @@ def find_row_by_id(record_id):
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{ASET_SHEET_NAME}!A:Z",
+        range=f"{SHEET_ASET}!A:Z",
     ).execute()
     rows = result.get("values", [])
     for i, row in enumerate(rows):
@@ -188,7 +208,7 @@ def get_all_peminjaman():
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{ASET_SHEET_NAME}!A:Z",
+        range=f"{SHEET_ASET}!A:Z",
     ).execute()
     rows = result.get("values", [])
     if len(rows) < 2:
@@ -226,7 +246,7 @@ def update_row(row_index, updated_row):
     service = _get_service()
     service.spreadsheets().values().update(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{ASET_SHEET_NAME}!A{row_index}:Z{row_index}",
+        range=f"{SHEET_ASET}!A{row_index}:Z{row_index}",
         valueInputOption="RAW",
         body={"values": [updated_row]},
     ).execute()
@@ -237,7 +257,7 @@ def find_row_by_nomor_surat(nomor_surat):
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{ASET_SHEET_NAME}!A:Z",
+        range=f"{SHEET_ASET}!A:Z",
     ).execute()
     rows = result.get("values", [])
     if not rows:
@@ -289,7 +309,7 @@ def update_items_return(nomor_surat, item_ids_to_return, catatan=""):
     col_letter = chr(ord("A") + barang_col)
     service.spreadsheets().values().update(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{ASET_SHEET_NAME}!{col_letter}{row_num}",
+        range=f"{SHEET_ASET}!{col_letter}{row_num}",
         valueInputOption="RAW",
         body={"values": [[row[barang_col]]]},
     ).execute()
@@ -303,7 +323,7 @@ def _get_inventaris_raw():
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{INV_SHEET_NAME}!A:Z",
+        range=f"{SHEET_INV}!A:Z",
     ).execute()
     rows = result.get("values", [])
     _inventaris_cache["data"] = rows
@@ -335,7 +355,7 @@ def update_stock_return_batch(item_deltas: dict):
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{INV_SHEET_NAME}!A:Z",
+        range=f"{SHEET_INV}!A:Z",
     ).execute()
     rows = result.get("values", [])
     headers = rows[0]
@@ -354,8 +374,8 @@ def update_stock_return_batch(item_deltas: dict):
             new_val = max(0, current - item_deltas[item_id])
             dcol_letter = chr(ord("A") + dipinjam_col)
             ucol_letter = chr(ord("A") + updated_col)
-            data_updates.append({"range": f"{INV_SHEET_NAME}!{dcol_letter}{idx}", "values": [[new_val]]})
-            data_updates.append({"range": f"{INV_SHEET_NAME}!{ucol_letter}{idx}", "values": [[now]]})
+            data_updates.append({"range": f"{SHEET_INV}!{dcol_letter}{idx}", "values": [[new_val]]})
+            data_updates.append({"range": f"{SHEET_INV}!{ucol_letter}{idx}", "values": [[now]]})
 
     if data_updates:
         service.spreadsheets().values().batchUpdate(
@@ -366,19 +386,7 @@ def update_stock_return_batch(item_deltas: dict):
 
 
 # Inventaris aset (barang) -- sheet terpisah dari peminjaman
-def _next_id():
-    rows = get_all_inventaris()
-    nums = []
-    for r in rows:
-        try:
-            nums.append(int(r["id"].split("-")[1]))
-        except (IndexError, ValueError, KeyError):
-            continue
-    nxt = (max(nums) + 1) if nums else 1
-    return f"INV-{nxt:04d}"
- 
-
-def get_all_inventaris():
+def _fetch_all_inventaris():
     now = time.time()
     if _inventaris_cache["data"] is not None and (now - _inventaris_cache["ts"]) <= CACHE_TTL:
         return _inventaris_cache["data"]
@@ -386,7 +394,7 @@ def get_all_inventaris():
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{INV_SHEET_NAME}!A:Z",
+        range=f"{SHEET_INV}!A:Z",
     ).execute()
     rows = result.get("values", [])
     if len(rows) < 2:
@@ -406,20 +414,36 @@ def get_all_inventaris():
     _inventaris_cache["data"] = data
     _inventaris_cache["ts"] = now
     return data
- 
- 
+
+def get_all_inventaris(bidang=None):
+    data = _fetch_all_inventaris()
+    if bidang:
+        target = BIDANG_SHEET_VALUE.get(bidang, bidang)
+        data = [r for r in data if (r.get("sub_bidang") or "").strip().lower() == target.strip().lower()]
+    return data
+
 def find_inventaris_by_id(item_id):
     service = _get_service()
     result = service.spreadsheets().values().get(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{INV_SHEET_NAME}!A:Z",
+        range=f"{SHEET_INV}!A:Z",
     ).execute()
     rows = result.get("values", [])
     for i, row in enumerate(rows):
         if row and row[0] == item_id:
-            return i + 1, row  # 1-indexed, row 1 = header
+            return i + 1, row
     return None, None
- 
+
+def _next_id():
+    rows = _fetch_all_inventaris()
+    nums = []
+    for r in rows:
+        try:
+            nums.append(int(r["id"].split("-")[1]))
+        except (IndexError, ValueError, KeyError):
+            continue
+    nxt = (max(nums) + 1) if nums else 1
+    return f"INV-{nxt:04d}"
  
 def search_inventaris(query, limit=10):
     """Dipakai untuk autocomplete di form peminjaman."""
@@ -432,11 +456,8 @@ def search_inventaris(query, limit=10):
         r for r in rows
         if query in r.get("nama_barang", "").lower()
         or query in r.get("merk", "").lower()
-        or query in r.get("sub_bidang", "").lower()
-        or query in r.get("lokasi", "").lower()
     ]
     return matched[:limit]
- 
  
 def create_inventaris(data):
     service = _get_service()
@@ -458,12 +479,11 @@ def create_inventaris(data):
     ]
     service.spreadsheets().values().append(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{INV_SHEET_NAME}!A:Z",
+        range=f"{SHEET_INV}!A:Z",
         valueInputOption="RAW",
         body={"values": [row]},
     ).execute()
     return item_id
- 
  
 def update_inventaris(item_id, data):
     row_index, row = find_inventaris_by_id(item_id)
@@ -487,13 +507,12 @@ def update_inventaris(item_id, data):
     service = _get_service()
     service.spreadsheets().values().update(
         spreadsheetId=ASET_SPREADSHEET_ID,
-        range=f"{INV_SHEET_NAME}!A{row_index}:Z{row_index}",
+        range=f"{SHEET_INV}!A{row_index}:Z{row_index}",
         valueInputOption="RAW",
         body={"values": [updated_row]},
     ).execute()
     return True
- 
- 
+  
 def delete_inventaris(item_id, row_index=None):
     """
     Menghapus baris inventaris berdasarkan row_index dengan mencari GID secara otomatis
@@ -511,13 +530,13 @@ def delete_inventaris(item_id, row_index=None):
         sheet_id_gid = None
         
         for sheet in spreadsheet.get('sheets', []):
-            if sheet['properties']['title'] == INV_SHEET_NAME:
+            if sheet['properties']['title'] == SHEET_INV:
                 sheet_id_gid = sheet['properties']['sheetId']
                 break
         
         # Jika nama tab tidak ditemukan di Google Sheets, hentikan proses
         if sheet_id_gid is None:
-            print(f"Error: Tab dengan nama '{INV_SHEET_NAME}' tidak ditemukan di file Google Sheets Anda.")
+            print(f"Error: Tab dengan nama '{SHEET_INV}' tidak ditemukan di file Google Sheets Anda.")
             return False
 
         # 2. Eksekusi hapus baris menggunakan GID yang sudah ditemukan
@@ -535,7 +554,7 @@ def delete_inventaris(item_id, row_index=None):
             }]},
         ).execute()
         
-        print(f"Berhasil menghapus baris ke-{row_index} pada tab '{INV_SHEET_NAME}' (GID: {sheet_id_gid})")
+        print(f"Berhasil menghapus baris ke-{row_index} pada tab '{SHEET_INV}' (GID: {sheet_id_gid})")
         return True
         
     except Exception as e:

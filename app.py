@@ -21,8 +21,10 @@ from werkzeug.security import check_password_hash
 from functools import wraps
 from flask_wtf import CSRFProtect
 from urllib.parse import urlparse, urljoin
+from functools import wraps
 
-from sheets.sheets import read_sheet
+from sheets.sheets_auth import get_users
+from sheets.sheets_inventory_labkomp import read_sheet
 from sheets.sheets_pengumuman import get_all_pengumuman
 
 from routes.routes_jadwal_pelajaran import split_mixed_script
@@ -33,7 +35,7 @@ from routes.routes_inventory_komp import inventory_labkomp_bp
 from routes.routes_peminjaman import peminjaman_invlabkomp_bp
 from routes.routes_pengumuman import pengumuman_bp
 from routes.routes_jadwal_pelajaran import jadwal_pelajaran_bp
-
+from routes.routes_perizinan import perizinan_bp
 
 
 load_dotenv()
@@ -47,6 +49,7 @@ app.register_blueprint(inventory_labkomp_bp)
 app.register_blueprint(peminjaman_invlabkomp_bp)
 app.register_blueprint(pengumuman_bp)
 app.register_blueprint(jadwal_pelajaran_bp)
+app.register_blueprint(perizinan_bp)
 app.jinja_env.globals['split_mixed_script'] = split_mixed_script
 
 # =========================
@@ -117,27 +120,45 @@ def is_safe_url(target):
         and ref_url.netloc == test_url.netloc
         )
 
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "user" not in session:
+            return redirect(url_for("login", next=request.path))
+        return f(*args, **kwargs)
+    return wrapper
+
+def role_required(*roles):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            if "user" not in session:
+                return redirect(url_for("login", next=request.path))
+            if session.get("role") not in roles:
+                abort(403)
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    next_url = request.values.get("next", "") 
-
+    next_url = request.values.get("next", "")
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
-        rows = read_sheet("login")
-        if not rows:
+        users = get_users()
+        if not users:
             flash("Sistem login belum dikonfigurasi.")
             return redirect(url_for("login"))
 
-        headers = rows[0]
-        users = [dict(zip(headers, r)) for r in rows[1:]]
-        user = next((u for u in users if u["username"] == username), None)
+        user = next((u for u in users if u.get("username") == username), None)
+        time.sleep(0.5)  # anti-timing-attack
 
-        time.sleep(0.5)
-
-        if user and check_password_hash(user["password_hash"], password):
+        if user and check_password_hash(user.get("password_hash", ""), password):
             session["user"] = username
+            session["role"] = user.get("role", "")
+            session["nama"] = user.get("nama", "")
             session.regenerate = True
 
             target = request.form.get("next") or next_url
@@ -146,18 +167,8 @@ def login():
             return redirect(url_for("repository"))
 
         flash("Username atau password salah.")
-        
         return redirect(url_for("login", next=next_url))
-
-    return render_template("login.html", next=next_url)
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if "user" not in session:
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return decorated_function
+    return render_template("auth/login.html", next=next_url)
 
 # LOGOUT
 @app.route("/logout")
@@ -219,10 +230,7 @@ def repository():
             "links": [
                 {"title": "Presensi kegiatan Asrama", "url": "https://presensimanu.my.id/login", "subtext": "Formulir presensi kegiatan asrama"},
                 {"title": "Berita Acara Persidangan Santri", "url": "https://docs.google.com/forms/d/e/1FAIpQLSc5OG8Kf879_mOgmQNxIRuTfH3beYR_DZ54waDaDjWudECLtQ/viewform", "subtext": "Formulir berita acara persidangan santri"},
-                {"title": "Buku Catatan Santri", "url": "https://docs.google.com/spreadsheets/d/10smJykmE_TgM4JfR5eigez4bUa5LDEgEtxjnyZJyA1Q/edit?gid=0#gid=0", "subtext": "Under maintenance", "disabled": True},
-                {"title": "Formulir Perizinan", "url": "https://tally.so/r/w5Gqz6", "subtext": "Under maintenance", "disabled": True},
-                {"title": "Jurnal Perizinan", "url": "https://datastudio.google.com/u/0/reporting/73d02ac9-ca68-479f-9fd3-e1f40834dc6b/page/OTbEE", "subtext": "Under maintenance", "disabled": True},
-                {"title": "Tabungan Santri", "url": "#", "subtext": "Under maintenance", "disabled": True}
+                {"title": "Formulir & Jurnal Perizinan", "url": "#", "subtext": "Coming Soon", "disabled": True},
             ]
         },
         {
@@ -267,7 +275,6 @@ def uploaded_file(filename):
 #URL
 @app.context_processor
 def inject_base_url():
-    from sheets.sheets import read_sheet
 
     rows = read_sheet('url')
     if not rows or len(rows) < 2:

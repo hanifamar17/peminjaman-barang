@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% block title %}Pengembalian Barang{% endblock %}
+
 {% block content %}
 <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 
@@ -40,9 +42,15 @@
     <div class="space-y-4">
         <input type="file" id="proof" accept="image/*" class="hidden">
         <div id="fileName" class="text-xs"></div>
-        <button id="btnReturn" class="w-full bg-zinc-900 text-white text-[13px] font-semibold py-4 hover:bg-zinc-800 disabled:bg-zinc-200">Konfirmasi Pengembalian</button>
+        <button id="btnReturn" class="w-full bg-zinc-900 text-white text-[13px] font-semibold py-4 min-h-[44px] hover:bg-[#a8501f]
+    active:scale-[0.96]
+    transition-all duration-150
+    touch-manipulation
+    focus:outline-none focus:ring-2 focus:ring-[#a8501f]/40
+    cursor-pointer disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2">Konfirmasi Pengembalian</button>
     </div>
 </div>
+
 <script>
     const Toast = Swal.mixin({ toast: true, position: "top-end", showConfirmButton: false, timer: 2000, timerProgressBar: true });
     document.addEventListener("DOMContentLoaded", () => {
