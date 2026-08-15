@@ -383,7 +383,7 @@ def generate_pdf_peminjaman_aset(record_id):
         pdf_path = generate_pdf(data)
         tgl_surat_clean = str(data.get("tgl_surat", "")).replace("/", "-")
         nomor_surat_clean = str(data.get("nomor_surat", "")).replace("/", "-")
-        base_name = f"{nomor_surat_clean}_{data['nama'].replace(' ', '_')}_{tgl_surat_clean}"
+        base_name = f"{nomor_surat_clean}_{data['nama'].replace(' ', '_')}"
         pdf_file = upload_file(pdf_path, "application/pdf", f"{base_name}.pdf")
         os.remove(pdf_path)
  
