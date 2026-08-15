@@ -363,12 +363,6 @@ def generate_pdf_peminjaman_aset(record_id):
         abort(404)
  
     headers = get_sheet_headers()
-
-    current_app.logger.info(f"HEADERS: {headers}")
-    current_app.logger.info(f"ROW: {row}")
-    data = dict(zip(headers, row))
-    current_app.logger.info(f"NOMOR_SURAT RAW: {data.get('nomor_surat')!r}")
-    
     data = dict(zip(headers, row))
  
     if data.get("pdf_link"):
