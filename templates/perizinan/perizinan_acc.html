@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}ACC Wali Kelas{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <h2>Pengajuan Perizinan</h2>
+
+    <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- Pending Section -->
+    <div class="mt-6">
+        <h3>Pending</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nama</th>
+                    <th>Tanggal</th>
+                    <th>Alasan</th>
+                    <th>Durasi</th>
+                    <th>Diajukan Oleh</th>
+                    <th>Wali Kelas</th>
+                    <th>Status</th>
+                    <th>Detail</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in items_pending %}
+                <tr>
+                    <td>{{ r.id_perizinan }}</td>
+                    <td>{{ r.nama_siswa }}</td>
+                    <td>{{ r.tanggal }}</td>
+                    <td>{{ r.alasan }}</td>
+                    <td>{{ r.durasi }}</td>
+                    <td>{{ r.diajukan_oleh or r.petugas }}</td>
+                    <td>{{ r.wali_kelas_tujuan }}</td>
+                    <td>
+                        <a href="{{ url_for('perizinan.acc_detail_pending', id_perizinan=r.id_perizinan) }}">
+                            Detail
+                        </a>
+                    </td>
+                    <td class="badge-{{ r.status_perizinan }}">{{ r.status_perizinan }}</td>
+                    <td>
+                        <button type="button" onclick="confirmAct('{{ r.id_perizinan }}', 'approve')">
+                            Approve
+                        </button>
+                        <button type="button" onclick="confirmAct('{{ r.id_perizinan }}', 'reject')">
+                            Reject
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9">Tidak ada pengajuan pending.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Riwayat Section -->
+    <div class="mt-10">
+        <h3>Riwayat ACC</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nama</th>
+                    <th>Tanggal</th>
+                    <th>Alasan</th>
+                    <th>Durasi</th>
+                    <th>Diajukan Oleh</th>
+                    <th>Wali Kelas</th>
+                    <th>Catatan</th>
+                    <th>Status</th>
+                    <th>Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in items_riwayat %}
+                <tr>
+                    <td>{{ r.id_perizinan }}</td>
+                    <td>{{ r.nama_siswa }}</td>
+                    <td>{{ r.tanggal }}</td>
+                    <td>{{ r.alasan }}</td>
+                    <td>{{ r.durasi }}</td>
+                    <td>{{ r.diajukan_oleh or r.petugas }}</td>
+                    <td>{{ r.wali_kelas_tujuan }}</td>
+                    <td>{{ r.catatan_wali_kelas or '-' }}</td>
+                    <td class="badge-{{ r.status_perizinan }}">{{ r.status_perizinan }}</td>
+                    <td>
+                        <a href="{{ url_for('perizinan.acc_detail_riwayat', id_perizinan=r.id_perizinan) }}">
+                            Detail Riwayat
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9">Belum ada riwayat ACC.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const ACC_URL = '{{ url_for("perizinan.acc_list") }}';
+    const CSRF_TOKEN = document.getElementById('csrf_token').value;
+
+    // Toast configuration
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+
+    function confirmAct(id, aksi) {
+        if (aksi === 'approve') {
+            Swal.fire({
+                title: 'Setujui Pengajuan?',
+                text: `Pengajuan ID ${id} akan disetujui.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#22c55e',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Setujui!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    act(id, aksi, '');
+                }
+            });
+        } else if (aksi === 'reject') {
+            Swal.fire({
+                title: 'Tolak Pengajuan?',
+                input: 'textarea',
+                inputLabel: 'Catatan Penolakan',
+                inputPlaceholder: 'Masukkan alasan penolakan...',
+                inputAttributes: { 'aria-label': 'Catatan penolakan' },
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Tolak Pengajuan',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Alasan penolakan wajib diisi!';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    act(id, aksi, result.value);
+                }
+            });
+        }
+    }
+
+    function act(id, aksi, catatan) {
+        fetch(ACC_URL, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                csrf_token: CSRF_TOKEN,
+                id_perizinan: id,
+                aksi: aksi,
+                catatan: catatan
+            })
+        })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    Toast.fire({
+                        icon: 'success',
+                        title: d.message || 'Status berhasil diperbarui!'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Toast.fire({
+                        icon: 'error',
+                        title: d.message || 'Gagal memproses data.'
+                    });
+                }
+            })
+            .catch(() => {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Terjadi kesalahan sistem.'
+                });
+            });
+    }
+</script>
+{% endblock %}

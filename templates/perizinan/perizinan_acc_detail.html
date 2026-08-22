@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Detail Riwayat - {{ r.id_perizinan }}{% endblock %}
+
+{% block content %}
+<div>
+    <a href="{{ url_for('perizinan.acc_list') }}">&larr; Kembali ke List ACC</a>
+
+    <h2>Detail Riwayat ACC</h2>
+
+    <table>
+        <tr><th>ID Perizinan</th><td>{{ r.id_perizinan }}</td></tr>
+        <tr><th>NISN</th><td>{{ r.nisn or '-' }}</td></tr>
+        <tr><th>Nama Siswa</th><td>{{ r.nama_siswa }}</td></tr>
+        <tr><th>Tanggal Pengajuan</th><td>{{ r.tanggal }}</td></tr>
+        <tr><th>Alasan</th><td>{{ r.alasan }}</td></tr>
+        <tr><th>Durasi</th><td>{{ r.durasi }}</td></tr>
+        <tr><th>Jam Mulai</th><td>{{ r.jam_mulai or '-' }}</td></tr>
+        <tr><th>Tanggal Mulai</th><td>{{ r.tanggal_mulai or '-' }}</td></tr>
+        <tr><th>Jam Selesai</th><td>{{ r.jam_selesai or '-' }}</td></tr>
+        <tr><th>Tanggal Selesai</th><td>{{ r.tanggal_selesai or '-' }}</td></tr>
+        <tr><th>Diajukan Oleh</th><td>{{ r.diajukan_oleh or r.petugas }}</td></tr>
+        <tr><th>Wali Kelas</th><td>{{ r.wali_kelas_tujuan }}</td></tr>
+        <tr><th>Status Perizinan</th><td>{{ r.status_perizinan }}</td></tr>
+        <tr><th>Tanggal Diproses</th><td>{{ r.tanggal_acc or '-' }}</td></tr>
+        <tr><th>Catatan Wali Kelas</th><td>{{ r.catatan_wali_kelas or '-' }}</td></tr>
+        <tr><th>Dibuat Pada</th><td>{{ r.created_at or '-' }}</td></tr>
+        <tr><th>Diperbarui Pada</th><td>{{ r.updated_at or '-' }}</td></tr>
+    </table>
+</div>
+{% endblock %}

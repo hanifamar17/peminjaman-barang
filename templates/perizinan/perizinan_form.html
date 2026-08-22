@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block title %}Form Perizinan{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <h2 class="text-xl font-semibold mb-3">Form Perizinan Siswa</h2>
+    <form id="frm" class="space-y-3 max-w-md" novalidate>
+        <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
+        <div>
+            <label class="block text-sm font-medium mb-1">Nama Siswa <span class="text-red-500">*</span></label>
+            <div class="relative inline-block w-full">
+                <input id="nama_siswa" autocomplete="off" class="border rounded px-2 py-1 w-full" required>
+                <div id="suggest"
+                    class="absolute left-0 top-full w-full bg-white border rounded shadow z-50 max-h-56 overflow-y-auto">
+                </div>
+            </div>
+            <input type="hidden" id="nisn">
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Kelas <span class="text-red-500">*</span></label>
+            <select id="kelas_umum" class="border rounded px-2 py-1 w-full" required>
+                <option value="">Pilih Kelas</option>
+                <option value="10">10</option>
+                <option value="11 SOS1">11 SOS1</option>
+                <option value="11 SOS2">11 SOS2</option>
+                <option value="11 SAINS">11 SAINS</option>
+                <option value="12 SOS">12 SOS</option>
+                <option value="12 SAINS">12 SAINS</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Wali Kelas <span class="text-red-500">*</span></label>
+            <input id="wali_kelas_display" class="border rounded px-2 py-1 w-full bg-gray-100" readonly
+                placeholder="Otomatis sesuai kelas" required>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-sm font-medium mb-1">Tanggal Mulai <span class="text-red-500">*</span></label>
+                <input type="date" id="tanggal_mulai" class="border rounded px-2 py-1 w-full" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Jam Mulai <span class="text-red-500">*</span></label>
+                <input type="time" id="jam_mulai" class="border rounded px-2 py-1 w-full" required>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-sm font-medium mb-1">Tanggal Selesai <span
+                        class="text-red-500">*</span></label>
+                <input type="date" id="tanggal_selesai" class="border rounded px-2 py-1 w-full" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Jam Selesai <span class="text-red-500">*</span></label>
+                <input type="time" id="jam_selesai" class="border rounded px-2 py-1 w-full" required>
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Durasi <span class="text-red-500">*</span></label>
+            <select id="jumlah_jpl" class="border rounded px-2 py-1 w-full" required>
+                <option value="">Pilih Durasi</option>
+                <option value="2_jpl">2 JPL</option>
+                <option value="4_jpl">4 JPL</option>
+                <option value="6_jpl">6 JPL</option>
+                <option value="8_jpl">8 JPL</option>
+                <option value="10_jpl">10 JPL</option>
+                <option value="1_hari">1 Hari</option>
+                <option value="lebih_1_hari">> 1 Hari</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Alasan <span class="text-red-500">*</span></label>
+            <textarea id="alasan" maxlength="200" class="border rounded px-2 py-1 w-full" required></textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Petugas <span class="text-red-500">*</span></label>
+            <input id="petugas" class="border rounded px-2 py-1 w-full" required>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Status Petugas <span class="text-red-500">*</span></label>
+            <select id="status_petugas" class="border rounded px-2 py-1 w-full" required>
+                <option value="">Pilih Status</option>
+                <option value="guru">Guru</option>
+                <option value="wali_kelas">Wali Kelas</option>
+                <option value="pembimbing">Pembimbing</option>
+            </select>
+        </div>
+        <div>
+            <label class="inline-flex items-center gap-2">
+                <input type="checkbox" id="need_acc">
+                Perlu ACC Wali Kelas
+            </label>
+        </div>
+        <button type="button" id="btn_submit"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded">Kirim</button>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    (function () {
+        const SEARCH_URL = '{{ url_for("perizinan.siswa_search") }}';
+        const FORM_URL = '{{ url_for("perizinan.form_perizinan") }}';
+        const CSRF_TOKEN = document.getElementById('csrf_token').value;
+        const form = document.getElementById('frm');
+        const btnSubmit = document.getElementById('btn_submit');
+        const elNama = document.getElementById('nama_siswa');
+        const elNisn = document.getElementById('nisn');
+        const elKelas = document.getElementById('kelas_umum');
+        const elWaliDisplay = document.getElementById('wali_kelas_display');
+        const elSuggest = document.getElementById('suggest');
+        const elTanggalMulai = document.getElementById('tanggal_mulai');
+        const elJamMulai = document.getElementById('jam_mulai');
+        const elTanggalSelesai = document.getElementById('tanggal_selesai');
+        const elJamSelesai = document.getElementById('jam_selesai');
+        const elJumlahJpl = document.getElementById('jumlah_jpl');
+        const elAlasan = document.getElementById('alasan');
+        const elPetugas = document.getElementById('petugas');
+        const elStatusPetugas = document.getElementById('status_petugas');
+        const elNeedAcc = document.getElementById('need_acc');
+
+        function setKelasValue(raw) {
+            const target = raw.toLowerCase().replace(/\s+/g, ' ').trim();
+            for (const opt of elKelas.options) {
+                const optNorm = opt.value.toLowerCase().replace(/\s+/g, ' ').trim();
+                if (optNorm === target) {
+                    elKelas.value = opt.value;
+                    return;
+                }
+            }
+            elKelas.value = '';
+            console.warn('Kelas tidak cocok dengan opsi manapun:', raw);
+        }
+
+        let timer;
+
+        elNama.addEventListener('input', () => {
+            elNisn.value = '';
+            elWaliDisplay.value = '';
+            elKelas.value = '';
+            const q = elNama.value.trim();
+            clearTimeout(timer);
+            if (q.length < 2) {
+                elSuggest.innerHTML = '';
+                return;
+            }
+            timer = setTimeout(() => {
+                fetch(SEARCH_URL + '?q=' + encodeURIComponent(q))
+                    .then(response => {
+                        if (!response.ok) throw new Error('Gagal mengambil data siswa.');
+                        return response.json();
+                    })
+                    .then(list => {
+                        elSuggest.innerHTML = '';
+                        if (!list.length) {
+                            elSuggest.innerHTML = '<div class="px-2 py-1 text-gray-400">Tidak ditemukan</div>';
+                            return;
+                        }
+                        list.forEach(s => {
+                            const d = document.createElement('div');
+                            d.className = 'px-2 py-1 cursor-pointer hover:bg-gray-100';
+                            d.textContent = `${s.nama_siswa} (${s.nisn}) - Kelas ${s.kelas_umum}`;
+                            d.addEventListener('mousedown', e => {
+                                e.preventDefault();
+                                elNama.value = s.nama_siswa;
+                                elNisn.value = s.nisn;
+                                setKelasValue(String(s.kelas_umum || '').trim());
+                                elWaliDisplay.value = s.wali_kelas || '';
+                                elSuggest.innerHTML = '';
+                            });
+                            elSuggest.appendChild(d);
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Gagal mengambil data siswa.'
+                        });
+                    });
+            }, 250);
+        });
+
+        elNama.addEventListener('blur', () => {
+            setTimeout(() => {
+                elSuggest.innerHTML = '';
+            }, 150);
+        });
+
+        function validateForm() {
+            if (!elNisn.value.trim()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Siswa belum dipilih',
+                    text: 'Pilih siswa dari daftar pencarian.'
+                });
+                elNama.focus();
+                return false;
+            }
+
+            if (!elKelas.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Kelas belum dipilih',
+                    text: 'Pilih kelas siswa.'
+                });
+                elKelas.focus();
+                return false;
+            }
+
+            if (!elWaliDisplay.value.trim()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Wali kelas belum tersedia',
+                    text: 'Wali kelas siswa belum diset.'
+                });
+                return false;
+            }
+
+            if (!form.checkValidity()) {
+                const invalid = form.querySelector(':invalid');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Form belum lengkap',
+                    text: 'Semua field wajib diisi.'
+                }).then(() => {
+                    if (invalid) invalid.focus();
+                });
+                return false;
+            }
+
+            if (elTanggalSelesai.value < elTanggalMulai.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tanggal tidak valid',
+                    text: 'Tanggal selesai tidak boleh sebelum tanggal mulai.'
+                });
+                elTanggalSelesai.focus();
+                return false;
+            }
+
+            if (elTanggalSelesai.value === elTanggalMulai.value && elJamSelesai.value <= elJamMulai.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Waktu tidak valid',
+                    text: 'Jam selesai harus setelah jam mulai.'
+                });
+                elJamSelesai.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        btnSubmit.addEventListener('click', async () => {
+            if (!validateForm()) return;
+
+            const body = new URLSearchParams({
+                csrf_token: CSRF_TOKEN,
+                nisn: elNisn.value.trim(),
+                tanggal_mulai: elTanggalMulai.value,
+                jam_mulai: elJamMulai.value,
+                tanggal_selesai: elTanggalSelesai.value,
+                jam_selesai: elJamSelesai.value,
+                jumlah_jpl: elJumlahJpl.value,
+                alasan: elAlasan.value.trim(),
+                petugas: elPetugas.value.trim(),
+                status_petugas: elStatusPetugas.value,
+                need_acc: elNeedAcc.checked ? '1' : '0'
+            });
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Mengirim...';
+
+            try {
+                const response = await fetch(FORM_URL, {
+                    method: 'POST',
+                    body
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch {
+                    throw new Error(`Server mengembalikan HTTP ${response.status}`);
+                }
+
+                if (!response.ok || !data.success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: data.message || 'Perizinan gagal diproses.'
+                    });
+                    return;
+                }
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: data.message,
+                    confirmButtonText: 'OK'
+                });
+
+                window.location = data.redirect;
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan',
+                    text: error.message || 'Tidak dapat menghubungi server.'
+                });
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Kirim';
+            }
+        });
+    })();
+</script>
+{% endblock %}

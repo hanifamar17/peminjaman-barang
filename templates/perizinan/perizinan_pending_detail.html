@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Detail Pending - {{ r.id_perizinan }}{% endblock %}
+
+{% block content %}
+<div>
+    <a href="{{ url_for('perizinan.acc_list') }}">&larr; Kembali ke List ACC</a>
+
+    <h2>Detail Pengajuan Pending</h2>
+
+    <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
+
+    <table>
+        <tr><th>ID Perizinan</th><td>{{ r.id_perizinan }}</td></tr>
+        <tr><th>NISN</th><td>{{ r.nisn or '-' }}</td></tr>
+        <tr><th>Nama Siswa</th><td>{{ r.nama_siswa }}</td></tr>
+        <tr><th>Tanggal</th><td>{{ r.tanggal }}</td></tr>
+        <tr><th>Alasan</th><td>{{ r.alasan }}</td></tr>
+        <tr><th>Durasi</th><td>{{ r.durasi }}</td></tr>
+        <tr><th>Jam Mulai</th><td>{{ r.jam_mulai or '-' }}</td></tr>
+        <tr><th>Tanggal Mulai</th><td>{{ r.tanggal_mulai or '-' }}</td></tr>
+        <tr><th>Jam Selesai</th><td>{{ r.jam_selesai or '-' }}</td></tr>
+        <tr><th>Tanggal Selesai</th><td>{{ r.tanggal_selesai or '-' }}</td></tr>
+        <tr><th>Diajukan Oleh</th><td>{{ r.diajukan_oleh or r.petugas }}</td></tr>
+        <tr><th>Wali Kelas</th><td>{{ r.wali_kelas_tujuan }}</td></tr>
+        <tr><th>Status</th><td>{{ r.status_perizinan }}</td></tr>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <button type="button" onclick="confirmApprove()">Approve / Setujui</button>
+        <button type="button" onclick="confirmReject()">Reject / Tolak</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const ACC_URL = '{{ url_for("perizinan.acc_list") }}';
+    const REDIRECT_URL = '{{ url_for("perizinan.acc_list") }}';
+    const ID_PERIZINAN = '{{ r.id_perizinan }}';
+    const CSRF_TOKEN = document.getElementById('csrf_token').value;
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+
+    function confirmApprove() {
+        Swal.fire({
+            title: 'Setujui Pengajuan?',
+            text: `Perizinan ${ID_PERIZINAN} akan disetujui.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Setujui'
+        }).then((res) => {
+            if (res.isConfirmed) act('approve', '');
+        });
+    }
+
+    function confirmReject() {
+        Swal.fire({
+            title: 'Tolak Pengajuan',
+            input: 'textarea',
+            inputLabel: 'Catatan Penolakan',
+            inputPlaceholder: 'Tulis alasan penolakan...',
+            showCancelButton: true,
+            confirmButtonText: 'Tolak',
+            inputValidator: (val) => !val && 'Alasan penolakan wajib diisi!'
+        }).then((res) => {
+            if (res.isConfirmed) act('reject', res.value);
+        });
+    }
+
+    function act(aksi, catatan) {
+        fetch(ACC_URL, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                csrf_token: CSRF_TOKEN,
+                id_perizinan: ID_PERIZINAN,
+                aksi: aksi,
+                catatan: catatan
+            })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success || d.status) {
+                Toast.fire({ icon: 'success', title: d.message || 'Status berhasil diperbarui!' })
+                    .then(() => window.location.href = REDIRECT_URL);
+            } else {
+                Toast.fire({ icon: 'error', title: d.message || 'Gagal!' });
+            }
+        })
+        .catch(() => Toast.fire({ icon: 'error', title: 'Error server!' }));
+    }
+</script>
+{% endblock %}

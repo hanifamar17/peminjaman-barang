@@ -230,7 +230,7 @@ def repository():
             "links": [
                 {"title": "Presensi kegiatan Asrama", "url": "https://presensimanu.my.id/login", "subtext": "Formulir presensi kegiatan asrama"},
                 {"title": "Berita Acara Persidangan Santri", "url": "https://docs.google.com/forms/d/e/1FAIpQLSc5OG8Kf879_mOgmQNxIRuTfH3beYR_DZ54waDaDjWudECLtQ/viewform", "subtext": "Formulir berita acara persidangan santri"},
-                {"title": "Formulir & Jurnal Perizinan", "url": "#", "subtext": "Coming Soon", "disabled": True},
+                {"title": "Formulir & Jurnal Perizinan", "url": url_for('perizinan.index'), "subtext": "Formulir dan jurnal perizinan siswa", "disabled": False},
             ]
         },
         {

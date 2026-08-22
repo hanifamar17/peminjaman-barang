@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Surat Perizinan {{ id_perizinan }}</title></head>
+<body style="font-family: Arial, sans-serif; max-width:700px; margin:auto;">
+  <h2 style="text-align:center;">SURAT IZIN SISWA</h2>
+  <p><b>No:</b> {{ id_perizinan }}</p>
+  <table>
+    <tr><td>Nama</td><td>: {{ nama_siswa }}</td></tr>
+    <tr><td>NISN</td><td>: {{ nisn }}</td></tr>
+    <tr><td>Tanggal</td><td>: {{ tanggal }}</td></tr>
+    <tr><td>Durasi</td><td>: {{ durasi }}</td></tr>
+    <tr><td>Alasan</td><td>: {{ alasan }}</td></tr>
+    <tr><td>Petugas</td><td>: {{ petugas }}</td></tr>
+    <tr><td>Status</td><td>: {{ status_perizinan }}</td></tr>
+  </table>
+  <p style="margin-top:40px;">Dicetak: {{ dicetak }}</p>
+</body>
+</html>

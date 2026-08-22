@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Perizinan{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <h2>Status Izin Hari Ini ({{ tanggal }})</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama</th>
+                <th>NISN</th>
+                <th>Durasi</th>
+                <th>Alasan</th>
+                <th>Petugas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in items %}
+            <tr>
+                <td>{{ r.id_perizinan }}</td>
+                <td>{{ r.nama_siswa }}</td>
+                <td>{{ r.nisn }}</td>
+                <td>{{ r.durasi }}</td>
+                <td>{{ r.alasan }}</td>
+                <td>{{ r.petugas }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">Tidak ada siswa izin hari ini.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

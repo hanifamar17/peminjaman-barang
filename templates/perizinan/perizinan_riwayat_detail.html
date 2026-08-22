@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Detail Perizinan {{ item.id_perizinan }}{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <h2>Detail Perizinan {{ item.id_perizinan }}</h2>
+  <table>
+    <tr>
+      <th>Nama</th>
+      <td>{{ item.nama_siswa }}</td>
+    </tr>
+    <tr>
+      <th>NISN</th>
+      <td>{{ item.nisn }}</td>
+    </tr>
+    <tr>
+      <th>Tanggal</th>
+      <td>{{ item.tanggal }}</td>
+    </tr>
+    <tr>
+      <th>Durasi</th>
+      <td>{{ item.durasi }}</td>
+    </tr>
+    <tr>
+      <th>Alasan</th>
+      <td>{{ item.alasan }}</td>
+    </tr>
+    <tr>
+      <th>Petugas</th>
+      <td>{{ item.petugas }}</td>
+    </tr>
+    <tr>
+      <th>Status</th>
+      <td class="badge-{{ item.status_perizinan }}">{{ item.status_perizinan }}</td>
+    </tr>
+  </table>
+  <p><a href="{{ url_for('perizinan.surat_digital', id_perizinan=item.id_perizinan) }}" target="_blank">Lihat Surat
+      Digital</a></p>
+  <p><a href="{{ url_for('perizinan.riwayat_list') }}">Kembali ke Riwayat</a></p>
+</div>
+{% endblock %}

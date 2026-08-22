@@ -15,24 +15,25 @@ TOKEN_FILE = os.getenv("TOKEN_FILE")
 
 
 def _get_drive_service():
-    creds = Credentials.from_authorized_user_file(
-        TOKEN_FILE,
-        DRIVE_SCOPES
-    )
+    token_env = os.getenv("TOKEN_FILE")
+    if not token_env:
+        raise RuntimeError("TOKEN_FILE tidak diset")
 
-    # Refresh token otomatis jika access token sudah expired
+    if token_env.strip().endswith(".json"):
+        creds = Credentials.from_authorized_user_file(token_env, DRIVE_SCOPES)
+    else:
+        token_dict = json.loads(token_env)
+        creds = Credentials.from_authorized_user_info(token_dict, DRIVE_SCOPES)
+
     if creds.expired and creds.refresh_token:
         creds.refresh(Request())
+        if token_env.strip().endswith(".json"):
+            with open(token_env, "w") as token:
+                token.write(creds.to_json())
+        # else: serverless — token refreshed in-memory only, tidak persist
+        # perlu simpan ke storage lain kalau mau persist across invocations
 
-        with open(TOKEN_FILE, "w") as token:
-            token.write(creds.to_json())
-
-    return build(
-        "drive",
-        "v3",
-        credentials=creds,
-        cache_discovery=False
-    )
+    return build("drive", "v3", credentials=creds, cache_discovery=False)
 
 
 def upload_file(local_path: str, mime_type: str, drive_filename: str = None) -> dict:

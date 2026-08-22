@@ -375,8 +375,9 @@ def generate_pdf_peminjaman_aset(record_id):
     row_index, row = find_row_by_id(record_id)
     if row is None:
         abort(404)
- 
+        
     headers = get_sheet_headers()
+
     data = dict(zip(headers, row))
  
     if data.get("pdf_link"):
@@ -395,9 +396,8 @@ def generate_pdf_peminjaman_aset(record_id):
         data["jaminan_surat"] = str(data.get("jaminan_surat")).lower() in ("true", "1", "on")
  
         pdf_path = generate_pdf(data)
-        tgl_surat_clean = str(data.get("tgl_surat", "")).replace("/", "-")
         nomor_surat_clean = str(data.get("nomor_surat", "")).replace("/", "-")
-        base_name = f"{nomor_surat_clean}_{data['nama'].replace(' ', '_')}_{tgl_surat_clean}"
+        base_name = f"{nomor_surat_clean}_{data['nama'].replace(' ', '_')}"
         pdf_file = upload_file(pdf_path, "application/pdf", f"{base_name}.pdf")
         os.remove(pdf_path)
  

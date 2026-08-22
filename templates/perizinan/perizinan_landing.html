@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Perizinan Siswa{% endblock %}
+{% block content %}
+
+<div
+    class="max-w-[460px] mx-auto px-5 pt-14 pb-20 bg-[#faf8f5] text-[#1f1c19] font-['Inter',ui-sans-serif,system-ui,sans-serif] overflow-x-clip">
+
+    <div class="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#a8501f] mb-3">
+        Layanan Perizinan
+    </div>
+
+    <h1
+        class="text-[26px] leading-[1.15] font-semibold font-['Source_Serif_4',ui-serif,Georgia,serif] tracking-[-0.01em] mb-3 break-words">
+        Perizinan Siswa
+    </h1>
+
+    <p class="text-[14px] leading-relaxed max-w-[36ch] mb-10 text-[#6b6459]">
+        Kelola proses perizinan siswa, pantau status permohonan, dan lihat riwayat perizinan.
+    </p>
+
+    <nav class="border-t border-[#e6e0d6]">
+        <!-- Item 01 -->
+        <a href="{{ url_for('perizinan.dashboard') }}"
+            class="group flex items-center gap-4 py-5 border-b border-[#e6e0d6] no-underline transition-all duration-150 ease-out hover:pl-[6px] hover:bg-[#1f1c19]/[0.02] active:bg-[#f3e6dc] active:scale-[0.99]">
+            <span
+                class="font-['Source_Serif_4',ui-serif,Georgia,serif] tabular-nums text-[15px] w-6 shrink-0 text-[#a49b8c] transition-colors duration-150 group-hover:text-[#a8501f]">01</span>
+            <div class="flex-1 min-w-0">
+                <h3
+                    class="text-[15px] font-semibold m-0 text-[#1f1c19] transition-colors duration-150 group-hover:text-[#a8501f]">
+                    Dashboard</h3>
+                <p class="text-[13px] mt-0.5 m-0 text-[#a49b8c]">Lihat status siswa izin hari ini</p>
+            </div>
+            <svg class="w-4 h-4 shrink-0 text-[#a49b8c] transition-all duration-150 group-hover:text-[#a8501f] group-hover:translate-x-[3px]"
+                viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M3.333 8h9.334" />
+                <path d="M8 3.333 12.667 8 8 12.667" />
+            </svg>
+        </a>
+
+        <!-- Item 02 -->
+        <a href="{{ url_for('perizinan.riwayat_list') }}"
+            class="group flex items-center gap-4 py-5 border-b border-[#e6e0d6] no-underline transition-all duration-150 ease-out hover:pl-[6px] hover:bg-[#1f1c19]/[0.02] active:bg-[#f3e6dc] active:scale-[0.99]">
+            <span
+                class="font-['Source_Serif_4',ui-serif,Georgia,serif] tabular-nums text-[15px] w-6 shrink-0 text-[#a49b8c] transition-colors duration-150 group-hover:text-[#a8501f]">02</span>
+            <div class="flex-1 min-w-0">
+                <h3
+                    class="text-[15px] font-semibold m-0 text-[#1f1c19] transition-colors duration-150 group-hover:text-[#a8501f]">
+                    Riwayat Perizinan</h3>
+                <p class="text-[13px] mt-0.5 m-0 text-[#a49b8c]">Lihat riwayat permohonan perizinan siswa</p>
+            </div>
+            <svg class="w-4 h-4 shrink-0 text-[#a49b8c] transition-all duration-150 group-hover:text-[#a8501f] group-hover:translate-x-[3px]"
+                viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M3.333 8h9.334" />
+                <path d="M8 3.333 12.667 8 8 12.667" />
+            </svg>
+        </a>
+
+        <!-- Item 03 -->
+        <a href="{{ url_for('perizinan.form_perizinan') }}"
+            class="group flex items-center gap-4 py-5 border-b border-[#e6e0d6] no-underline transition-all duration-150 ease-out hover:pl-[6px] hover:bg-[#1f1c19]/[0.02] active:bg-[#f3e6dc] active:scale-[0.99]">
+            <span
+                class="font-['Source_Serif_4',ui-serif,Georgia,serif] tabular-nums text-[15px] w-6 shrink-0 text-[#a49b8c] transition-colors duration-150 group-hover:text-[#a8501f]">03</span>
+            <div class="flex-1 min-w-0">
+                <h3
+                    class="text-[15px] font-semibold m-0 text-[#1f1c19] transition-colors duration-150 group-hover:text-[#a8501f]">
+                    Form Perizinan</h3>
+                <p class="text-[13px] mt-0.5 m-0 text-[#a49b8c]">Ajukan permohonan perizinan</p>
+            </div>
+            <svg class="w-4 h-4 shrink-0 text-[#a49b8c] transition-all duration-150 group-hover:text-[#a8501f] group-hover:translate-x-[3px]"
+                viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M3.333 8h9.334" />
+                <path d="M8 3.333 12.667 8 8 12.667" />
+            </svg>
+        </a>
+    </nav>
+
+    <!-- Item 04 -->
+    {% if session.get('role') in ['admin', 'wali kelas'] %}
+    <a href="{{ url_for('perizinan.acc_list') }}"
+        class="group flex items-center gap-4 py-5 border-b border-[#e6e0d6] no-underline transition-all duration-150 ease-out hover:pl-[6px] hover:bg-[#1f1c19]/[0.02] active:bg-[#f3e6dc] active:scale-[0.99]">
+        <span
+            class="font-['Source_Serif_4',ui-serif,Georgia,serif] tabular-nums text-[15px] w-6 shrink-0 text-[#a49b8c] transition-colors duration-150 group-hover:text-[#a8501f]">04</span>
+        <div class="flex-1 min-w-0">
+            <h3
+                class="text-[15px] font-semibold m-0 text-[#1f1c19] transition-colors duration-150 group-hover:text-[#a8501f]">
+                Persetujuan Perizinan</h3>
+            <p class="text-[13px] mt-0.5 m-0 text-[#a49b8c]">Lihat pengajuan perizinan siswa</p>
+        </div>
+        <svg class="w-4 h-4 shrink-0 text-[#a49b8c] transition-all duration-150 group-hover:text-[#a8501f] group-hover:translate-x-[3px]"
+            viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M3.333 8h9.334" />
+            <path d="M8 3.333 12.667 8 8 12.667" />
+        </svg>
+    </a>
+    {% endif %}
+
+    <a href="/repository"
+        class="inline-flex items-center gap-2 mt-8 text-[13px] font-medium text-[#6b6459] no-underline transition-all duration-150 hover:text-[#1f1c19] hover:-translate-x-[2px] active:scale-[0.97]">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.667 8H3.333" />
+            <path d="M8 12.667 3.333 8 8 3.333" />
+        </svg>
+        Kembali ke Dashboard Utama
+    </a>
+
+</div>
+{% endblock %}
