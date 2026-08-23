@@ -3,107 +3,212 @@
 {% block title %}ACC Wali Kelas{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
-    <h2>Pengajuan Perizinan</h2>
+<div class="max-w-5xl mx-auto px-4 sm:px-5 pt-8 sm:pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
 
     <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 
+    <!-- Link Kembali -->
+    <a href="{{ url_for('perizinan.index') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
+    </a>
+
+    <!-- Header & Total Data -->
+    <div class="mt-8 mb-10">
+        <h1 class="page-title text-xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Pengajuan Perizinan</h1>
+        <p class="page-sub text-sm sm:text-md leading-relaxed text-[var(--ink-soft)] mt-1.5 sm:mt-2">
+            Kelola persetujuan izin siswa & lihat riwayat keputusan.
+        </p>
+    </div>
+
+    <!-- Live Search Input dengan Debounce -->
+    <div class="w-full lg:w-72 mb-6">
+        <div class="relative z-0 w-full">
+            <input type="text" id="filter"
+                class="block py-2 px-0 w-full text-sm text-zinc-900 bg-transparent border-0 border-b border-zinc-300 appearance-none focus:outline-none focus:ring-0 focus:border-zinc-900 transition-colors duration-150 rounded-none placeholder-zinc-400"
+                placeholder="Cari nama, kelas, status...">
+            <div id="searchCount" class="text-xs text-zinc-500 mt-1.5 hidden"></div>
+        </div>
+    </div>
+
     <!-- Pending Section -->
-    <div class="mt-6">
-        <h3>Pending</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nama</th>
-                    <th>Tanggal</th>
-                    <th>Alasan</th>
-                    <th>Durasi</th>
-                    <th>Diajukan Oleh</th>
-                    <th>Wali Kelas</th>
-                    <th>Status</th>
-                    <th>Detail</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in items_pending %}
-                <tr>
-                    <td>{{ r.id_perizinan }}</td>
-                    <td>{{ r.nama_siswa }}</td>
-                    <td>{{ r.tanggal }}</td>
-                    <td>{{ r.alasan }}</td>
-                    <td>{{ r.durasi }}</td>
-                    <td>{{ r.diajukan_oleh or r.petugas }}</td>
-                    <td>{{ r.wali_kelas_tujuan }}</td>
-                    <td>
-                        <a href="{{ url_for('perizinan.acc_detail_pending', id_perizinan=r.id_perizinan) }}">
-                            Detail
-                        </a>
-                    </td>
-                    <td class="badge-{{ r.status_perizinan }}">{{ r.status_perizinan }}</td>
-                    <td>
-                        <button type="button" onclick="confirmAct('{{ r.id_perizinan }}', 'approve')">
-                            Approve
-                        </button>
-                        <button type="button" onclick="confirmAct('{{ r.id_perizinan }}', 'reject')">
-                            Reject
-                        </button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="9">Tidak ada pengajuan pending.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="mb-12">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <h2 class="text-base font-bold tracking-tight text-[#1f1c19]">Menunggu Persetujuan</h2>
+                <p class="text-xs text-[#a49b8c] mt-0.5">Klik nama siswa untuk melihat detail pengajuan.</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                <span id="pendingCount">{{ items_pending|length }}</span> Pending
+            </span>
+        </div>
+
+        <div class="overflow-x-auto border-t border-[#e6e0d6]">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead>
+                    <tr
+                        class="border-b border-[#e6e0d6] text-[11px] font-semibold text-[#a49b8c] uppercase tracking-wider">
+                        <th class="py-2 pr-4 w-12">No</th>
+                        <th class="py-2 pr-6">Nama</th>
+                        <th class="py-2 pr-6 max-w-xs whitespace-normal">Alasan</th>
+                        <th class="py-2 pr-6">Tanggal Mulai</th>
+                        <th class="py-2 pr-6">Tanggal Selesai</th>
+                        <th class="py-2 pr-6">Durasi</th>
+                        <th class="py-2 pr-6">Wali Kelas</th>
+                        <th class="py-2 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyPending">
+                    {% for r in items_pending %}
+                    <tr class="group border-b border-[#e6e0d6] hover:bg-[#f3f0ea] transition-colors" data-row-pending>
+                        <td class="py-2 pr-4 text-[13px] font-medium text-[#a49b8c] row-no-pending">
+                            {{ "%02d" | format(loop.index) }}
+                        </td>
+                        <td class="py-2 pr-6">
+                            <a href="{{ url_for('perizinan.acc_detail_pending', id_perizinan=r.id_perizinan) }}"
+                                class="font-semibold text-[#1f1c19] hover:underline">
+                                {{ r.nama_siswa }}
+                            </a>
+                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.kelas_umum }}</div>
+                        </td>
+                        <td
+                            class="py-2 pr-6 text-[13px] text-[#6b6459] max-w-xs whitespace-normal break-words leading-snug">
+                            {{ r.alasan }}
+                        </td>
+                        <td class="py-2 pr-6">
+                            <div class="text-[13px] text-[#6b6459]">{{ r.tanggal_mulai }}</div>
+                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.jam_mulai }} WIB</div>
+                        </td>
+                        <td class="py-2 pr-6">
+                            <div class="text-[13px] text-[#6b6459]">{{ r.tanggal_selesai }}</div>
+                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.jam_selesai }} WIB</div>
+                        </td>
+                        <td class="py-2 pr-6 text-[13px] text-[#6b6459]">
+                            {{ r.durasi }}
+                        </td>
+                        <td class="py-2 pr-6 text-[13px] text-[#6b6459]">
+                            {{ r.wali_kelas_tujuan }}
+                        </td>
+                        <td class="py-2 text-right">
+                            <select
+                                onchange="if(this.value){ confirmAct('{{ r.id_perizinan }}', this.value); this.value=''; }"
+                                class="py-1 px-2 text-[11px] font-bold uppercase tracking-wider bg-white border border-[#e6e0d6] rounded text-[#1f1c19] focus:outline-none focus:border-zinc-900 cursor-pointer">
+                                <option value="" selected disabled>Aksi</option>
+                                <option value="approve" class="text-emerald-600 font-semibold">Approve</option>
+                                <option value="reject" class="text-rose-600 font-semibold">Reject</option>
+                            </select>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="emptyPending"
+            class="{% if items_pending %}hidden{% endif %} py-8 text-center text-[13px] font-semibold text-zinc-400">
+            Tidak ada pengajuan pending.
+        </div>
     </div>
 
     <!-- Riwayat Section -->
-    <div class="mt-10">
-        <h3>Riwayat ACC</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nama</th>
-                    <th>Tanggal</th>
-                    <th>Alasan</th>
-                    <th>Durasi</th>
-                    <th>Diajukan Oleh</th>
-                    <th>Wali Kelas</th>
-                    <th>Catatan</th>
-                    <th>Status</th>
-                    <th>Detail</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in items_riwayat %}
-                <tr>
-                    <td>{{ r.id_perizinan }}</td>
-                    <td>{{ r.nama_siswa }}</td>
-                    <td>{{ r.tanggal }}</td>
-                    <td>{{ r.alasan }}</td>
-                    <td>{{ r.durasi }}</td>
-                    <td>{{ r.diajukan_oleh or r.petugas }}</td>
-                    <td>{{ r.wali_kelas_tujuan }}</td>
-                    <td>{{ r.catatan_wali_kelas or '-' }}</td>
-                    <td class="badge-{{ r.status_perizinan }}">{{ r.status_perizinan }}</td>
-                    <td>
-                        <a href="{{ url_for('perizinan.acc_detail_riwayat', id_perizinan=r.id_perizinan) }}">
-                            Detail Riwayat
-                        </a>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="9">Belum ada riwayat ACC.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div>
+        <div class="mb-3">
+            <h2 class="text-base font-bold tracking-tight text-[#1f1c19]">Riwayat ACC</h2>
+            <p class="text-xs text-[#a49b8c] mt-0.5">Klik nama siswa untuk melihat detail perizinan.</p>
+        </div>
+
+        <div class="overflow-x-auto border-t border-[#e6e0d6]">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead>
+                    <tr
+                        class="border-b border-[#e6e0d6] text-[11px] font-semibold text-[#a49b8c] uppercase tracking-wider">
+                        <th class="py-2 pr-4 w-12">No</th>
+                        <th class="py-2 pr-6">Nama</th>
+                        <th class="py-2 pr-6 max-w-xs whitespace-normal">Alasan</th>
+                        <th class="py-2 pr-6">Tanggal Mulai</th>
+                        <th class="py-2 pr-6">Tanggal Selesai</th>
+                        <th class="py-2 pr-6">Durasi</th>
+                        <th class="py-2 pr-6">Wali Kelas</th>
+                        <th class="py-2 pr-6 max-w-xs whitespace-normal">Catatan</th>
+                        <th class="py-2 pr-6">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyRiwayat">
+                    {% for r in items_riwayat %}
+                    <tr class="group border-b border-[#e6e0d6] hover:bg-[#f3f0ea] transition-colors" data-row-riwayat>
+                        <td class="py-2 pr-4 text-[13px] font-medium text-[#a49b8c] row-no-riwayat">
+                            {{ "%02d" | format(loop.index) }}
+                        </td>
+                        <td class="py-2 pr-6">
+                            <a href="{{ url_for('perizinan.acc_detail_riwayat', id_perizinan=r.id_perizinan) }}"
+                                class="font-semibold text-[#1f1c19] hover:underline">
+                                {{ r.nama_siswa }}
+                            </a>
+                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.kelas_umum }}</div>
+                        </td>
+                        <td
+                            class="py-2 pr-6 text-[13px] text-[#6b6459] max-w-xs whitespace-normal break-words leading-snug">
+                            {{ r.alasan }}
+                        </td>
+                        <td class="py-2 pr-6">
+                            <div class="text-[13px] text-[#6b6459]">{{ r.tanggal_mulai }}</div>
+                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.jam_mulai }} WIB</div>
+                        </td>
+                        <td class="py-2 pr-6">
+                            <div class="text-[13px] text-[#6b6459]">{{ r.tanggal_selesai }}</div>
+                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.jam_selesai }} WIB</div>
+                        </td>
+                        <td class="py-2 pr-6 text-[13px] text-[#6b6459]">
+                            {{ r.durasi }}
+                        </td>
+                        <td class="py-2 pr-6 text-[13px] text-[#6b6459]">
+                            {{ r.wali_kelas_tujuan }}
+                        </td>
+                        <td
+                            class="py-2 pr-6 text-[13px] text-[#6b6459] max-w-xs whitespace-normal break-words leading-snug">
+                            {{ r.catatan_wali_kelas or '-' }}
+                        </td>
+                        <td class="py-2 pr-6">
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight border 
+                            {% if r.status_perizinan == 'aktif' or r.status_perizinan == 'disetujui' %}
+                                bg-emerald-50 text-emerald-700 border-emerald-200
+                            {% elif r.status_perizinan == 'ditolak' %}
+                                bg-rose-50 text-rose-700 border-rose-200
+                            {% else %}
+                                bg-[#f3f0ea] text-[#6b6459] border-[#e6e0d6]
+                            {% endif %}">
+                                {{ r.status_perizinan }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="emptyRiwayat"
+            class="{% if items_riwayat %}hidden{% endif %} py-8 text-center text-[13px] font-semibold text-zinc-400">
+            Belum ada riwayat ACC.
+        </div>
+
+        <!-- Pagination khusus Riwayat ACC -->
+        <div
+            class="flex items-center justify-between py-5 border-b border-zinc-200 text-[13px] font-semibold text-zinc-500">
+            <div>Hal <span id="currentPage" class="text-zinc-900">1</span>/<span id="totalPages"
+                    class="text-zinc-900">1</span></div>
+            <div class="flex gap-5">
+                <button id="prevBtn"
+                    class="uppercase hover:text-zinc-900 active:scale-[0.97] disabled:opacity-30 disabled:pointer-events-none transition-all touch-manipulation cursor-pointer">
+                    &larr; Prev
+                </button>
+                <button id="nextBtn"
+                    class="uppercase hover:text-zinc-900 active:scale-[0.97] disabled:opacity-30 disabled:pointer-events-none transition-all touch-manipulation cursor-pointer">
+                    Next &rarr;
+                </button>
+            </div>
+        </div>
     </div>
+
 </div>
 {% endblock %}
 
@@ -115,7 +220,6 @@
     const ACC_URL = '{{ url_for("perizinan.acc_list") }}';
     const CSRF_TOKEN = document.getElementById('csrf_token').value;
 
-    // Toast configuration
     const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -131,7 +235,7 @@
                 text: `Pengajuan ID ${id} akan disetujui.`,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#22c55e',
+                confirmButtonColor: '#059669',
                 cancelButtonColor: '#6b7280',
                 confirmButtonText: 'Ya, Setujui!'
             }).then((result) => {
@@ -147,7 +251,7 @@
                 inputPlaceholder: 'Masukkan alasan penolakan...',
                 inputAttributes: { 'aria-label': 'Catatan penolakan' },
                 showCancelButton: true,
-                confirmButtonColor: '#ef4444',
+                confirmButtonColor: '#dc2626',
                 cancelButtonColor: '#6b7280',
                 confirmButtonText: 'Tolak Pengajuan',
                 inputValidator: (value) => {
@@ -200,5 +304,119 @@
                 });
             });
     }
+
+    // --- Dynamic Search & Pagination Logic ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const filterInput = document.getElementById("filter");
+        const rowsPending = Array.from(document.querySelectorAll("[data-row-pending]"));
+        const rowsRiwayat = Array.from(document.querySelectorAll("[data-row-riwayat]"));
+
+        const emptyPending = document.getElementById("emptyPending");
+        const emptyRiwayat = document.getElementById("emptyRiwayat");
+        const searchCount = document.getElementById("searchCount");
+
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const currentPageEl = document.getElementById("currentPage");
+        const totalPagesEl = document.getElementById("totalPages");
+
+        const itemsPerPage = 10;
+        let currentPage = 1;
+        let filteredRiwayatRows = [...rowsRiwayat];
+
+        // Debounce Function
+        function debounce(func, delay = 300) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredRiwayatRows.length / itemsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            // Hide all riwayat rows first
+            rowsRiwayat.forEach(row => row.classList.add("hidden"));
+
+            // Show slice for current page
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageRows = filteredRiwayatRows.slice(start, end);
+
+            pageRows.forEach((row, idx) => {
+                row.classList.remove("hidden");
+                const noTd = row.querySelector(".row-no-riwayat");
+                if (noTd) {
+                    const globalIdx = start + idx + 1;
+                    noTd.textContent = String(globalIdx).padStart(2, '0');
+                }
+            });
+
+            currentPageEl.textContent = currentPage;
+            totalPagesEl.textContent = totalPages;
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+            emptyRiwayat.classList.toggle("hidden", filteredRiwayatRows.length > 0);
+        }
+
+        function handleSearch() {
+            const query = filterInput.value.toLowerCase().trim();
+            let pendingMatchCount = 0;
+
+            // Filter Tabel Pending
+            rowsPending.forEach((row) => {
+                const text = row.textContent.toLowerCase();
+                const matches = text.includes(query);
+                row.classList.toggle("hidden", !matches);
+                if (matches) {
+                    pendingMatchCount++;
+                    const noTd = row.querySelector(".row-no-pending");
+                    if (noTd) noTd.textContent = String(pendingMatchCount).padStart(2, '0');
+                }
+            });
+            emptyPending.classList.toggle("hidden", pendingMatchCount > 0);
+
+            // Filter Data Riwayat
+            filteredRiwayatRows = rowsRiwayat.filter((row) => {
+                return row.textContent.toLowerCase().includes(query);
+            });
+
+            // Update Search Count
+            if (query !== "") {
+                const totalFound = pendingMatchCount + filteredRiwayatRows.length;
+                searchCount.textContent = `Ditemukan: ${totalFound} data`;
+                searchCount.classList.remove("hidden");
+            } else {
+                searchCount.classList.add("hidden");
+            }
+
+            currentPage = 1;
+            updatePagination();
+        }
+
+        filterInput.addEventListener("input", debounce(handleSearch, 250));
+
+        prevBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePagination();
+            }
+        });
+
+        nextBtn.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredRiwayatRows.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePagination();
+            }
+        });
+
+        // Init
+        updatePagination();
+    });
 </script>
 {% endblock %}
