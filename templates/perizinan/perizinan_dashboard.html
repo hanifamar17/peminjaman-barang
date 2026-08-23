@@ -3,17 +3,21 @@
 {% block title %}Dashboard Perizinan{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6 text-[#1f1c19]">
+<div class="max-w-5xl mx-auto px-5 pt-12 pb-20 bg-[#faf8f5] text-[#1f1c19]">
+
+    <!-- Link Kembali -->
+    <a href="{{ url_for('perizinan.index') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
+    </a>
 
     <!-- Realtime Monitor Display Section -->
-    <div class="mb-10">
+    <div class="mt-8 mb-10">
         <div class="flex items-center justify-between mb-5 pb-3 border-b border-[#e6e0d6]">
-            <div>
-                <h2 class="text-xl font-bold tracking-tight text-[#1f1c19] m-0">
-                    Siswa Izin Hari Ini
-                </h2>
-                <p class="text-xs text-[#a49b8c] mt-1 m-0">{{ tanggal }}</p>
-            </div>
+            <h2 class="text-xl font-bold tracking-tight text-[#1f1c19] m-0">
+                Siswa Izin Hari Ini
+            </h2>
+            <p class="text-xl text-[#a49b8c] m-0">{{ tanggal }}</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#e6e0d6] border border-[#e6e0d6]">
@@ -35,12 +39,14 @@
                         <div class="border border-[#e6e0d6] px-2 py-1.5">
                             <span
                                 class="block text-[#a49b8c] uppercase tracking-widest font-semibold mb-0.5">Mulai</span>
-                            <span class="text-[#1f1c19] font-medium">{{ r.tanggal_mulai }} · {{ r.jam_mulai }} WIB</span>
+                            <span class="text-[#1f1c19] font-medium">{{ r.tanggal_mulai }} · {{ r.jam_mulai }}
+                                WIB</span>
                         </div>
                         <div class="border border-[#e6e0d6] px-2 py-1.5">
                             <span
                                 class="block text-[#a49b8c] uppercase tracking-widest font-semibold mb-0.5">Selesai</span>
-                            <span class="text-[#1f1c19] font-medium">{{ r.tanggal_selesai }} · {{ r.jam_selesai }} WIB</span>
+                            <span class="text-[#1f1c19] font-medium">{{ r.tanggal_selesai }} · {{ r.jam_selesai }}
+                                WIB</span>
                         </div>
                     </div>
                 </div>
@@ -59,7 +65,7 @@
 
     <!-- Detail Data Table Section -->
     <div>
-        <h3 class="text-[11px] font-bold uppercase tracking-widest text-[#a49b8c] mb-3">Tabel Detail Perizinan</h3>
+        <h3 class="text-[11px] font-bold uppercase tracking-widest text-[#a49b8c] mb-3">Detail Perizinan</h3>
         <div class="overflow-x-auto border-t border-[#e6e0d6]">
             <table class="w-full text-left text-sm whitespace-nowrap">
                 <thead>

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}404 - Halaman Tidak Ditemukan{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-5 py-12 sm:py-20 text-[var(--ink)]">
+
+    <div class="max-w-md mx-auto text-center">
+
+        <!-- Icon Indicator -->
+        <div class="inline-flex items-center justify-center w-12 h-12 border border-[#e6e0d6] bg-[#f3f0ea] mb-6">
+            <i class="fa-solid fa-compass text-lg text-[#a8501f]"></i>
+        </div>
+
+        <!-- Header -->
+        <p class="text-[10px] font-bold uppercase tracking-wider text-[#a49b8c] mb-2 m-0">Error 404</p>
+        <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">
+            Halaman Tidak Ditemukan
+        </h1>
+        <p class="page-sub text-sm leading-relaxed text-[var(--ink-soft)] mt-3 mb-8 max-w-[42ch] mx-auto">
+            Tautan mungkin kedaluwarsa atau salah. Silakan periksa kembali URL atau kembali ke halaman utama.
+        </p>
+
+        <!-- Action -->
+        <div class="pt-6 border-t border-[#e6e0d6]">
+            <a href="{{ url_for('peminjaman_invlabkomp.peminjaman_landing') }}"
+                class="block w-full text-center bg-[#1f1c19] text-white text-[13px] font-semibold py-3.5 hover:bg-[#a8501f] transition-all cursor-pointer border-0">
+                Kembali ke Beranda
+            </a>
+        </div>
+
+        <!-- Footer Note -->
+        <p class="text-[11px] text-[#a49b8c] mt-8 m-0">
+            Jika masalah berlanjut, hubungi petugas madrasah.
+        </p>
+
+    </div>
+
+</div>
+{% endblock %}

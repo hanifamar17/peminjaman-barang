@@ -11,6 +11,10 @@ from flask import (
     send_from_directory,
     request, redirect, url_for, session, flash
 )
+import logging
+from socket import timeout as SocketTimeoutError
+from requests.exceptions import Timeout, ConnectionError as RequestsConnectionError
+
 from mailer import (
     mail,
     init_app,
@@ -288,8 +292,27 @@ def inject_base_url():
 # ERROR HANDLER
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template("404.html"), 404
+    return render_template("errors/404.html"), 404
 
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
+@app.errorhandler(TimeoutError)
+@app.errorhandler(SocketTimeoutError)
+@app.errorhandler(Timeout)
+@app.errorhandler(RequestsConnectionError)
+def handle_sheet_timeout(e):
+    logger.error(f"Sheet connection error: {type(e).__name__}: {e}")
+    return render_template("errors/sheet_timeout.html"), 503
+
+@app.errorhandler(503)
+def handle_503(e):
+    return render_template("errors/sheet_timeout.html"), 503
+
+@app.errorhandler(500)
+def handle_internal_error(e):
+    logger.error(f"Internal error: {e}")
+    return render_template("errors/internal.html"), 500
 
 # =======================
 # MAIN

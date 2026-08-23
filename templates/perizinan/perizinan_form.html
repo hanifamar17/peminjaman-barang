@@ -1,99 +1,159 @@
 {% extends "base.html" %}
 {% block title %}Form Perizinan{% endblock %}
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
-    <h2 class="text-xl font-semibold mb-3">Form Perizinan Siswa</h2>
-    <form id="frm" class="space-y-3 max-w-md" novalidate>
-        <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
-        <div>
-            <label class="block text-sm font-medium mb-1">Nama Siswa <span class="text-red-500">*</span></label>
-            <div class="relative inline-block w-full">
-                <input id="nama_siswa" autocomplete="off" class="border rounded px-2 py-1 w-full" required>
-                <div id="suggest"
-                    class="absolute left-0 top-full w-full bg-white border rounded shadow z-50 max-h-56 overflow-y-auto">
-                </div>
-            </div>
-            <input type="hidden" id="nisn">
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[var(--ink)]">
+
+  <a href="{{ url_for('perizinan.index') }}"
+    class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+    <i class="ph ph-arrow-left"></i> Kembali
+  </a>
+
+  <div class="mt-8 mb-10">
+    <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">Form Perizinan Siswa</h1>
+    <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Lengkapi formulir untuk mencetak atau mengajukan izin siswa.</p>
+  </div>
+
+  <form id="frm" class="space-y-6" novalidate>
+    <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="col-span-2 sm:col-span-1">
+        <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Nama Siswa <span class="text-[#a8501f]">*</span></label>
+        <div class="relative w-full">
+          <input id="nama_siswa" autocomplete="off" required
+            class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] focus:ring-0 outline-none transition-colors text-[14px]">
+          <div id="searchSpinner" class="hidden absolute right-0 top-1/2 -translate-y-1/2 pt-2">
+            <svg class="w-3.5 h-3.5 animate-spin text-[#a49b8c]" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+          </div>
+          <div id="suggest" class="absolute left-0 top-full w-full bg-[#faf8f5] border border-[#e6e0d6] shadow-sm z-50 max-h-56 overflow-y-auto hidden"></div>
         </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Kelas <span class="text-red-500">*</span></label>
-            <select id="kelas_umum" class="border rounded px-2 py-1 w-full" required>
-                <option value="">Pilih Kelas</option>
-                <option value="10">10</option>
-                <option value="11 SOS1">11 SOS1</option>
-                <option value="11 SOS2">11 SOS2</option>
-                <option value="11 SAINS">11 SAINS</option>
-                <option value="12 SOS">12 SOS</option>
-                <option value="12 SAINS">12 SAINS</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Wali Kelas <span class="text-red-500">*</span></label>
-            <input id="wali_kelas_display" class="border rounded px-2 py-1 w-full bg-gray-100" readonly
-                placeholder="Otomatis sesuai kelas" required>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-            <div>
-                <label class="block text-sm font-medium mb-1">Tanggal Mulai <span class="text-red-500">*</span></label>
-                <input type="date" id="tanggal_mulai" class="border rounded px-2 py-1 w-full" required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Jam Mulai <span class="text-red-500">*</span></label>
-                <input type="time" id="jam_mulai" class="border rounded px-2 py-1 w-full" required>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-            <div>
-                <label class="block text-sm font-medium mb-1">Tanggal Selesai <span
-                        class="text-red-500">*</span></label>
-                <input type="date" id="tanggal_selesai" class="border rounded px-2 py-1 w-full" required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Jam Selesai <span class="text-red-500">*</span></label>
-                <input type="time" id="jam_selesai" class="border rounded px-2 py-1 w-full" required>
-            </div>
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Durasi <span class="text-red-500">*</span></label>
-            <select id="jumlah_jpl" class="border rounded px-2 py-1 w-full" required>
-                <option value="">Pilih Durasi</option>
-                <option value="2_jpl">2 JPL</option>
-                <option value="4_jpl">4 JPL</option>
-                <option value="6_jpl">6 JPL</option>
-                <option value="8_jpl">8 JPL</option>
-                <option value="10_jpl">10 JPL</option>
-                <option value="1_hari">1 Hari</option>
-                <option value="lebih_1_hari">> 1 Hari</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Alasan <span class="text-red-500">*</span></label>
-            <textarea id="alasan" maxlength="200" class="border rounded px-2 py-1 w-full" required></textarea>
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Petugas <span class="text-red-500">*</span></label>
-            <input id="petugas" class="border rounded px-2 py-1 w-full" required>
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Status Petugas <span class="text-red-500">*</span></label>
-            <select id="status_petugas" class="border rounded px-2 py-1 w-full" required>
-                <option value="">Pilih Status</option>
-                <option value="guru">Guru</option>
-                <option value="wali_kelas">Wali Kelas</option>
-                <option value="pembimbing">Pembimbing</option>
-            </select>
-        </div>
-        <div>
-            <label class="inline-flex items-center gap-2">
-                <input type="checkbox" id="need_acc">
-                Perlu ACC Wali Kelas
-            </label>
-        </div>
-        <button type="button" id="btn_submit"
-            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded">Kirim</button>
-    </form>
+        <input type="hidden" id="nisn">
+      </div>
+
+      <div class="col-span-2 sm:col-span-1">
+        <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Kelas <span class="text-[#a8501f]">*</span></label>
+        <select id="kelas_umum" required class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
+          <option value="">- Pilih Kelas -</option>
+          <option value="10">10</option>
+          <option value="11 SOS1">11 SOS1</option>
+          <option value="11 SOS2">11 SOS2</option>
+          <option value="11 SAINS">11 SAINS</option>
+          <option value="12 SOS">12 SOS</option>
+          <option value="12 SAINS">12 SAINS</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Wali Kelas <span class="text-[#a8501f]">*</span></label>
+      <input id="wali_kelas_display" readonly placeholder="Otomatis sesuai kelas" required
+        class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px] text-[#6b6459] italic">
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Tanggal Mulai <span class="text-[#a8501f]">*</span></label>
+        <input type="date" id="tanggal_mulai" required
+          class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Jam Mulai <span class="text-[#a8501f]">*</span></label>
+        <input type="time" id="jam_mulai" required
+          class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Tanggal Selesai <span class="text-[#a8501f]">*</span></label>
+        <input type="date" id="tanggal_selesai" required
+          class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Jam Selesai <span class="text-[#a8501f]">*</span></label>
+        <input type="time" id="jam_selesai" required
+          class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="col-span-2 sm:col-span-1">
+        <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Durasi <span class="text-[#a8501f]">*</span></label>
+        <select id="jumlah_jpl" required class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
+          <option value="">- Pilih Durasi -</option>
+          <option value="2_jpl">2 JPL</option>
+          <option value="4_jpl">4 JPL</option>
+          <option value="6_jpl">6 JPL</option>
+          <option value="8_jpl">8 JPL</option>
+          <option value="10_jpl">10 JPL</option>
+          <option value="1_hari">1 Hari</option>
+          <option value="lebih_1_hari">> 1 Hari</option>
+        </select>
+      </div>
+      <div class="col-span-2 sm:col-span-1">
+        <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Status Petugas <span class="text-[#a8501f]">*</span></label>
+        <select id="status_petugas" required class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] outline-none text-[14px]">
+          <option value="">- Pilih Status -</option>
+          <option value="guru">Guru</option>
+          <option value="wali_kelas">Wali Kelas</option>
+          <option value="pembimbing">Pembimbing</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Petugas <span class="text-[#a8501f]">*</span></label>
+      <input id="petugas" required
+        class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] focus:ring-0 outline-none transition-colors text-[14px]">
+    </div>
+
+    <div>
+      <label class="block text-[10px] font-bold text-[#a49b8c] uppercase tracking-widest mb-1">Alasan <span class="text-[#a8501f]">*</span></label>
+      <textarea id="alasan" maxlength="200" required rows="2"
+        class="w-full py-2 px-0 bg-transparent border-0 border-b border-[#e6e0d6] focus:border-[#1f1c19] focus:ring-0 outline-none transition-colors text-[14px] resize-none"></textarea>
+    </div>
+
+    <div class="pt-2">
+      <label class="inline-flex items-center gap-3 cursor-pointer select-none">
+        <input type="checkbox" id="need_acc" class="w-4 h-4 accent-[#1f1c19] cursor-pointer">
+        <span class="text-[13px] font-semibold text-[#1f1c19]">Perlu ACC Wali Kelas</span>
+      </label>
+    </div>
+
+    <div class="flex items-center justify-end gap-6 pt-4">
+      <a href="{{ url_for('perizinan.riwayat_list') }}"
+        class="text-[12px] font-bold text-[#a49b8c] uppercase hover:text-[#1f1c19]">Batal</a>
+      <button id="btn_submit" type="button" class="w-full sm:w-auto
+        bg-[#1f1c19] text-white text-[12px] font-bold uppercase
+        px-6 py-3 min-h-[44px]
+        hover:bg-[#a8501f]
+        active:scale-[0.96]
+        transition-all duration-150
+        touch-manipulation
+        focus:outline-none focus:ring-2 focus:ring-[#a8501f]/40
+        cursor-pointer
+        flex items-center justify-center gap-2">
+
+        <span id="submitText">Kirim</span>
+
+        <span id="submitLoader" class="hidden items-center gap-2">
+          <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          Mengirim...
+        </span>
+
+      </button>
+    </div>
+  </form>
+
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script>
     (function () {
@@ -102,11 +162,14 @@
         const CSRF_TOKEN = document.getElementById('csrf_token').value;
         const form = document.getElementById('frm');
         const btnSubmit = document.getElementById('btn_submit');
+        const submitText = document.getElementById('submitText');
+        const submitLoader = document.getElementById('submitLoader');
         const elNama = document.getElementById('nama_siswa');
         const elNisn = document.getElementById('nisn');
         const elKelas = document.getElementById('kelas_umum');
         const elWaliDisplay = document.getElementById('wali_kelas_display');
         const elSuggest = document.getElementById('suggest');
+        const elSearchSpinner = document.getElementById('searchSpinner');
         const elTanggalMulai = document.getElementById('tanggal_mulai');
         const elJamMulai = document.getElementById('jam_mulai');
         const elTanggalSelesai = document.getElementById('tanggal_selesai');
@@ -138,10 +201,17 @@
             elKelas.value = '';
             const q = elNama.value.trim();
             clearTimeout(timer);
+
             if (q.length < 2) {
                 elSuggest.innerHTML = '';
+                elSuggest.classList.add('hidden');
+                elSearchSpinner.classList.add('hidden');
                 return;
             }
+
+            elSearchSpinner.classList.remove('hidden');
+            elSuggest.classList.add('hidden');
+
             timer = setTimeout(() => {
                 fetch(SEARCH_URL + '?q=' + encodeURIComponent(q))
                     .then(response => {
@@ -149,15 +219,20 @@
                         return response.json();
                     })
                     .then(list => {
+                        elSearchSpinner.classList.add('hidden');
                         elSuggest.innerHTML = '';
+                        elSuggest.classList.remove('hidden');
+
                         if (!list.length) {
-                            elSuggest.innerHTML = '<div class="px-2 py-1 text-gray-400">Tidak ditemukan</div>';
+                            elSuggest.innerHTML = '<div class="px-3 py-3 text-[13px] text-[#a49b8c] text-center">Siswa tidak ditemukan</div>';
                             return;
                         }
+
                         list.forEach(s => {
                             const d = document.createElement('div');
-                            d.className = 'px-2 py-1 cursor-pointer hover:bg-gray-100';
-                            d.textContent = `${s.nama_siswa} (${s.nisn}) - Kelas ${s.kelas_umum}`;
+                            d.className = 'px-3 py-2 text-[13px] cursor-pointer hover:bg-[#f3f0ea] transition-colors border-b border-[#e6e0d6] last:border-b-0';
+                            d.innerHTML = `<span class="font-semibold text-[#1f1c19]">${s.nama_siswa}</span>
+                                <span class="text-[#a49b8c]"> · ${s.nisn} · Kelas ${s.kelas_umum}</span>`;
                             d.addEventListener('mousedown', e => {
                                 e.preventDefault();
                                 elNama.value = s.nama_siswa;
@@ -165,11 +240,13 @@
                                 setKelasValue(String(s.kelas_umum || '').trim());
                                 elWaliDisplay.value = s.wali_kelas || '';
                                 elSuggest.innerHTML = '';
+                                elSuggest.classList.add('hidden');
                             });
                             elSuggest.appendChild(d);
                         });
                     })
                     .catch(error => {
+                        elSearchSpinner.classList.add('hidden');
                         console.error(error);
                         Swal.fire({
                             icon: 'error',
@@ -183,71 +260,41 @@
         elNama.addEventListener('blur', () => {
             setTimeout(() => {
                 elSuggest.innerHTML = '';
+                elSuggest.classList.add('hidden');
             }, 150);
         });
 
         function validateForm() {
             if (!elNisn.value.trim()) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Siswa belum dipilih',
-                    text: 'Pilih siswa dari daftar pencarian.'
-                });
+                Swal.fire({ icon: 'warning', title: 'Siswa belum dipilih', text: 'Pilih siswa dari daftar pencarian.' });
                 elNama.focus();
                 return false;
             }
-
             if (!elKelas.value) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Kelas belum dipilih',
-                    text: 'Pilih kelas siswa.'
-                });
+                Swal.fire({ icon: 'warning', title: 'Kelas belum dipilih', text: 'Pilih kelas siswa.' });
                 elKelas.focus();
                 return false;
             }
-
             if (!elWaliDisplay.value.trim()) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Wali kelas belum tersedia',
-                    text: 'Wali kelas siswa belum diset.'
-                });
+                Swal.fire({ icon: 'warning', title: 'Wali kelas belum tersedia', text: 'Wali kelas siswa belum diset.' });
                 return false;
             }
-
             if (!form.checkValidity()) {
                 const invalid = form.querySelector(':invalid');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Form belum lengkap',
-                    text: 'Semua field wajib diisi.'
-                }).then(() => {
-                    if (invalid) invalid.focus();
-                });
+                Swal.fire({ icon: 'warning', title: 'Form belum lengkap', text: 'Semua field wajib diisi.' })
+                    .then(() => { if (invalid) invalid.focus(); });
                 return false;
             }
-
             if (elTanggalSelesai.value < elTanggalMulai.value) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Tanggal tidak valid',
-                    text: 'Tanggal selesai tidak boleh sebelum tanggal mulai.'
-                });
+                Swal.fire({ icon: 'warning', title: 'Tanggal tidak valid', text: 'Tanggal selesai tidak boleh sebelum tanggal mulai.' });
                 elTanggalSelesai.focus();
                 return false;
             }
-
             if (elTanggalSelesai.value === elTanggalMulai.value && elJamSelesai.value <= elJamMulai.value) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Waktu tidak valid',
-                    text: 'Jam selesai harus setelah jam mulai.'
-                });
+                Swal.fire({ icon: 'warning', title: 'Waktu tidak valid', text: 'Jam selesai harus setelah jam mulai.' });
                 elJamSelesai.focus();
                 return false;
             }
-
             return true;
         }
 
@@ -269,13 +316,12 @@
             });
 
             btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Mengirim...';
+            submitText.classList.add('hidden');
+            submitLoader.classList.remove('hidden');
+            submitLoader.classList.add('flex');
 
             try {
-                const response = await fetch(FORM_URL, {
-                    method: 'POST',
-                    body
-                });
+                const response = await fetch(FORM_URL, { method: 'POST', body });
 
                 let data;
                 try {
@@ -285,32 +331,20 @@
                 }
 
                 if (!response.ok || !data.success) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: data.message || 'Perizinan gagal diproses.'
-                    });
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Perizinan gagal diproses.' });
                     return;
                 }
 
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: data.message,
-                    confirmButtonText: 'OK'
-                });
-
+                await Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message, confirmButtonText: 'OK' });
                 window.location = data.redirect;
             } catch (error) {
                 console.error(error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Terjadi Kesalahan',
-                    text: error.message || 'Tidak dapat menghubungi server.'
-                });
+                Swal.fire({ icon: 'error', title: 'Terjadi Kesalahan', text: error.message || 'Tidak dapat menghubungi server.' });
             } finally {
                 btnSubmit.disabled = false;
-                btnSubmit.textContent = 'Kirim';
+                submitText.classList.remove('hidden');
+                submitLoader.classList.add('hidden');
+                submitLoader.classList.remove('flex');
             }
         });
     })();

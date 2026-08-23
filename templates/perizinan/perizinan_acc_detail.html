@@ -1,31 +1,107 @@
 {% extends "base.html" %}
 
-{% block title %}Detail Riwayat - {{ r.id_perizinan }}{% endblock %}
+{% block title %}Detail Riwayat {{ r.nama_siswa }}{% endblock %}
 
 {% block content %}
-<div>
-    <a href="{{ url_for('perizinan.acc_list') }}">&larr; Kembali ke List ACC</a>
+<div class="max-w-2xl mx-auto px-5 py-9 sm:py-14 text-[var(--ink)]">
 
-    <h2>Detail Riwayat ACC</h2>
+    <!-- Back Link -->
+    <a href="{{ url_for('perizinan.acc_list') }}"
+        class="back-link inline-flex items-center gap-2 text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors select-none touch-manipulation">
+        <i class="ph ph-arrow-left"></i> Kembali
+    </a>
 
-    <table>
-        <tr><th>ID Perizinan</th><td>{{ r.id_perizinan }}</td></tr>
-        <tr><th>NISN</th><td>{{ r.nisn or '-' }}</td></tr>
-        <tr><th>Nama Siswa</th><td>{{ r.nama_siswa }}</td></tr>
-        <tr><th>Tanggal Pengajuan</th><td>{{ r.tanggal }}</td></tr>
-        <tr><th>Alasan</th><td>{{ r.alasan }}</td></tr>
-        <tr><th>Durasi</th><td>{{ r.durasi }}</td></tr>
-        <tr><th>Jam Mulai</th><td>{{ r.jam_mulai or '-' }}</td></tr>
-        <tr><th>Tanggal Mulai</th><td>{{ r.tanggal_mulai or '-' }}</td></tr>
-        <tr><th>Jam Selesai</th><td>{{ r.jam_selesai or '-' }}</td></tr>
-        <tr><th>Tanggal Selesai</th><td>{{ r.tanggal_selesai or '-' }}</td></tr>
-        <tr><th>Diajukan Oleh</th><td>{{ r.diajukan_oleh or r.petugas }}</td></tr>
-        <tr><th>Wali Kelas</th><td>{{ r.wali_kelas_tujuan }}</td></tr>
-        <tr><th>Status Perizinan</th><td>{{ r.status_perizinan }}</td></tr>
-        <tr><th>Tanggal Diproses</th><td>{{ r.tanggal_acc or '-' }}</td></tr>
-        <tr><th>Catatan Wali Kelas</th><td>{{ r.catatan_wali_kelas or '-' }}</td></tr>
-        <tr><th>Dibuat Pada</th><td>{{ r.created_at or '-' }}</td></tr>
-        <tr><th>Diperbarui Pada</th><td>{{ r.updated_at or '-' }}</td></tr>
-    </table>
+    <!-- Header -->
+    <div class="flex items-center justify-between mt-8 mb-10">
+        <div>
+            <h1 class="page-title text-2xl sm:text-[26px] font-bold tracking-tight leading-snug m-0">
+                Detail Riwayat ACC
+            </h1>
+            <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">
+                Arsip riwayat perizinan dan riwayat persetujuan.
+            </p>
+        </div>
+        <span
+            class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border 
+            {{ 'bg-emerald-50 text-emerald-700 border-emerald-200' if r.status_perizinan|lower in ['disetujui', 'approved', 'aktif'] else ('bg-rose-50 text-rose-700 border-rose-200' if r.status_perizinan|lower in ['ditolak', 'rejected'] else 'bg-amber-50 text-amber-700 border-amber-200') }}">
+            {{ r.status_perizinan }}
+        </span>
+    </div>
+
+    <div class="space-y-8">
+        <!-- Metadata Grid -->
+        <div class="border-t border-[#e6e0d6] pt-6 grid grid-cols-2 gap-6">
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">ID
+                    Perizinan</span>
+                <span class="text-[14px] font-mono font-semibold bg-[#e6e0d6]/50 px-2 py-0.5">{{ r.id_perizinan
+                    }}</span>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Nama Siswa</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.nama_siswa }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">NISN</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.nisn or '-' }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Durasi</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.durasi }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Tgl / Jam
+                    Mulai</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.tanggal_mulai or '-' }} {{ r.jam_mulai or
+                    '' }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Tgl / Jam
+                    Selesai</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.tanggal_selesai or '-' }} {{ r.jam_selesai
+                    or '' }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Diajukan
+                    Oleh</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.diajukan_oleh or r.petugas }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Wali Kelas</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.wali_kelas_tujuan }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Tanggal
+                    Diproses</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.tanggal_acc or '-' }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Dibuat
+                    Pada</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.created_at or '-' }}</p>
+            </div>
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Diperbarui
+                    Pada</span>
+                <p class="text-[14px] font-semibold text-[#1f1c19] m-0">{{ r.updated_at or '-' }}</p>
+            </div>
+        </div>
+
+        <!-- Alasan & Catatan -->
+        <div class="pt-4 border-t border-[#e6e0d6] space-y-4">
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Alasan</span>
+                <p class="text-[14px] text-[#6b6459] italic m-0">"{{ r.alasan }}"</p>
+            </div>
+            {% if r.catatan_wali_kelas %}
+            <div>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Catatan Wali
+                    Kelas</span>
+                <p class="text-[14px] text-[#6b6459] m-0">{{ r.catatan_wali_kelas }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
 </div>
 {% endblock %}
