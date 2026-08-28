@@ -17,60 +17,109 @@
         <p class="page-sub text-md leading-relaxed text-[var(--ink-soft)] mt-2 max-w-[46ch]">Masukkan kode
             peminjaman/referensi pada form di bawah</p>
     </div>
-    
+
     <div class="relative w-full mb-8">
         <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wide mb-1">Kode Peminjaman</label>
-        <input id="loanCode" type="text" placeholder="Masukkan kode ref..." class="block py-2.5 w-full text-[15px] font-semibold border-b border-zinc-200 focus:outline-none focus:border-zinc-900 uppercase font-mono">
-        <div id="loanLoader" class="hidden absolute right-0 top-7"><div class="w-4 h-4 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin"></div></div>
+        <input id="loanCode" type="text" placeholder="Masukkan kode ref..."
+            class="block py-2.5 w-full text-[15px] font-semibold border-b border-zinc-200 focus:outline-none focus:border-zinc-900 uppercase font-mono">
+        <div id="loanLoader" class="hidden absolute right-0 top-7">
+            <div class="w-4 h-4 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin"></div>
+        </div>
     </div>
     <div id="loanSummary" class="hidden space-y-6 mb-8 border-t border-zinc-200 pt-6">
         <div class="grid grid-cols-2 gap-4">
-            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Kode Referensi</span><span id="sIdItem" class="text-sm font-mono font-semibold bg-zinc-100 px-2"></span></div>
-            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Status</span><span id="sStatus" class="inline-block mt-0.5 text-xs font-bold uppercase"></span></div>
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Kode Referensi</span><span
+                    id="sIdItem" class="text-sm font-mono font-semibold bg-zinc-100 px-2"></span></div>
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Status</span><span id="sStatus"
+                    class="inline-block mt-0.5 text-xs font-bold uppercase"></span></div>
         </div>
-        <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Peminjam</span><p id="sBorrower" class="text-base font-semibold"></p></div>
+        <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Peminjam</span>
+            <p id="sBorrower" class="text-base font-semibold"></p>
+        </div>
         <div class="grid grid-cols-2 gap-4">
-            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Tgl Pinjam</span><p id="sLoanDate" class="text-sm font-semibold"></p></div>
-            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Tgl Kembali</span><p id="sReturnDate" class="text-sm font-semibold"></p></div>
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Tgl Pinjam</span>
+                <p id="sLoanDate" class="text-sm font-semibold"></p>
+            </div>
+            <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Tgl Kembali</span>
+                <p id="sReturnDate" class="text-sm font-semibold"></p>
+            </div>
         </div>
-        <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Catatan</span><p id="sNote" class="text-sm text-zinc-500 font-mono"></p></div>
+        <div><span class="block text-[11px] font-bold text-zinc-400 uppercase">Catatan</span>
+            <p id="sNote" class="text-sm text-zinc-500 font-mono"></p>
+        </div>
         <div>
             <h3 class="text-[13px] font-bold uppercase tracking-widest">Daftar Barang</h3>
-            <table class="w-full text-left text-sm mt-4"><tbody id="sItems" class="divide-y divide-zinc-100"></tbody></table>
+            <table class="w-full text-left text-sm mt-4">
+                <tbody id="sItems" class="divide-y divide-zinc-100"></tbody>
+            </table>
         </div>
     </div>
     <div class="space-y-4">
         <input type="file" id="proof" accept="image/*" class="hidden">
         <div id="fileName" class="text-xs"></div>
-        <button id="btnReturn" class="w-full bg-zinc-900 text-white text-[13px] font-semibold py-4 min-h-[44px] hover:bg-[#a8501f]
+        <button id="btnReturn"
+            class="w-full bg-zinc-900 text-white text-[13px] font-semibold py-4 min-h-[44px] hover:bg-[#a8501f]
     active:scale-[0.96]
     transition-all duration-150
     touch-manipulation
     focus:outline-none focus:ring-2 focus:ring-[#a8501f]/40
-    cursor-pointer disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2">Konfirmasi Pengembalian</button>
+    cursor-pointer disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed flex items-center justify-center gap-2">Konfirmasi
+            Pengembalian</button>
+    </div>
+
+    <div id="clickBlocker" class="fixed inset-0 bg-black/10 backdrop-blur-[1px] z-50 hidden cursor-wait transition-all">
     </div>
 </div>
 
 <script>
     const Toast = Swal.mixin({ toast: true, position: "top-end", showConfirmButton: false, timer: 2000, timerProgressBar: true });
+
     document.addEventListener("DOMContentLoaded", () => {
-        const [loanCode, summary, btn, proof, loader, token] = [document.getElementById("loanCode"), document.getElementById("loanSummary"), document.getElementById("btnReturn"), document.getElementById("proof"), document.getElementById("loanLoader"), document.getElementById("csrf_token").value];
-        let currentLoan, debounce;
+        const [loanCode, summary, btn, proof, loader, token, clickBlocker] = [
+            document.getElementById("loanCode"),
+            document.getElementById("loanSummary"),
+            document.getElementById("btnReturn"),
+            document.getElementById("proof"),
+            document.getElementById("loanLoader"),
+            document.getElementById("csrf_token").value,
+            document.getElementById("clickBlocker")
+        ];
+
+        let currentLoan, debounce, isSubmitting = false;
+
+        const setUIState = (loading) => {
+            isSubmitting = loading;
+            if (btn) {
+                btn.disabled = loading;
+                btn.classList.toggle('opacity-75', loading);
+            }
+            if (clickBlocker) {
+                clickBlocker.classList.toggle('hidden', !loading);
+            }
+            if (loading) {
+                btn.innerHTML = `<svg class="animate-spin h-4 w-4 inline mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Memproses...`;
+            } else {
+                btn.innerText = "Konfirmasi Pengembalian";
+            }
+        };
+
         loanCode.addEventListener("input", (e) => {
             e.target.value = e.target.value.toUpperCase();
             clearTimeout(debounce);
-            if(e.target.value.trim()) loader.classList.remove("hidden");
+            if (e.target.value.trim()) loader.classList.remove("hidden");
             debounce = setTimeout(fetchLoan, 500);
         });
+
         proof.addEventListener("change", (e) => {
-            if(e.target.files.length) document.getElementById("fileName").innerText = "📸 " + e.target.files[0].name;
+            if (e.target.files.length) document.getElementById("fileName").innerText = "📸 " + e.target.files[0].name;
         });
+
         function fetchLoan() {
             const code = loanCode.value.trim();
-            if(!code) { summary.classList.add("hidden"); loader.classList.add("hidden"); return; }
+            if (!code) { summary.classList.add("hidden"); loader.classList.add("hidden"); return; }
             fetch(`/peminjaman/api/loan/${code}`).then(res => res.json()).then(res => {
                 loader.classList.add("hidden");
-                if(!res.ok) { summary.classList.add("hidden"); return; }
+                if (!res.ok) { summary.classList.add("hidden"); return; }
                 currentLoan = res.loan;
                 document.getElementById("sIdItem").innerText = currentLoan.code;
                 document.getElementById("sBorrower").innerText = currentLoan.borrower_name;
@@ -78,36 +127,58 @@
                 document.getElementById("sReturnDate").innerText = currentLoan.return_date;
                 document.getElementById("sNote").innerText = currentLoan.note || "-";
                 document.getElementById("sStatus").innerText = currentLoan.status;
+
                 const items = document.getElementById("sItems");
                 items.innerHTML = "";
                 currentLoan.items.forEach(i => items.innerHTML += `<tr class="border-b"><td class="py-0.5">${i.item_name}</td><td class="text-right">${i.qty} unit</td></tr>`);
-                if(currentLoan.status.toLowerCase() === 'dikembalikan') { btn.disabled = true; btn.innerText = "Dikembalikan"; }
-                else { btn.disabled = false; btn.innerText = "Konfirmasi Pengembalian"; }
+
+                if (currentLoan.status.toLowerCase() === 'dikembalikan') {
+                    btn.disabled = true;
+                    btn.innerText = "Dikembalikan";
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = "Konfirmasi Pengembalian";
+                }
                 summary.classList.remove("hidden");
             });
         }
+
         btn.addEventListener("click", () => {
-            if(!currentLoan) return;
-            Swal.fire({ title: "Proses Pengembalian?", text: "Pastikan fisik sesuai.", icon: "warning", showCancelButton: true, confirmButtonText: "Ya, Selesaikan" }).then(r => {
-                if(!r.isConfirmed) return;
+            if (!currentLoan || isSubmitting) return;
+
+            Swal.fire({
+                title: "Proses Pengembalian?",
+                text: "Pastikan fisik sesuai.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Selesaikan"
+            }).then(r => {
+                if (!r.isConfirmed) return;
+
                 const fd = new FormData();
                 fd.append("code", currentLoan.code);
-                if(proof.files.length) fd.append("proof", proof.files[0]);
-                btn.disabled = true;
-                btn.innerHTML = `<svg class="animate-spin h-4 w-4 inline mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Memproses...`;
-                fetch('{{url_for("peminjaman_invlabkomp.return_submit")}}', { method: "POST", headers: { 'X-CSRFToken': token }, body: fd }).then(res => res.json()).then(res => {
-                    if(res.ok) {
-                        Toast.fire({ icon: "success", title: "Berhasil dikembalikan" }).then(() => location.reload());
-                    } else { 
-                        Toast.fire({ icon: "error", title: res.error || "Gagal" }); 
-                        btn.disabled = false; 
-                        btn.innerText = "Konfirmasi Pengembalian";
-                    }
-                }).catch(() => {
-                    Toast.fire({ icon: "error", title: "Server Error" });
-                    btn.disabled = false;
-                    btn.innerText = "Konfirmasi Pengembalian";
-                });
+                if (proof.files.length) fd.append("proof", proof.files[0]);
+
+                setUIState(true);
+
+                fetch('{{url_for("peminjaman_invlabkomp.return_submit")}}', {
+                    method: "POST",
+                    headers: { 'X-CSRFToken': token },
+                    body: fd
+                })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.ok) {
+                            Toast.fire({ icon: "success", title: "Berhasil dikembalikan" }).then(() => location.reload());
+                        } else {
+                            Toast.fire({ icon: "error", title: res.error || "Gagal" });
+                            setUIState(false);
+                        }
+                    })
+                    .catch(() => {
+                        Toast.fire({ icon: "error", title: "Server Error" });
+                        setUIState(false);
+                    });
             });
         });
     });

@@ -14,14 +14,16 @@
     <!-- Header Section -->
     <div class="mb-10 mt-8">
         <h1 class="text-2xl sm:text-[26px] font-bold tracking-tight mb-2">Ringkasan Peminjaman</h1>
-        <p class="text-sm text-[#6b6459]">No. Surat: <span class="font-mono font-bold bg-[#e6e0d6]/50 px-1.5 py-0.5">{{ data.nomor_surat }}</span></p>
+        <p class="text-sm text-[#6b6459]">No. Surat: <span class="font-mono font-bold bg-[#e6e0d6]/50 px-1.5 py-0.5">{{
+                data.nomor_surat }}</span></p>
     </div>
 
     <!-- Data Grid -->
     <div class="space-y-8">
         <div class="grid grid-cols-2 gap-x-6 gap-y-6">
             <div>
-                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Nama Peminjam</span>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Nama
+                    Peminjam</span>
                 <p class="text-[14px] font-semibold">{{ data.nama }}</p>
             </div>
             <div>
@@ -29,11 +31,13 @@
                 <p class="text-[14px] text-[#1f1c19]">{{ data.pekerjaan }}</p>
             </div>
             <div>
-                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">No. Telepon</span>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">No.
+                    Telepon</span>
                 <p class="text-[14px] font-mono">{{ data.telepon }}</p>
             </div>
             <div>
-                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">No. Identitas</span>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">No.
+                    Identitas</span>
                 <p class="text-[14px] font-mono">{{ data.no_identitas }}</p>
             </div>
             <div>
@@ -48,11 +52,13 @@
 
         <div class="border-t border-[#e6e0d6] pt-6 grid grid-cols-1 gap-6">
             <div>
-                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Lokasi Penggunaan</span>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Lokasi
+                    Penggunaan</span>
                 <p class="text-[14px]">{{ data.lokasi_penggunaan }}</p>
             </div>
             <div>
-                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Alamat Lengkap</span>
+                <span class="block text-[11px] font-bold text-[#a49b8c] uppercase tracking-wider mb-1">Alamat
+                    Lengkap</span>
                 <p class="text-[14px] leading-relaxed">{{ data.alamat }}</p>
             </div>
             <div>
@@ -78,7 +84,7 @@
         <div class="bg-[#f3f0ea] p-5 border border-[#e6e0d6]">
             <p class="text-sm font-medium text-[#1f1c19] mb-4">Dokumen berita acara sudah tersedia.</p>
             <a href="{{ url_for('inventaris.preview_pdf_peminjaman_aset', record_id=record_id) }}" target="_blank"
-               class="block w-full text-center bg-[#1f1c19] text-white text-[13px] font-semibold py-3.5 hover:bg-[#333] transition-all">
+                class="block w-full text-center bg-[#1f1c19] text-white text-[13px] font-semibold py-3.5 hover:bg-[#333] transition-all">
                 Lihat PDF
             </a>
         </div>
@@ -89,12 +95,18 @@
                 <span class="text-sm text-[#6b6459]">Saya memastikan seluruh data di atas valid dan benar.</span>
             </label>
             <button type="submit" id="btn-generate" disabled
-                class="w-full px-5 py-3.5 bg-[#e6e0d6] text-[#a49b8c] text-[13px] font-semibold transition-all cursor-not-allowed">
-                Generate Dokumen PDF
+                class="w-full px-5 py-3.5 bg-[#e6e0d6] text-[#a49b8c] text-[13px] font-semibold transition-all cursor-not-allowed flex items-center justify-center gap-2">
+                <span id="btnText">Generate Dokumen PDF</span>
+                <div id="btnLoader"
+                    class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
             </button>
         </form>
-        <p id="generate-status" class="text-sm mt-3"></p>
+        <div id="generate-status"
+            class="hidden text-xs font-medium p-3 rounded-md transition-all duration-200 flex items-center gap-2"></div>
         {% endif %}
+    </div>
+
+    <div id="clickBlocker" class="fixed inset-0 bg-black/10 backdrop-blur-[1px] z-50 hidden cursor-wait transition-all">
     </div>
 </div>
 
@@ -105,6 +117,12 @@
     const barangData = document.getElementById("barang-data");
     const barang = barangData ? JSON.parse(barangData.textContent || "[]") : [];
     const tbody = document.getElementById("barang-tbody");
+    const checkbox = document.getElementById("setuju");
+    const btn = document.getElementById("btn-generate");
+    const form = document.getElementById("generate-form");
+    const statusEl = document.getElementById("generate-status");
+    let isSubmitting = false;
+
     if (tbody) {
         barang.forEach(b => {
             const tr = document.createElement("tr");
@@ -122,9 +140,6 @@
         });
     }
 
-    // Interaktivitas persetujuan & form submission
-    const checkbox = document.getElementById("setuju");
-    const btn = document.getElementById("btn-generate");
     if (checkbox && btn) {
         checkbox.addEventListener("change", () => {
             btn.disabled = !checkbox.checked;
@@ -140,14 +155,40 @@
         });
     }
 
-    const form = document.getElementById("generate-form");
+    const showStatus = (msg, isSuccess = false) => {
+        if (!statusEl) return;
+        statusEl.textContent = msg;
+        statusEl.className = `text-xs font-medium p-3 rounded-md transition-all duration-200 flex items-center gap-2 mt-3 ${isSuccess
+            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+            : 'bg-rose-50 text-rose-800 border border-rose-200'
+            }`;
+    };
+
+    const hideStatus = () => {
+        if (!statusEl) return;
+        statusEl.textContent = "";
+        statusEl.className = "hidden text-xs font-medium p-3 rounded-md transition-all duration-200 flex items-center gap-2 mt-3";
+    };
+
+    const setUIState = (loading) => {
+        isSubmitting = loading;
+
+        if (btn) {
+            btn.disabled = loading || !checkbox.checked;
+            btn.classList.toggle("opacity-75", loading);
+            btn.classList.toggle("cursor-not-allowed", loading);
+        }
+
+        if (btnText) btnText.textContent = loading ? "Memproses Berkas PDF..." : "Generate Dokumen PDF";
+        if (btnLoader) btnLoader.classList.toggle("hidden", !loading);
+        if (clickBlocker) clickBlocker.classList.toggle("hidden", !loading);
+    };
+
     if (form) {
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const statusEl = document.getElementById("generate-status");
+            if (isSubmitting || !checkbox.checked) return;
 
-            btn.disabled = true;
-            btn.textContent = "Memproses Berkas PDF...";
             statusEl.textContent = "";
             statusEl.className = "text-sm font-medium mt-3 px-2";
 
@@ -155,21 +196,25 @@
             if (!csrfMeta) {
                 statusEl.textContent = "Akses ditolak: CSRF token tidak ditemukan di dokumen.";
                 statusEl.classList.add("text-red-600");
-                btn.disabled = false;
-                btn.textContent = "Generate Dokumen PDF";
                 return;
             }
-            const csrfToken = csrfMeta.content;
+
+            setUIState(true);
 
             try {
+                const formData = new FormData();
+                if (checkbox.checked) {
+                    formData.append("setuju", "on");
+                }
+
                 const res = await fetch(window.location.pathname + "/generate", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken
+                        "X-CSRFToken": csrfMeta.content
                     },
-                    body: JSON.stringify({ setuju: checkbox.checked }),
+                    body: formData
                 });
+
                 const json = await res.json();
                 if (json.success) {
                     statusEl.textContent = json.message || "Berhasil! Memuat ulang sistem...";
@@ -178,14 +223,13 @@
                 } else {
                     statusEl.textContent = json.message || "Gagal memproses pembuatan berkas.";
                     statusEl.classList.add("text-red-600");
-                    btn.disabled = false;
-                    btn.textContent = "Generate Dokumen PDF";
+                    setUIState(false);
                 }
             } catch (err) {
+                console.error(err);
                 statusEl.textContent = "Terjadi gangguan koneksi jaringan sistem, coba lagi.";
                 statusEl.classList.add("text-red-600");
-                btn.disabled = false;
-                btn.textContent = "Generate Dokumen PDF";
+                setUIState(false);
             }
         });
     }

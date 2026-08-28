@@ -231,7 +231,7 @@ def search_barang_inventaris():
     return jsonify({"items": items})
 
 
-# ==== Submit peminjaman aset (revisi) ====
+# ==== Submit peminjaman aset ====
 @inventaris_bp.route("/submit", methods=["POST"])
 def submit_peminjaman_aset():
     form = request.form
@@ -317,7 +317,7 @@ def submit_peminjaman_aset():
         )
         return jsonify({
             "success": True,
-            "message": "Peminjaman berhasil diajukan. Silakan buka link ringkasan untuk konfirmasi.",
+            "message": "Peminjaman berhasil diajukan dan akan diarahkan ke halaman ringkasan peminjaman",
             "record_id": record_id,
             "ringkasan_url": ringkasan_url,
         })
@@ -368,7 +368,8 @@ def ringkasan_peminjaman_aset(record_id):
 @inventaris_bp.route("/ringkasan/<record_id>/generate", methods=["GET", "POST"])
 def generate_pdf_peminjaman_aset(record_id):
     # Validasi persetujuan WAJIB dicek di server, jangan percaya JS saja
-    setuju = request.form.get("setuju") == "on" or request.json and request.json.get("setuju")
+    payload = request.get_json(silent=True) or {}
+    setuju = request.form.get("setuju") == "on" or payload.get("setuju") is True
     if not setuju:
         return jsonify({"success": False, "message": "Anda harus menyetujui ringkasan terlebih dahulu"}), 400
  

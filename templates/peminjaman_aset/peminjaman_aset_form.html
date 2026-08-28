@@ -301,8 +301,10 @@
                 Edit
               </button>
               <button type="button" id="btnConfirmSubmit"
-                class="flex-1 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] text-xs font-bold uppercase tracking-widest hover:bg-[var(--color-accent)] transition-all cursor-pointer">
-                Kirim
+                class="flex-1 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] text-xs font-bold uppercase tracking-widest hover:bg-[var(--color-accent)] transition-all cursor-pointer flex items-center justify-center gap-2">
+                <span id="submitText">Kirim</span>
+                <div id="submitLoader"
+                  class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               </button>
             </div>
           </div>
@@ -310,6 +312,9 @@
       </div>
     </div>
   </form>
+
+  <div id="clickBlocker" class="fixed inset-0 bg-black/10 backdrop-blur-[1px] z-50 hidden cursor-wait transition-all">
+  </div>
 </div>
 
 <script>
@@ -570,14 +575,26 @@
     // ==== Submit System ====
     document.getElementById("btnConfirmSubmit").addEventListener("click", async function () {
       const form = document.getElementById("borrowForm");
-      buildHiddenBarangInputs();
-      const formData = new FormData(form);
+      const submitBtn = this;
+      const submitText = document.getElementById("submitText");
+      const submitLoader = document.getElementById("submitLoader");
+      const clickBlocker = document.getElementById("clickBlocker");
       const csrfToken = document.getElementById("csrf_token").value;
 
-      const submitBtn = this;
-      const originalButton = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = "Memproses...";
+      const setUIState = (loading) => {
+        submitBtn.disabled = loading;
+        submitBtn.classList.toggle('opacity-75', loading);
+        submitBtn.classList.toggle('cursor-not-allowed', loading);
+
+        if (submitText) submitText.innerText = loading ? "Memproses..." : "Kirim";
+        if (submitLoader) submitLoader.classList.toggle('hidden', !loading);
+        if (clickBlocker) clickBlocker.classList.toggle('hidden', !loading);
+      };
+
+      buildHiddenBarangInputs();
+      const formData = new FormData(form);
+
+      setUIState(true);
 
       Swal.fire({
         title: "Sedang Memproses",
@@ -617,14 +634,13 @@
           window.location.href = result.ringkasan_url;
         } else {
           Toast.fire({ icon: "error", title: result.message || "Gagal memproses data." });
+          setUIState(false);
         }
       } catch (error) {
         Swal.close();
         console.error(error);
-        Toast.fire({ icon: "error", title: "Gagal terhubung dengan komputasi awan server." });
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalButton;
+        Toast.fire({ icon: "error", title: "Gagal terhubung dengan server." });
+        setUIState(false);
       }
     });
 

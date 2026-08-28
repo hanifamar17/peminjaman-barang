@@ -3,13 +3,16 @@ import json
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from dotenv import load_dotenv
+from google.oauth2 import service_account
+from flask import current_app
 
 load_dotenv()
 
 # Upload dokumen aset peminjaman ke Google Drive
-DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive"]
+DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
 DRIVE_FOLDER_ID = os.getenv("PEMINJAMAN_ASET_DRIVE_FOLDER_ID")  # folder tujuan di Drive
 TOKEN_FILE = os.getenv("TOKEN_FILE")
 
@@ -37,19 +40,24 @@ def _get_drive_service():
 
 
 def upload_file(local_path: str, mime_type: str, drive_filename: str = None) -> dict:
-    """Upload satu file ke folder Drive yang ditentukan. Return dict {id, webViewLink}."""
     service = _get_drive_service()
     filename = drive_filename or os.path.basename(local_path)
 
+    folder_id = DRIVE_FOLDER_ID.strip() if DRIVE_FOLDER_ID else None
     file_metadata = {"name": filename}
-    if DRIVE_FOLDER_ID:
-        file_metadata["parents"] = [DRIVE_FOLDER_ID]
+    if folder_id:
+        file_metadata["parents"] = [folder_id]
 
     media = MediaFileUpload(local_path, mimetype=mime_type, resumable=False)
-    
     uploaded = (
         service.files()
-        .create(body=file_metadata, media_body=media, fields="id, webViewLink")
+        .create(
+            body=file_metadata,
+            media_body=media,
+            fields="id, webViewLink",
+            supportsAllDrives=True,
+            supportsTeamDrives=True
+        )
         .execute()
     )
     return uploaded

@@ -1,3 +1,5 @@
+import re
+
 from flask import Blueprint, session, request, redirect, url_for, abort, jsonify, render_template
 from routes.decorators import login_required, role_required
 from sheets.sheets_perizinan import (
@@ -81,14 +83,26 @@ def siswa_search():
     q = request.args.get("q", "").strip().lower()
     if len(q) < 2:
         return jsonify([])
-    hasil = [
-        {
-            "nisn": s["nisn"], "nama_siswa": s["nama_siswa"], "kelas_umum": s["kelas_umum"],
-            "wali_kelas": get_wali_kelas_untuk_siswa(s),
-        }
-        for s in get_data_siswa()
-        if q in str(s.get("nama_siswa", "")).lower()
-    ][:10]
+    
+    hasil = []
+    for s in get_data_siswa():
+        if q in str(s.get("nama_siswa", "")).lower():
+            wali_info = get_wali_kelas_untuk_siswa(s)
+            
+            if isinstance(wali_info, dict):
+                nama_wali = wali_info.get("nama", "")
+            else:
+                nama_wali = str(wali_info or "")
+
+            hasil.append({
+                "nisn": s["nisn"],
+                "nama_siswa": s["nama_siswa"],
+                "kelas_umum": s["kelas_umum"],
+                "wali_kelas": nama_wali, 
+            })
+            if len(hasil) >= 10:
+                break
+
     return jsonify(hasil)
     
 # FORM PERIZINAN
@@ -148,8 +162,15 @@ def form_perizinan():
             need_acc = data.get("need_acc") == "1"
  
             # wali kelas tujuan otomatis dari kelas siswa, bukan input manual
-            wali_kelas_tujuan = get_wali_kelas_untuk_siswa(siswa)
- 
+            wali_info = get_wali_kelas_untuk_siswa(siswa)
+            wali_kelas_tujuan = wali_info.get("nama", "") if isinstance(wali_info, dict) else str(wali_info)
+            no_hp_raw = wali_info.get("no_hp", "")
+
+            # Clean & format HP ke 628xxx
+            no_hp_wa = re.sub(r'\D', '', no_hp_raw)
+            if no_hp_wa.startswith('0'):
+                no_hp_wa = '62' + no_hp_wa[1:]
+
             if check_duplikat_aktif(nisn, tanggal_mulai, jumlah_jpl):
                 return jsonify({"success": False, "message": "Siswa sudah punya izin aktif di tanggal & durasi yang sama"}), 400
  
@@ -178,10 +199,29 @@ def form_perizinan():
                     "diajukan_oleh": petugas, "wali_kelas_tujuan": wali_kelas_tujuan,
                     "tanggal_acc": "", "catatan_wali_kelas": "",
                 })
+
+                url_acc = url_for("perizinan.acc_detail_pending", id_perizinan=id_perizinan, _external=True)
+
+                pesan_wa = (
+                    f"*PENGAJUAN ACC PERIZINAN SISWA*\n\n"
+                    f"Yth. Bapak/Ibu Wali Kelas ({wali_kelas_tujuan}),\n"
+                    f"Mohon periksa pengajuan izin siswa berikut:\n\n"
+                    f"• *Nama:* {siswa['nama_siswa']}\n"
+                    f"• *Kelas:* {kelas_umum}\n"
+                    f"• *Waktu mulai:* {tanggal_mulai} ({jam_mulai})\n"
+                    f"• *Waktu selesai:* {tanggal_selesai} ({jam_selesai})\n"
+                    f"• *Alasan:* {alasan}\n"
+                    f"• *Petugas Input:* {petugas}\n\n"
+                    f"Silakan klik link berikut untuk memproses (setujui/tolak):\n"
+                    f"{url_acc}"
+                )
+
                 return jsonify({
                     "success": True,
                     "message": f"Pengajuan {id_perizinan} terkirim ke {wali_kelas_tujuan or '(wali kelas belum diset)'}.",
                     "redirect": url_for("perizinan.form_perizinan"),
+                    "wa_target": no_hp_wa,
+                    "wa_text": pesan_wa
                 }), 200
  
         except ValueError as e:

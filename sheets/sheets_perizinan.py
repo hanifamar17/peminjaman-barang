@@ -257,20 +257,23 @@ def get_wali_kelas_map(force=False):
         kelas_raw = str(r.get("kelas", "")).strip()
         if not kelas_raw:
             continue
-        nama = r.get("nama_wali_kelas", "")
+        nama = str(r.get("nama_wali_kelas", "")).strip()
+        no_hp = str(r.get("no_hp", "")).strip()  # Ambil kolom no_hp
+        
+        info = {"nama": nama, "no_hp": no_hp}
         for varian in _varian_kelas(kelas_raw):
-            data[varian] = nama
+            data[varian] = info
     _wali_kelas_cache["data"] = data
     _wali_kelas_cache["fetched_at"] = time.time()
     return data
- 
+
 def get_wali_kelas_untuk_siswa(siswa: dict):
     kelas = str(siswa.get("kelas_umum", "")).strip()
     wali_map = get_wali_kelas_map()
     for varian in _varian_kelas(kelas):
         if varian in wali_map:
-            return wali_map[varian]
-    return ""
+            return wali_map[varian]  # Return dict {"nama": ..., "no_hp": ...}
+    return {"nama": "", "no_hp": ""}
  
  
 # VALIDASI JAM/TANGGAL MULAI-SELESAI

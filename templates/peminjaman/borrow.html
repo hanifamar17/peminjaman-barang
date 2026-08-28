@@ -96,6 +96,9 @@
                 class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
         </button>
     </form>
+
+    <div id="clickBlocker" class="fixed inset-0 bg-black/10 backdrop-blur-[1px] z-50 hidden cursor-wait transition-all">
+    </div>
 </div>
 
 <script>
@@ -109,6 +112,10 @@
         const searchResult = document.getElementById('searchResult');
         const loader = document.getElementById('loader');
         const previewText = document.getElementById('previewText');
+        const clickBlocker = document.getElementById('clickBlocker');
+        const originalTextHTML = submitText.innerHTML;
+
+        let isSubmitting = false;
 
         const debounce = (fn, delay = 500) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; };
 
@@ -172,25 +179,50 @@
         window.updateQty = (idx, val) => { selectedItems[idx].qty = parseInt(val); updatePreview(); };
         borrowForm.addEventListener('input', updatePreview);
 
+        const setUIState = (loading) => {
+            isSubmitting = loading;
+
+            if (submitBtn) {
+                submitBtn.disabled = loading;
+                submitBtn.classList.toggle('opacity-75', loading);
+                submitBtn.classList.toggle('cursor-not-allowed', loading);
+            }
+
+            if (submitLoader) submitLoader.classList.toggle('hidden', !loading);
+
+            if (submitText) {
+                submitText.innerHTML = loading ? 'Memproses...' : originalTextHTML;
+            }
+
+            if (clickBlocker) {
+                clickBlocker.classList.toggle('hidden', !loading);
+            }
+        };
+
         borrowForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (isSubmitting) return;
             if (!selectedItems.length) return Toast.fire({ icon: 'warning', title: 'Pilih barang' });
-            
-            const confirm = await Swal.fire({ title: 'Lanjutkan Peminjaman?', icon: 'question', showCancelButton: true, confirmButtonText: 'Ya, Lanjutkan' });
+
+            const confirm = await Swal.fire({
+                title: 'Lanjutkan Peminjaman?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Lanjutkan'
+            });
+
             if (!confirm.isConfirmed) return;
 
-            const btn = document.getElementById('submitBtn');
-            const loader = document.getElementById('submitLoader');
-            const text = document.getElementById('submitText');
-            
-            btn.disabled = true;
-            loader.classList.remove('hidden');
-            text.innerText = 'Memproses...';
+            setUIState(true);
 
             try {
                 const res = await fetch('{{ url_for("peminjaman_invlabkomp.borrow_submit") }}', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
                     body: JSON.stringify({
                         borrower_name: borrowForm.borrower_name.value,
                         borrower_email: borrowForm.borrower_email.value,
@@ -200,18 +232,21 @@
                         items: selectedItems
                     })
                 });
+
                 const json = await res.json();
+
                 if (json.ok) {
                     await Toast.fire({ icon: 'success', title: 'Berhasil dipinjam' });
                     location.href = '{{ url_for("peminjaman_invlabkomp.history") }}';
+                    // Biarkan setUIState(true) tetap aktif saat redirect
                 } else {
                     Toast.fire({ icon: 'error', title: json.error || 'Gagal' });
+                    setUIState(false);
                 }
-            } catch (e) { Toast.fire({ icon: 'error', title: 'Sistem Error' }); }
-            finally { 
-                btn.disabled = false; 
-                loader.classList.add('hidden');
-                text.innerText = 'Konfirmasi Peminjaman →';
+            } catch (e) {
+                console.error('Error:', e);
+                Toast.fire({ icon: 'error', title: 'Sistem Error' });
+                setUIState(false);
             }
         });
     });

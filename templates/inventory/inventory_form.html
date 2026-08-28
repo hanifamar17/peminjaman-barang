@@ -74,21 +74,20 @@
                 class="block py-2 px-0 w-full text-[14px] text-zinc-900 bg-transparent border-0 border-b border-zinc-200 focus:outline-none focus:border-zinc-900 resize-none">{{ item.note if item else '' }}</textarea>
         </div>
 
-
-
         <div class="flex items-center justify-end gap-6 pt-4">
             <a href="{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}"
                 class="text-[12px] font-bold text-[#a49b8c] uppercase hover:text-[#1f1c19]">Batal</a>
+
             <button id="submitBtn" type="submit" class="w-full sm:w-auto
-    bg-[#1f1c19] text-white text-[12px] font-bold uppercase
-    px-6 py-3 min-h-[44px]
-    hover:bg-[#a8501f]
-    active:scale-[0.96]
-    transition-all duration-150
-    touch-manipulation
-    focus:outline-none focus:ring-2 focus:ring-[#a8501f]/40
-    cursor-pointer
-    flex items-center justify-center gap-2">
+        bg-[#1f1c19] text-white text-[12px] font-bold uppercase
+        px-6 py-3 min-h-[44px]
+        hover:bg-[#a8501f]
+        active:scale-[0.96]
+        transition-all duration-150
+        touch-manipulation
+        focus:outline-none focus:ring-2 focus:ring-[#a8501f]/40
+        cursor-pointer
+        flex items-center justify-center gap-2">
 
                 <span id="submitText">
                     {{ 'Perbarui Data' if item else 'Simpan Data' }}
@@ -102,9 +101,11 @@
                     </svg>
                     Menyimpan...
                 </span>
-
+            </button>
         </div>
     </form>
+    <div id="clickBlocker" class="fixed inset-0 bg-black/10 backdrop-blur-[1px] z-50 hidden cursor-wait transition-all">
+    </div>
 </div>
 
 
@@ -126,54 +127,48 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Seleksi Elemen
         const inventoryForm = document.querySelector('form');
         const submitBtn = document.getElementById('submitBtn');
         const submitText = document.getElementById('submitText');
         const submitLoader = document.getElementById('submitLoader');
-        const form = document.querySelector('form');
-        const csrfInput = inventoryForm.querySelector('input[name="csrf_token"]');
+        const clickBlocker = document.getElementById('clickBlocker');
+        const csrfInput = inventoryForm ? inventoryForm.querySelector('input[name="csrf_token"]') : null;
 
-        form.addEventListener('submit', () => {
-            submitBtn.disabled = true;
-            submitBtn.classList.add(
-                'opacity-80',
-                'cursor-not-allowed',
-                'active:scale-100'
-            );
+        // URL Redirect persis mengikuti tombol Batal dari Jinja2
+        const REDIRECT_URL = "{{ url_for('inventory_labkomp.inventory_list') if item else url_for('inventory_labkomp.inventory_landing') }}";
 
-            submitText.classList.add('hidden');
-            submitLoader.classList.remove('hidden');
-        });
+        let isSubmitting = false;
 
-        // Fungsi Reset Tombol
-        const resetButton = () => {
+        const setUIState = (loading) => {
+            isSubmitting = loading;
+
             if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                submitBtn.disabled = loading;
+                submitBtn.classList.toggle('opacity-75', loading);
+                submitBtn.classList.toggle('cursor-not-allowed', loading);
             }
-            if (submitText) submitText.classList.remove('hidden');
-            if (submitLoader) submitLoader.classList.add('hidden');
+            if (submitText) submitText.classList.toggle('hidden', loading);
+            if (submitLoader) submitLoader.classList.toggle('hidden', !loading);
+
+            // Kunci layar tanpa ubah CSS form/body (mencegah layout geser/rusak)
+            if (clickBlocker) {
+                clickBlocker.classList.toggle('hidden', !loading);
+            }
         };
 
-        // 3. Event Listener Submit
         if (inventoryForm) {
             inventoryForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // Validasi CSRF Element
+                if (isSubmitting) return;
+
                 if (!csrfInput) {
                     console.error("Elemen csrf_token tidak ditemukan!");
+                    Toast.fire({ icon: 'error', title: 'CSRF Token hilang' });
                     return;
                 }
 
-                // Animasi Loading: ON
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
-                }
-                if (submitText) submitText.classList.add('hidden');
-                if (submitLoader) submitLoader.classList.remove('hidden');
+                setUIState(true);
 
                 const formData = new FormData(inventoryForm);
 
@@ -187,9 +182,8 @@
                         }
                     });
 
-                    // Pastikan response oke
                     if (!response.ok) {
-                        const errorData = await response.json();
+                        const errorData = await response.json().catch(() => ({}));
                         throw new Error(errorData.error || 'Gagal menyimpan data');
                     }
 
@@ -202,7 +196,7 @@
                         });
 
                         setTimeout(() => {
-                            window.location.href = "{{ url_for('inventory_labkomp.inventory_list') }}";
+                            window.location.href = REDIRECT_URL;
                         }, 1500);
 
                     } else {
@@ -215,7 +209,7 @@
                         icon: 'error',
                         title: error.message || 'Terjadi kesalahan sistem'
                     });
-                    resetButton();
+                    setUIState(false);
                 }
             });
         }
