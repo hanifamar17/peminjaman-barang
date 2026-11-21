@@ -52,7 +52,7 @@
                 </div>
                 <div class="mt-3 pt-2.5 border-t border-[#e6e0d6] flex justify-between items-center text-[11px]">
                     <span class="text-[#a49b8c] uppercase tracking-wide font-semibold">{{ r.durasi }}</span>
-                    <span class="font-bold text-[#a8501f] uppercase tracking-wide">Aktif</span>
+                    <span class="text-[#a49b8c] tracking-wide font-semibold">{{ r.petugas }}</span>
                 </div>
             </div>
             {% else %}
@@ -60,66 +60,6 @@
                 Tidak ada siswa izin hari ini.
             </div>
             {% endfor %}
-        </div>
-    </div>
-
-    <!-- Detail Data Table Section -->
-    <div>
-        <h3 class="text-[11px] font-bold uppercase tracking-widest text-[#a49b8c] mb-3">Detail Perizinan</h3>
-        <div class="overflow-x-auto border-t border-[#e6e0d6]">
-            <table class="w-full text-left text-sm whitespace-nowrap">
-                <thead>
-                    <tr
-                        class="border-b border-[#e6e0d6] text-[11px] font-semibold text-[#a49b8c] uppercase tracking-wider">
-                        <th class="py-2 pr-4 w-12">No</th>
-                        <th class="py-2 pr-6">Nama</th>
-                        <th class="py-2 pr-6">Tanggal Mulai</th>
-                        <th class="py-2 pr-6">Tanggal Selesai</th>
-                        <th class="py-2 pr-6">Durasi</th>
-                        <th class="py-2 pr-6 max-w-xs whitespace-normal">Alasan</th>
-                        <th class="py-2 text-right">Petugas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for r in items %}
-                    <tr class="border-b border-[#e6e0d6] hover:bg-[#f3f0ea] transition-colors">
-                        <td class="py-2 pr-4 text-[13px] font-medium text-[#a49b8c]">
-                            {{ "%02d" | format(loop.index) }}
-                        </td>
-                        <td class="py-2 pr-6">
-                            <div class="font-semibold text-[#1f1c19]">
-                                {{ r.nama_siswa }}
-                            </div>
-                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.kelas_umum }}</div>
-                        </td>
-                        <td class="py-2 pr-6">
-                            <div class="text-[13px] text-[#6b6459]">{{ r.tanggal_mulai }}</div>
-                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.jam_mulai }} WIB</div>
-                        </td>
-                        <td class="py-2 pr-6">
-                            <div class="text-[13px] text-[#6b6459]">{{ r.tanggal_selesai }}</div>
-                            <div class="text-[12px] text-[#a49b8c] mt-0.5">{{ r.jam_selesai }} WIB</div>
-                        </td>
-                        <td class="py-2 pr-6 text-[13px] text-[#6b6459]">
-                            {{ r.durasi }}
-                        </td>
-                        <td
-                            class="py-2 pr-6 text-[13px] text-[#6b6459] max-w-xs whitespace-normal break-words leading-snug">
-                            {{ r.alasan }}
-                        </td>
-                        <td class="py-2 text-right text-[13px] text-[#6b6459]">
-                            {{ r.petugas }}
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-[13px] font-semibold text-[#a49b8c]">
-                            Tidak ada data detail perizinan.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
     </div>
 

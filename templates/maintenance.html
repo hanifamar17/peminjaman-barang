@@ -1,45 +1,81 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Pemberitahuan · e-Manu Digital Repository</title>
 
-{% block title %}Maintenance{% endblock %}
+  <script src="https://cdn.tailwindcss.com"></script>
 
-{% block content %}
-<!-- Hallmark · macrostructure: System Log Panel (not centered-card) · theme: existing tokens (--ink/--paper/--line/--accent/--accent-soft) · fonts: Manrope + JetBrains Mono · pre-emit critique: P5 H4 E5 S5 R5 V5 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
 
-<div class="min-h-[70vh] px-6 py-16 sm:py-24">
-  <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-x-10 gap-y-8">
+  <style>
+    :root {
+      --paper: #faf8f5;
+      --ink: #1f1c19;
+      --ink-soft: #6b6459;
+      --ink-faint: #a49b8c;
+      --line: #e6e0d6;
+      --accent: #a8501f;
+    }
 
-    <div class="sm:pt-1">
-      <div class="text-[11px] tracking-widest uppercase" style="font-family:'JetBrains Mono',monospace; color:var(--accent);">
-        503
-      </div>
-      <div class="mt-1 flex items-center gap-2">
-        <span class="inline-block w-1.5 h-1.5" style="background:var(--accent);"></span>
-        <span class="text-[11px] tracking-widest uppercase" style="font-family:'JetBrains Mono',monospace; color:var(--ink); opacity:.6;">
-          maintenance
-        </span>
-      </div>
-    </div>
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', system-ui, sans-serif;
+    }
 
-    <div>
-      <h1 class="text-3xl sm:text-5xl font-extrabold leading-[1.05] max-w-lg" style="color:var(--ink); font-family:'Manrope',sans-serif; overflow-wrap:anywhere;">
-        Sedang ada pembaruan sistem.
-      </h1>
+    h1 {
+      font-family: 'Source Serif 4', Georgia, serif;
+    }
 
-      <p class="mt-5 max-w-md text-base leading-relaxed" style="color:var(--ink); opacity:.68;">
-        Layanan ini sementara tidak dapat diakses. Silakan coba lagi beberapa saat lagi.
+    a.group:hover {
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased">
+
+  <div class="min-h-screen flex items-center justify-center px-6 py-16">
+    <div class="w-full max-w-[440px]">
+
+      <p class="text-[11px] font-semibold tracking-[0.08em] uppercase mb-5" style="color: var(--ink-faint);">
+        Pemberitahuan
       </p>
 
-      <div class="mt-10 border-t pt-5" style="border-color:var(--line);">
-        <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[13px]" style="font-family:'JetBrains Mono',monospace;">
-          <dt style="color:var(--ink); opacity:.5;">status</dt>
-          <dd style="color:var(--accent);">maintenance_mode = true</dd>
+      <h1 class="text-[28px] sm:text-[32px] leading-[1.2] font-semibold tracking-[-0.015em] mb-5">
+        Sistem sedang dalam proses migrasi
+      </h1>
 
-          <dt style="color:var(--ink); opacity:.5;">unit</dt>
-          <dd style="color:var(--ink);">MA Nurul Ummah Kotagede</dd>
-        </dl>
+      <p class="text-[15px] leading-relaxed mb-5" style="color: var(--ink-soft);">
+        Digital Repository sedang dimigrasikan ke alamat baru pada weekend ini. Sistem lama akan dihentikan, sementara sistem baru sedang disiapkan agar segera dapat diakses.
+      </p>
+
+      <p class="text-[15px] leading-relaxed mb-9" style="color: var(--ink-soft);">
+        Mohon bersabar dan cek secara berkala. Layanan akan segera tersedia di alamat berikut:
+      </p>
+
+      <a href="https://repository.manu.sch.id"
+         class="group inline-flex items-center gap-2 text-[13px] font-semibold tracking-wide no-underline transition-colors duration-150"
+         style="color: var(--accent);">
+        repository.manu.sch.id
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+             class="transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+          <path d="M7 17L17 7"/><path d="M7 7h10v10"/>
+        </svg>
+      </a>
+
+      <div class="mt-14 pt-6" style="border-top: 1px solid var(--line);">
+        <p class="text-[12px] leading-relaxed" style="color: var(--ink-faint);">
+          Halaman ini bersifat sementara. Terima kasih atas pengertiannya.
+        </p>
       </div>
-    </div>
 
+    </div>
   </div>
-</div>
-{% endblock %}
+
+</body>
+</html>
