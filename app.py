@@ -279,12 +279,14 @@ def uploaded_file(filename):
 #URL
 @app.context_processor
 def inject_base_url():
-
-    rows = read_sheet('url')
-    if not rows or len(rows) < 2:
+    try:
+        rows = read_sheet('url')
+        if not rows or len(rows) < 2:
+            base_url = '/'
+        else:
+            base_url = rows[1][0] or '/'
+    except Exception:
         base_url = '/'
-    else:
-        base_url = rows[1][0] or '/'
 
     return dict(base_url=base_url)
 
